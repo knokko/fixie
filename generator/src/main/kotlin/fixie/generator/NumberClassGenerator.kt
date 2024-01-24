@@ -89,7 +89,7 @@ class NumberClassGenerator(
             writer.println()
             if (number.checkOverflow) {
                 writer.println("\t@Throws(FixedPointException::class)")
-                writer.println("\toperator fun unaryMinus() = if (raw == ${number.internalType}.MIN_VALUE)")
+                writer.println("\toperator fun unaryMinus() = if (raw != ${number.internalType}.MIN_VALUE)")
                 writer.println("\t\t${number.className}(-raw) else throw FixedPointException(\"Can't negate MIN_VALUE\")")
             } else writer.println("\toperator fun unaryMinus() = ${number.className}(-raw)")
         }

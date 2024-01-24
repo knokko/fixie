@@ -19,6 +19,9 @@ class NumberTestsGenerator(
         generateIntConversion(IntType(true, 8))
         generateDoubleConversion(true)
         generateDoubleConversion(false)
+        generateUnaryMinus()
+        generateAdditionAndSubtraction()
+        generateCompareTo()
         writer.println("}")
     }
 
@@ -70,7 +73,7 @@ class NumberTestsGenerator(
         writer.println("package fixie")
         writer.println()
         writer.println("import org.junit.jupiter.api.Test")
-        writer.println("import org.junit.jupiter.api.Assertions.assertEquals")
+        writer.println("import org.junit.jupiter.api.Assertions.*")
         writer.println()
         writer.println("class $testClassName {")
     }
@@ -117,6 +120,74 @@ class NumberTestsGenerator(
         for (candidate in testSequence) {
             generateTestCase(candidate)
             generateTestCase(-candidate)
+        }
+
+        writer.println("\t}")
+    }
+
+    private fun generateUnaryMinus() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testUnaryMinus() {")
+
+        val testSequence = generateTestSequence(Long.MIN_VALUE + 1, Long.MAX_VALUE, 31, 1, 2024012410)
+        if (number.checkOverflow) writer.println("\t\tassertThrows(FixedPointException::class.java) { -${number.className}.raw(Long.MIN_VALUE) }")
+
+        for (candidate in testSequence) {
+            writer.println("\t\tassertEquals(${-candidate}, -${number.className}.raw($candidate).raw)")
+        }
+        writer.println("\t}")
+    }
+
+    private fun generateAdditionAndSubtraction() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testAdditionAndSubtraction() {")
+        writer.println("\t\tfun testValues(a: ${number.className}, b: ${number.className}, c: ${number.className}) {")
+        writer.println("\t\t\tassertEquals(c, a + b)")
+        writer.println("\t\t\tassertEquals(c, b + a)")
+        writer.println("\t\t\tassertEquals(a, c - b)")
+        writer.println("\t\t\tassertEquals(b, c - a)")
+        writer.println("\t\t}")
+
+        writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MIN_VALUE), ${number.className}.ONE, ${number.className}.raw(${number.internalType}.MIN_VALUE + ${number.oneValue.toLong()}))")
+
+        val minValue = (number.internalType.getMinValue() / number.oneValue).longValueExact()
+        val maxValue = (number.internalType.getMaxValue() / number.oneValue).longValueExact() / 2
+        val intSequence = generateTestSequence(minValue, maxValue, 48, 2, 20242401130)
+        val rng = Random(32)
+        for (candidate in intSequence) {
+            val adder = rng.nextLong(maxValue)
+            writer.println("\t\ttestValues(${number.className}.from($candidate), ${number.className}.from($adder), ${number.className}.from(${adder + candidate}))")
+        }
+
+        writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MAX_VALUE), -${number.className}.ONE, ${number.className}.raw(${number.internalType}.MAX_VALUE - ${number.oneValue.toLong()}))")
+
+        writer.println("\t}")
+    }
+
+    private fun generateCompareTo() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testCompareTo() {")
+        writer.println("\t\tassertTrue(${number.className}.ZERO < ${number.className}.ONE)")
+        writer.println("\t\tassertFalse(${number.className}.ZERO > ${number.className}.ONE)")
+        writer.println("\t\tassertFalse(${number.className}.ONE < ${number.className}.ONE)")
+        writer.println("\t\tassertFalse(${number.className}.ONE > ${number.className}.ONE)")
+        writer.println("\t\tassertTrue(${number.className}.ONE <= ${number.className}.ONE)")
+        writer.println("\t\tassertTrue(${number.className}.ONE >= ${number.className}.ONE)")
+        writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MIN_VALUE) < ${number.className}.raw(${number.internalType}.MAX_VALUE))")
+        writer.println()
+        writer.println("\t\tval minDelta = ${number.className}.raw(1)")
+        writer.println("\t\tassertEquals(${number.className}.from(12), ${number.className}.from(12))")
+        writer.println("\t\tassertNotEquals(${number.className}.from(12), ${number.className}.from(12) + minDelta)")
+
+        val minValue = 1.0 / number.oneValue.toDouble()
+        val maxValue = number.internalType.getMaxValue().toDouble() / number.oneValue.toDouble()
+        val sequence = generateTestSequence(minValue, maxValue, 52.1, 2, 20241143)
+        for (candidate in sequence) {
+            if (candidate != minValue) writer.println("\t\tassertFalse(${number.className}.from($candidate) < ${number.className}.from($candidate) - minDelta)")
+            if (candidate != maxValue) writer.println("\t\tassertTrue(${number.className}.from($candidate) < ${number.className}.from($candidate) + minDelta)")
         }
 
         writer.println("\t}")

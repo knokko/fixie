@@ -149,6 +149,13 @@ class NumberTestsGenerator(
         writer.println("\t\t\tassertEquals(a, c - b)")
         writer.println("\t\t\tassertEquals(b, c - a)")
         writer.println("\t\t}")
+        writer.println("\t\tfun testValues(a: Long, b: Long, c: Long) {")
+        writer.println("\t\t\ttestValues(${number.className}.from(a), ${number.className}.from(b), ${number.className}.from(c))")
+        writer.println("\t\t\tassertEquals(${number.className}.from(c), ${number.className}.from(a) + b)")
+        writer.println("\t\t\tassertEquals(${number.className}.from(c), b + ${number.className}.from(a))")
+        writer.println("\t\t\tassertEquals(${number.className}.from(a), ${number.className}.from(c) - b)")
+        writer.println("\t\t\tassertEquals(${number.className}.from(b), c - ${number.className}.from(a))")
+        writer.println("\t\t}")
 
         writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MIN_VALUE), ${number.className}.ONE, ${number.className}.raw(${number.internalType}.MIN_VALUE + ${number.oneValue.toLong()}))")
 
@@ -158,7 +165,7 @@ class NumberTestsGenerator(
         val rng = Random(32)
         for (candidate in intSequence) {
             val adder = rng.nextLong(maxValue)
-            writer.println("\t\ttestValues(${number.className}.from($candidate), ${number.className}.from($adder), ${number.className}.from(${adder + candidate}))")
+            writer.println("\t\ttestValues($candidate, $adder, ${candidate + adder})")
         }
 
         writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MAX_VALUE), -${number.className}.ONE, ${number.className}.raw(${number.internalType}.MAX_VALUE - ${number.oneValue.toLong()}))")

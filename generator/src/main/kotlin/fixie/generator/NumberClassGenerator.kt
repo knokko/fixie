@@ -14,7 +14,7 @@ class NumberClassGenerator(
         // TODO Generate toString
         generateCompanionObject()
         writer.println("}")
-        // TODO Extension functions
+        generateExtensionFunctions()
     }
 
     private fun generateClassPrefix() {
@@ -78,7 +78,9 @@ class NumberClassGenerator(
     private fun generateArithmetic() {
         generateUnaryMinus()
         generatePlusSelf()
+        generateStandardTypesArithmetic("plus", "+")
         generateMinusSelf()
+        generateStandardTypesArithmetic("minus", "-")
         // TODO Multiplication
         // TODO Division
         generateCompareToSelf()
@@ -103,6 +105,14 @@ class NumberClassGenerator(
         writer.println("${prefix}} catch (overflow: ArithmeticException) {")
         writer.println("$prefix\tthrow FixedPointException(\"$errorMessage\")")
         writer.println("${prefix}}")
+    }
+
+    private fun generateStandardTypesArithmetic(methodName: String, operator: String) {
+        for (otherType in arrayOf("Int", "Long", "Float", "Double")) {
+            writer.println()
+            if (number.checkOverflow) writer.println("\t@Throws(FixedPointException::class)")
+            writer.println("\toperator fun $methodName(right: $otherType) = this $operator from(right)")
+        }
     }
 
     private fun generatePlusSelf() {
@@ -187,5 +197,18 @@ class NumberClassGenerator(
         generateFromFloatAndDouble()
         // TODO fraction
         writer.println("\t}")
+    }
+
+    private fun generateExtensionFunctions() {
+        generateArithmeticExtensionFunctions("plus", "+")
+        generateArithmeticExtensionFunctions("minus", "-")
+    }
+
+    private fun generateArithmeticExtensionFunctions(methodName: String, operator: String) {
+        for (typeName in arrayOf("Int", "Long", "Float", "Double")) {
+            writer.println()
+            if (number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
+            writer.println("operator fun $typeName.$methodName(right: ${number.className}) = ${number.className}.from(this) $operator right")
+        }
     }
 }

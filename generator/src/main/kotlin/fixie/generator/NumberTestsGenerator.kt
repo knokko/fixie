@@ -222,7 +222,7 @@ class NumberTestsGenerator(
 
             if (fits) {
                 writer.println("\t\ttestValues($a, $b)")
-            } else {
+            } else if (number.checkOverflow) {
                 writer.println("\t\tassertThrows(FixedPointException::class.java) { ${number.className}.from($a) * $b }")
             }
         }

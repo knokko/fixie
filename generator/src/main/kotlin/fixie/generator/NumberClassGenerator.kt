@@ -29,8 +29,10 @@ class NumberClassGenerator(
             writer.println("import java.math.BigInteger")
             writer.println()
         }
-        writer.println("import java.lang.Math.*")
-        writer.println()
+        if (number.internalType.signed || number.checkOverflow) {
+            writer.println("import java.lang.Math.*")
+            writer.println()
+        }
         writer.println(number.internalType.declareValue("private const val RAW_ONE", number.oneValue))
         writer.println()
         writer.println("@JvmInline")
@@ -199,17 +201,16 @@ class NumberClassGenerator(
             val largerType = IntType(number.internalType.signed, 2 * number.internalType.numBytes)
             writer.println("\t\tval largeValue = this.raw.to$largerType() * right.raw.to$largerType()")
 
+            val oneValue = number.oneValue.longValueExact()
+            val backReduction = if (oneValue.countOneBits() == 1) {
+                "largeValue shr ${oneValue.countTrailingZeroBits()}"
+            } else "largeValue / RAW_ONE"
+
             if (number.checkOverflow) {
-
-                val oneValue = number.oneValue.longValueExact()
-                val backReduction = if (oneValue.countOneBits() == 1) {
-                    "largeValue shr ${oneValue.countTrailingZeroBits()}"
-                } else "largeValue / RAW_ONE"
-
                 generateTryCatch("\t\t", listOf(
                     "return ${number.className}(to${number.internalType}Exact($backReduction))"
                 ), "Can't represent \$this * \$right")
-            } else writer.println("\t\treturn ${number.className}.to${number.internalType}()")
+            } else writer.println("\t\treturn ${number.className}(($backReduction).to${number.internalType}())")
         }
         writer.println("\t}")
     }
@@ -233,7 +234,8 @@ class NumberClassGenerator(
             val cantOverflow = number.internalType.canRepresent(number.oneValue.multiply(intType.getMaxValue()))
             val cantUnderflow = number.internalType.canRepresent(number.oneValue.multiply(intType.getMinValue()))
             if (!number.checkOverflow || (cantUnderflow && cantOverflow)) {
-                writer.println("\t\tfun from(value: $intType) = ${number.className}(value * RAW_ONE)")
+                val conversion = if (number.internalType == intType) "" else ".to${number.internalType}()"
+                writer.println("\t\tfun from(value: $intType) = ${number.className}(value$conversion * RAW_ONE)")
             } else {
                 writer.println("\t\t@Throws(FixedPointException::class)")
                 writer.println("\t\tfun from(value: $intType): ${number.className} {")
@@ -265,7 +267,7 @@ class NumberClassGenerator(
             writer.println("\t\t\treturn ${number.className}(${roundingOperation("doubleValue")}$toFunction)")
             writer.println("\t\t}")
         } else {
-            writer.println("\t\tfun from(value: Double) = ${roundingOperation("RAW_ONE.toDouble() * value")}$toFunction")
+            writer.println("\t\tfun from(value: Double) = ${number.className}(${roundingOperation("RAW_ONE.toDouble() * value")}$toFunction)")
         }
     }
 

@@ -53,6 +53,54 @@ fun main() {
         oneValue = BigInteger.valueOf(1000L * 1000L),
         checkOverflow = true
     ))
+    generate(NumberClass(
+        className = "FixUncheckedDecMicro64",
+        internalType = IntType(true, 8),
+        oneValue = BigInteger.valueOf(1000L * 1000L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedDecMicro32",
+        internalType = IntType(true, 4),
+        oneValue = BigInteger.valueOf(1000L * 1000L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedMicro64",
+        internalType = IntType(true, 8),
+        oneValue = BigInteger.valueOf(1024L * 1024L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedMicro32",
+        internalType = IntType(true, 4),
+        oneValue = BigInteger.valueOf(1024L * 1024L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedMicro64U",
+        internalType = IntType(false, 8),
+        oneValue = BigInteger.valueOf(1024L * 1024L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedMicro32U",
+        internalType = IntType(false, 4),
+        oneValue = BigInteger.valueOf(1024L * 1024L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedDecMicro64U",
+        internalType = IntType(false, 8),
+        oneValue = BigInteger.valueOf(1000L * 1000L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedDecMicro32U",
+        internalType = IntType(false, 4),
+        oneValue = BigInteger.valueOf(1000L * 1000L),
+        checkOverflow = false
+    ))
 }
 
 private fun generate(number: NumberClass) {

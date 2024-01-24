@@ -1,10 +1,10 @@
 package fixie.generator
 
 import java.io.PrintWriter
-import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToLong
+import kotlin.random.Random
 
 class NumberTestsGenerator(
         private val writer: PrintWriter,

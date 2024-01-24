@@ -3,6 +3,18 @@ package fixie
 import java.math.BigInteger
 
 @Throws(ArithmeticException::class)
+fun addExact(left: UByte, right: UByte) = if (UByte.MAX_VALUE - right >= left) (left + right).toUByte() else throw ArithmeticException()
+
+@Throws(ArithmeticException::class)
+fun subtractExact(left: UByte, right: UByte) = if (left >= right) (left - right).toUByte() else throw ArithmeticException()
+
+@Throws(ArithmeticException::class)
+fun addExact(left: UShort, right: UShort) = if (UShort.MAX_VALUE - right >= left) (left + right).toUShort() else throw ArithmeticException()
+
+@Throws(ArithmeticException::class)
+fun subtractExact(left: UShort, right: UShort) = if (left >= right) (left - right).toUShort() else throw ArithmeticException()
+
+@Throws(ArithmeticException::class)
 fun addExact(left: UInt, right: UInt) = if (UInt.MAX_VALUE - right >= left) left + right else throw ArithmeticException()
 
 @Throws(ArithmeticException::class)
@@ -13,6 +25,54 @@ fun addExact(left: ULong, right: ULong) = if (ULong.MAX_VALUE - right >= left) l
 
 @Throws(ArithmeticException::class)
 fun subtractExact(left: ULong, right: ULong) = if (left >= right) left - right else throw ArithmeticException()
+
+@Throws(ArithmeticException::class)
+fun addExact(left: Byte, right: Byte): Byte {
+    val intResult = left.toInt() + right.toInt()
+    if (intResult < Byte.MIN_VALUE || intResult > Byte.MAX_VALUE) throw ArithmeticException()
+    return intResult.toByte()
+}
+
+@Throws(ArithmeticException::class)
+fun subtractExact(left: Byte, right: Byte): Byte {
+    val intResult = left.toInt() - right.toInt()
+    if (intResult < Byte.MIN_VALUE || intResult > Byte.MAX_VALUE) throw ArithmeticException()
+    return intResult.toByte()
+}
+
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: Byte, right: Byte): Byte {
+    val intResult = left.toInt() * right.toInt()
+    if (intResult < Byte.MIN_VALUE || intResult > Byte.MAX_VALUE) throw ArithmeticException()
+    return intResult.toByte()
+}
+
+@Throws(ArithmeticException::class)
+fun addExact(left: Short, right: Short): Short {
+    val intResult = left.toInt() + right.toInt()
+    if (intResult < Short.MIN_VALUE || intResult > Short.MAX_VALUE) throw ArithmeticException()
+    return intResult.toShort()
+}
+
+@Throws(ArithmeticException::class)
+fun subtractExact(left: Short, right: Short): Short {
+    val intResult = left.toInt() - right.toInt()
+    if (intResult < Short.MIN_VALUE || intResult > Short.MAX_VALUE) throw ArithmeticException()
+    return intResult.toShort()
+}
+
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: Short, right: Short): Short {
+    val intResult = left.toInt() * right.toInt()
+    if (intResult < Short.MIN_VALUE || intResult > Short.MAX_VALUE) throw ArithmeticException()
+    return intResult.toShort()
+}
+
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: Byte, right: UByte) = toUByteExact(left.toInt() * right.toInt())
+
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: Short, right: UShort) = toUShortExact(left.toInt() * right.toInt())
 
 @Throws(ArithmeticException::class)
 fun multiplyExact(left: Int, right: UInt) = toUIntExact(left.toLong() * right.toLong())
@@ -46,6 +106,54 @@ fun multiplyHigh(x: ULong, y: ULong): ULong {
     val c = (x1 + x2) * (y1 + y2)
     val k = c - a - b
     return ((b shr 32) + k shr 32) + a
+}
+
+@Throws(ArithmeticException::class)
+fun toByteExact(value: Int): Byte {
+    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) throw ArithmeticException()
+    return value.toByte()
+}
+
+@Throws(ArithmeticException::class)
+fun toByteExact(value: Long): Byte {
+    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) throw ArithmeticException()
+    return value.toByte()
+}
+
+@Throws(ArithmeticException::class)
+fun toShortExact(value: Int): Short {
+    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) throw ArithmeticException()
+    return value.toShort()
+}
+
+@Throws(ArithmeticException::class)
+fun toShortExact(value: Long): Short {
+    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) throw ArithmeticException()
+    return value.toShort()
+}
+
+@Throws(ArithmeticException::class)
+fun toUByteExact(value: Int): UByte {
+    if (value < 0 || value > UByte.MAX_VALUE.toInt()) throw ArithmeticException()
+    return value.toUByte()
+}
+
+@Throws(ArithmeticException::class)
+fun toUByteExact(value: UInt): UByte{
+    if (value > UByte.MAX_VALUE.toUInt()) throw ArithmeticException()
+    return value.toUByte()
+}
+
+@Throws(ArithmeticException::class)
+fun toUShortExact(value: Int): UShort {
+    if (value < 0 || value > UShort.MAX_VALUE.toInt()) throw ArithmeticException()
+    return value.toUShort()
+}
+
+@Throws(ArithmeticException::class)
+fun toUShortExact(value: UInt): UShort {
+    if (value > UShort.MAX_VALUE.toUInt()) throw ArithmeticException()
+    return value.toUShort()
 }
 
 @Throws(ArithmeticException::class)

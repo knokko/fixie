@@ -48,8 +48,9 @@ class NumberClassGenerator(
 
     private fun generateToIntType(type: IntType) {
         writer.println()
-        if (type == number.internalType) writer.println("\tfun to$type() = raw / RAW_ONE")
-        else {
+        if (type == number.internalType || (number.internalType.signed == type.signed && number.internalType.numBytes < 4 && type.numBytes == 4)) {
+            writer.println("\tfun to$type() = raw / RAW_ONE")
+        } else {
             val cantOverflow = type.canRepresent(number.internalType.getMaxValue() / number.oneValue)
             val cantUnderflow = type.canRepresent(number.internalType.getMinValue() / number.oneValue)
             if (!number.checkOverflow || (cantOverflow && cantUnderflow)) writer.println("\tfun to$type() = (raw / RAW_ONE).to$type()")
@@ -88,11 +89,13 @@ class NumberClassGenerator(
     private fun generateUnaryMinus() {
         if (number.internalType.signed) {
             writer.println()
+
+            val negation = if (number.internalType.numBytes >= 4) "-raw" else "(-raw).to${number.internalType}()"
             if (number.checkOverflow) {
                 writer.println("\t@Throws(FixedPointException::class)")
                 writer.println("\toperator fun unaryMinus() = if (raw != ${number.internalType}.MIN_VALUE)")
-                writer.println("\t\t${number.className}(-raw) else throw FixedPointException(\"Can't negate MIN_VALUE\")")
-            } else writer.println("\toperator fun unaryMinus() = ${number.className}(-raw)")
+                writer.println("\t\t${number.className}($negation) else throw FixedPointException(\"Can't negate MIN_VALUE\")")
+            } else writer.println("\toperator fun unaryMinus() = ${number.className}($negation)")
         }
     }
 
@@ -125,7 +128,9 @@ class NumberClassGenerator(
             )
             writer.println("\t}")
         } else {
-            writer.println("\toperator fun plus(right: ${number.className}) = ${number.className}(this.raw + right.raw)")
+            var sum = "this.raw + right.raw"
+            if (number.internalType.numBytes < 4) sum = "($sum).to${number.internalType}()"
+            writer.println("\toperator fun plus(right: ${number.className}) = ${number.className}($sum)")
         }
     }
 
@@ -140,7 +145,9 @@ class NumberClassGenerator(
             )
             writer.println("\t}")
         } else {
-            writer.println("\toperator fun minus(right: ${number.className}) = ${number.className}(this.raw - right.raw)")
+            var difference = "this.raw - right.raw"
+            if (number.internalType.numBytes < 4) difference = "($difference).to${number.internalType}()"
+            writer.println("\toperator fun minus(right: ${number.className}) = ${number.className}($difference)")
         }
     }
 
@@ -235,7 +242,9 @@ class NumberClassGenerator(
             val cantUnderflow = number.internalType.canRepresent(number.oneValue.multiply(intType.getMinValue()))
             if (!number.checkOverflow || (cantUnderflow && cantOverflow)) {
                 val conversion = if (number.internalType == intType) "" else ".to${number.internalType}()"
-                writer.println("\t\tfun from(value: $intType) = ${number.className}(value$conversion * RAW_ONE)")
+                var result = "value$conversion * RAW_ONE"
+                if (number.internalType.numBytes < 4) result = "($result).to${number.internalType}()"
+                writer.println("\t\tfun from(value: $intType) = ${number.className}($result)")
             } else {
                 writer.println("\t\t@Throws(FixedPointException::class)")
                 writer.println("\t\tfun from(value: $intType): ${number.className} {")
@@ -256,7 +265,8 @@ class NumberClassGenerator(
         fun roundingOperation(parameter: String) = if (number.internalType.signed) {
             "round($parameter)"
         } else "kotlin.math.floor($parameter + 0.5)"
-        val toFunction = if (number.internalType.signed && number.internalType.numBytes == 8) "" else ".to${number.internalType}()"
+        var toFunction = if (number.internalType.signed && number.internalType.numBytes == 8) "" else ".to${number.internalType}()"
+        if (!number.internalType.signed && number.internalType.numBytes < 4) toFunction = ".toUInt()$toFunction"
         if (number.checkOverflow) {
             writer.println("\t\t@Throws(FixedPointException::class)")
             writer.println("\t\tfun from(value: Double): ${number.className} {")
@@ -279,6 +289,7 @@ class NumberClassGenerator(
         writer.println("\t\tval ONE = from(1)")
         writer.println()
         writer.println("\t\tfun raw(rawValue: ${number.internalType}) = ${number.className}(rawValue)")
+        if (number.internalType.numBytes < 4) generateFromIntType(IntType(true, number.internalType.numBytes))
         generateFromIntType(IntType(true, 4))
         generateFromIntType(IntType(true, 8))
         generateFromFloatAndDouble()

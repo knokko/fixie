@@ -1,8 +1,10 @@
 package fixie.generator
 
 import java.io.PrintWriter
+import java.math.BigInteger
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.nextDown
 import kotlin.math.roundToLong
 import kotlin.random.Random
 
@@ -15,12 +17,14 @@ class NumberTestsGenerator(
 
     fun generate() {
         generateClassPrefix()
+        // TODO Test overflow checks everywhere
         generateIntConversion(IntType(true, 4))
         generateIntConversion(IntType(true, 8))
         generateDoubleConversion(true)
         generateDoubleConversion(false)
-        generateUnaryMinus()
+        if (number.internalType.signed) generateUnaryMinus()
         generateAdditionAndSubtraction()
+        generateMultiplication()
         generateCompareTo()
         writer.println("}")
     }
@@ -93,7 +97,7 @@ class NumberTestsGenerator(
         for (candidate in testSequence) {
             writer.println("\t\ttestValue($candidate)")
         }
-        writer.println("}")
+        writer.println("\t}")
     }
 
     private fun generateDoubleConversion(convertToFloat: Boolean) {
@@ -103,7 +107,15 @@ class NumberTestsGenerator(
         else writer.println("\tfun testDoubleConversion() {")
 
         val minValue = 1.0 / number.oneValue.toDouble()
-        val maxValue = number.internalType.getMaxValue().toDouble() / number.oneValue.toDouble()
+        val realMaxValue = number.internalType.getMaxValue().toDouble() / number.oneValue.toDouble()
+
+        // Avoid nasty rounding errors
+        var maxValue = realMaxValue
+        if (convertToFloat) {
+            while (maxValue.toFloat().toDouble() > realMaxValue) maxValue = maxValue.nextDown()
+        } else {
+            while (maxValue * number.oneValue.toDouble() > number.internalType.getMaxValue().toDouble()) maxValue = maxValue.nextDown()
+        }
 
         fun generateTestCase(value: Double) {
             if (convertToFloat) {
@@ -119,7 +131,7 @@ class NumberTestsGenerator(
         else writer.println("\t\tval delta = $delta")
         for (candidate in testSequence) {
             generateTestCase(candidate)
-            generateTestCase(-candidate)
+            if (number.internalType.signed) generateTestCase(-candidate)
         }
 
         writer.println("\t}")
@@ -130,8 +142,12 @@ class NumberTestsGenerator(
         writer.println("\t@Test")
         writer.println("\tfun testUnaryMinus() {")
 
-        val testSequence = generateTestSequence(Long.MIN_VALUE + 1, Long.MAX_VALUE, 31, 1, 2024012410)
-        if (number.checkOverflow) writer.println("\t\tassertThrows(FixedPointException::class.java) { -${number.className}.raw(Long.MIN_VALUE) }")
+        val testSequence = generateTestSequence(
+            number.internalType.getMinValue().add(BigInteger.ONE).longValueExact(),
+            number.internalType.getMaxValue().longValueExact(),
+            31, 1, 2024012410
+        )
+        if (number.checkOverflow) writer.println("\t\tassertThrows(FixedPointException::class.java) { -${number.className}.raw(${number.internalType}.MIN_VALUE) }")
 
         for (candidate in testSequence) {
             writer.println("\t\tassertEquals(${-candidate}, -${number.className}.raw($candidate).raw)")
@@ -157,7 +173,8 @@ class NumberTestsGenerator(
         writer.println("\t\t\tassertEquals(${number.className}.from(b), c - ${number.className}.from(a))")
         writer.println("\t\t}")
 
-        writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MIN_VALUE), ${number.className}.ONE, ${number.className}.raw(${number.internalType}.MIN_VALUE + ${number.oneValue.toLong()}))")
+        val oneLongValue = number.oneValue.longValueExact().toString() + if (number.internalType.signed) "" else "u"
+        writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MIN_VALUE), ${number.className}.ONE, ${number.className}.raw(${number.internalType}.MIN_VALUE + $oneLongValue))")
 
         val minValue = (number.internalType.getMinValue() / number.oneValue).longValueExact()
         val maxValue = (number.internalType.getMaxValue() / number.oneValue).longValueExact() / 2
@@ -168,7 +185,47 @@ class NumberTestsGenerator(
             writer.println("\t\ttestValues($candidate, $adder, ${candidate + adder})")
         }
 
-        writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MAX_VALUE), -${number.className}.ONE, ${number.className}.raw(${number.internalType}.MAX_VALUE - ${number.oneValue.toLong()}))")
+        writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MAX_VALUE - $oneLongValue), ${number.className}.ONE, ${number.className}.raw(${number.internalType}.MAX_VALUE))")
+
+        writer.println("\t}")
+    }
+
+    private fun generateMultiplication() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testMultiplication() {")
+        writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MAX_VALUE), 1 * ${number.className}.raw(${number.internalType}.MAX_VALUE))")
+        if (number.internalType.signed) {
+            writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MIN_VALUE), 1 * ${number.className}.raw(${number.internalType}.MIN_VALUE))")
+            writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MIN_VALUE + 1), -1 * ${number.className}.raw(${number.internalType}.MAX_VALUE))")
+            if (number.checkOverflow) writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.raw(${number.internalType}.MIN_VALUE) }")
+        } else if (number.checkOverflow){
+            writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.ONE }")
+            writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.raw(${number.internalType}.MAX_VALUE)}")
+        }
+        writer.println()
+        writer.println("\t\tfun testValues(a: Long, b: Long) {")
+        writer.println("\t\t\tassertEquals(${number.className}.from(a * b), ${number.className}.from(a) * ${number.className}.from(b))")
+        writer.println("\t\t\tassertEquals(${number.className}.from(a * b), ${number.className}.from(a) * b)")
+        writer.println("\t\t\tassertEquals(${number.className}.from(a * b), b * ${number.className}.from(a))")
+        writer.println("\t\t}")
+
+        val minIntValue = (number.internalType.getMinValue() / number.oneValue).longValueExact()
+        val maxIntValue = (number.internalType.getMaxValue() / number.oneValue).longValueExact()
+
+        val sequence = generateTestSequence(minIntValue, maxIntValue, 6, 2, 20242401118)
+        for (a in sequence) {
+            val b = sequence.random()
+            val fits = try {
+                Math.multiplyExact(a, b) in minIntValue..maxIntValue
+            } catch (overflow: ArithmeticException) { false }
+
+            if (fits) {
+                writer.println("\t\ttestValues($a, $b)")
+            } else {
+                writer.println("\t\tassertThrows(FixedPointException::class.java) { ${number.className}.from($a) * $b }")
+            }
+        }
 
         writer.println("\t}")
     }
@@ -185,12 +242,18 @@ class NumberTestsGenerator(
         writer.println("\t\tassertTrue(${number.className}.ONE >= ${number.className}.ONE)")
         writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MIN_VALUE) < ${number.className}.raw(${number.internalType}.MAX_VALUE))")
         writer.println()
-        writer.println("\t\tval minDelta = ${number.className}.raw(1)")
+        val oneString = "1" + if (number.internalType.signed) "" else "u"
+        writer.println("\t\tval minDelta = ${number.className}.raw($oneString)")
         writer.println("\t\tassertEquals(${number.className}.from(12), ${number.className}.from(12))")
         writer.println("\t\tassertNotEquals(${number.className}.from(12), ${number.className}.from(12) + minDelta)")
 
         val minValue = 1.0 / number.oneValue.toDouble()
-        val maxValue = number.internalType.getMaxValue().toDouble() / number.oneValue.toDouble()
+        val realMaxValue = number.internalType.getMaxValue().toDouble() / number.oneValue.toDouble()
+
+        // Avoid nasty rounding errors
+        var maxValue = realMaxValue
+        while (maxValue * number.oneValue.toDouble() > number.internalType.getMaxValue().toDouble()) maxValue = maxValue.nextDown()
+
         val sequence = generateTestSequence(minValue, maxValue, 52.1, 2, 20241143)
         for (candidate in sequence) {
             if (candidate != minValue) writer.println("\t\tassertFalse(${number.className}.from($candidate) < ${number.className}.from($candidate) - minDelta)")

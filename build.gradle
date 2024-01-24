@@ -33,5 +33,10 @@ allprojects {
     test {
         useJUnitPlatform()
     }
+}
 
+project(':generated') {
+    dependencies {
+        implementation project(':')
+    }
 }

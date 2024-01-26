@@ -9,6 +9,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 
     compileKotlin {
@@ -38,5 +39,13 @@ allprojects {
 project(':generated') {
     dependencies {
         implementation project(':')
+    }
+}
+
+project(':benchmarks') {
+    dependencies {
+        implementation project(':')
+        implementation project(':generated')
+        implementation 'com.github.knokko:sample-profiler:v1.0.0'
     }
 }

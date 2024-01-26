@@ -194,34 +194,45 @@ class NumberTestsGenerator(
         writer.println("\t}")
     }
 
-    private fun generateMultiplication() {
+    private fun generateMultiplicationAndDivision() {
         writer.println()
         writer.println("\t@Test")
-        writer.println("\tfun testMultiplication() {")
+        writer.println("\tfun testMultiplicationAndDivision() {")
         writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MAX_VALUE), 1 * ${number.className}.raw(${number.internalType}.MAX_VALUE))")
+        writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MAX_VALUE), ${number.className}.raw(${number.internalType}.MAX_VALUE) / 1)")
         if (number.internalType.signed) {
             writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MIN_VALUE), 1 * ${number.className}.raw(${number.internalType}.MIN_VALUE))")
+            writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MIN_VALUE), ${number.className}.raw(${number.internalType}.MIN_VALUE) / 1)")
             var minPlusOne = "${number.internalType}.MIN_VALUE + 1"
             if (number.internalType.numBytes < 4) minPlusOne = "($minPlusOne).to${number.internalType}()"
             writer.println("\t\tassertEquals(${number.className}.raw($minPlusOne), -1 * ${number.className}.raw(${number.internalType}.MAX_VALUE))")
-            if (number.checkOverflow) writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.raw(${number.internalType}.MIN_VALUE) }")
+            writer.println("\t\tassertEquals(${number.className}.raw($minPlusOne), ${number.className}.raw(${number.internalType}.MAX_VALUE) / -1)")
+            if (number.checkOverflow) {
+                writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.raw(${number.internalType}.MIN_VALUE) }")
+                writer.println("\t\tassertThrows(FixedPointException::class.java) { ${number.className}.raw(${number.internalType}.MIN_VALUE) / -1 }")
+            }
         } else if (number.checkOverflow){
             writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.ONE }")
+            writer.println("\t\tassertThrows(FixedPointException::class.java) { ${number.className}.ONE / -1 }")
             writer.println("\t\tassertThrows(FixedPointException::class.java) { -1 * ${number.className}.raw(${number.internalType}.MAX_VALUE)}")
+            writer.println("\t\tassertThrows(FixedPointException::class.java) { ${number.className}.raw(${number.internalType}.MAX_VALUE) / -1 }")
         }
         writer.println()
         writer.println("\t\tfun testValues(a: Long, b: Long) {")
         writer.println("\t\t\tassertEquals(${number.className}.from(a * b), ${number.className}.from(a) * ${number.className}.from(b))")
         writer.println("\t\t\tassertEquals(${number.className}.from(a * b), ${number.className}.from(a) * b)")
         writer.println("\t\t\tassertEquals(${number.className}.from(a * b), b * ${number.className}.from(a))")
+        writer.println("\t\t\tif (b != 0L) assertEquals(${number.className}.from(a), ${number.className}.from(a * b) / b)")
+        writer.println("\t\t\tif (a != 0L) assertEquals(${number.className}.from(b), ${number.className}.from(a * b) / a)")
         writer.println("\t\t}")
 
         val minIntValue = (number.internalType.getMinValue() / number.oneValue).longValueExact()
         val maxIntValue = (number.internalType.getMaxValue() / number.oneValue).longValueExact()
 
         val sequence = generateTestSequence(minIntValue, maxIntValue, 6, 2, 20242401118)
+        val rng = Random(26012024235)
         for (a in sequence) {
-            val b = sequence.random(Random(26012024235))
+            val b = sequence.random(rng)
             val fits = try {
                 Math.multiplyExact(a, b) in minIntValue..maxIntValue
             } catch (overflow: ArithmeticException) { false }

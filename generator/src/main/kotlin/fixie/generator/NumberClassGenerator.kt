@@ -87,6 +87,7 @@ class NumberClassGenerator(
         generateDivSelf()
         generateStandardTypesArithmetic("div", "/")
         generateCompareToSelf()
+        generateCompareToOtherTypes()
     }
 
     private fun generateUnaryMinus() {
@@ -292,6 +293,14 @@ class NumberClassGenerator(
         writer.println("\toverride operator fun compareTo(other: ${number.className}) = this.raw.compareTo(other.raw)")
     }
 
+    private fun generateCompareToOtherTypes() {
+        fun generate(typeName: String) {
+            writer.println()
+            writer.println("\toperator fun compareTo(other: $typeName) = this.compareTo(from(other))")
+        }
+        for (typeName in arrayOf("Int", "Long", "Float", "Double")) generate(typeName)
+    }
+
     private fun generateFromIntType(intType: IntType) {
         writer.println()
         if (intType.numBytes > number.internalType.numBytes) {
@@ -392,6 +401,7 @@ class NumberClassGenerator(
         generateArithmeticExtensionFunctions("minus", "-")
         generateArithmeticExtensionFunctions("times", "*")
         generateArithmeticExtensionFunctions("div", "/")
+        generateCompareToExtensionFunctions()
     }
 
     private fun generateArithmeticExtensionFunctions(methodName: String, operator: String) {
@@ -399,6 +409,13 @@ class NumberClassGenerator(
             writer.println()
             if (number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
             writer.println("operator fun $typeName.$methodName(right: ${number.className}) = ${number.className}.from(this) $operator right")
+        }
+    }
+
+    private fun generateCompareToExtensionFunctions() {
+        for (typeName in arrayOf("Int", "Long", "Float", "Double")) {
+            writer.println()
+            writer.println("operator fun $typeName.compareTo(right: ${number.className}) = ${number.className}.from(this).compareTo(right)")
         }
     }
 

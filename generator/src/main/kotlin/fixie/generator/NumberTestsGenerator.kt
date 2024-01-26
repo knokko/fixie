@@ -252,8 +252,11 @@ class NumberTestsGenerator(
         writer.println("\t@Test")
         writer.println("\tfun testCompareTo() {")
         writer.println("\t\tassertTrue(${number.className}.ZERO < ${number.className}.ONE)")
+        writer.println("\t\tassertTrue(0 < ${number.className}.ONE)")
         writer.println("\t\tassertFalse(${number.className}.ZERO > ${number.className}.ONE)")
+        writer.println("\t\tassertFalse(0 > ${number.className}.ONE)")
         writer.println("\t\tassertFalse(${number.className}.ONE < ${number.className}.ONE)")
+        writer.println("\t\tassertFalse(${number.className}.ONE < 1)")
         writer.println("\t\tassertFalse(${number.className}.ONE > ${number.className}.ONE)")
         writer.println("\t\tassertTrue(${number.className}.ONE <= ${number.className}.ONE)")
         writer.println("\t\tassertTrue(${number.className}.ONE >= ${number.className}.ONE)")
@@ -278,8 +281,14 @@ class NumberTestsGenerator(
 
         val sequence = generateTestSequence(minValue, maxValue, 52.1, 2, 20241143)
         for (candidate in sequence) {
-            if (candidate != minValue) writer.println("\t\tassertFalse(${number.className}.from($candidate) < ${number.className}.from($candidate) - minDelta)")
-            if (candidate != maxValue) writer.println("\t\tassertTrue(${number.className}.from($candidate) < ${number.className}.from($candidate) + minDelta)")
+            if (candidate != minValue) {
+                writer.println("\t\tassertFalse(${number.className}.from($candidate) < ${number.className}.from($candidate) - minDelta)")
+                writer.println("\t\tassertFalse($candidate < ${number.className}.from($candidate) - minDelta)")
+            }
+            if (candidate != maxValue) {
+                writer.println("\t\tassertTrue(${number.className}.from($candidate) < ${number.className}.from($candidate) + minDelta)")
+                writer.println("\t\tassertTrue($candidate < ${number.className}.from($candidate) + minDelta)")
+            }
         }
 
         writer.println("\t}")

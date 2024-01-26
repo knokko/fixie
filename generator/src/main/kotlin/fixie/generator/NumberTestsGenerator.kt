@@ -24,7 +24,7 @@ class NumberTestsGenerator(
         generateDoubleConversion(false)
         if (number.internalType.signed) generateUnaryMinus()
         generateAdditionAndSubtraction()
-        generateMultiplication()
+        generateMultiplicationAndDivision()
         generateCompareTo()
         writer.println("}")
     }

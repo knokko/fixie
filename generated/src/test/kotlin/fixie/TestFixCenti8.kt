@@ -74,28 +74,37 @@ class TestFixCenti8 {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixCenti8.raw(Byte.MAX_VALUE), 1 * FixCenti8.raw(Byte.MAX_VALUE))
+		assertEquals(FixCenti8.raw(Byte.MAX_VALUE), FixCenti8.raw(Byte.MAX_VALUE) / 1)
 		assertEquals(FixCenti8.raw(Byte.MIN_VALUE), 1 * FixCenti8.raw(Byte.MIN_VALUE))
+		assertEquals(FixCenti8.raw(Byte.MIN_VALUE), FixCenti8.raw(Byte.MIN_VALUE) / 1)
 		assertEquals(FixCenti8.raw((Byte.MIN_VALUE + 1).toByte()), -1 * FixCenti8.raw(Byte.MAX_VALUE))
+		assertEquals(FixCenti8.raw((Byte.MIN_VALUE + 1).toByte()), FixCenti8.raw(Byte.MAX_VALUE) / -1)
 		assertThrows(FixedPointException::class.java) { -1 * FixCenti8.raw(Byte.MIN_VALUE) }
+		assertThrows(FixedPointException::class.java) { FixCenti8.raw(Byte.MIN_VALUE) / -1 }
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixCenti8.from(a * b), FixCenti8.from(a) * FixCenti8.from(b))
 			assertEquals(FixCenti8.from(a * b), FixCenti8.from(a) * b)
 			assertEquals(FixCenti8.from(a * b), b * FixCenti8.from(a))
+			if (b != 0L) assertEquals(FixCenti8.from(a), FixCenti8.from(a * b) / b)
+			if (a != 0L) assertEquals(FixCenti8.from(b), FixCenti8.from(a * b) / a)
 		}
 		testValues(-4, 0)
-		testValues(0, 0)
-		testValues(1, 0)
-		testValues(4, 0)
+		testValues(0, 1)
+		testValues(1, -4)
+		assertThrows(FixedPointException::class.java) { FixCenti8.from(4) * -4 }
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixCenti8.ZERO < FixCenti8.ONE)
+		assertTrue(0 < FixCenti8.ONE)
 		assertFalse(FixCenti8.ZERO > FixCenti8.ONE)
+		assertFalse(0 > FixCenti8.ONE)
 		assertFalse(FixCenti8.ONE < FixCenti8.ONE)
+		assertFalse(FixCenti8.ONE < 1)
 		assertFalse(FixCenti8.ONE > FixCenti8.ONE)
 		assertTrue(FixCenti8.ONE <= FixCenti8.ONE)
 		assertTrue(FixCenti8.ONE >= FixCenti8.ONE)
@@ -105,6 +114,8 @@ class TestFixCenti8 {
 		assertEquals(FixCenti8.from(3), FixCenti8.from(3))
 		assertNotEquals(FixCenti8.from(3), FixCenti8.from(3) - minDelta)
 		assertTrue(FixCenti8.from(0.03333333333333333) < FixCenti8.from(0.03333333333333333) + minDelta)
+		assertTrue(0.03333333333333333 < FixCenti8.from(0.03333333333333333) + minDelta)
 		assertFalse(FixCenti8.from(4.233333333333333) < FixCenti8.from(4.233333333333333) - minDelta)
+		assertFalse(4.233333333333333 < FixCenti8.from(4.233333333333333) - minDelta)
 	}
 }

@@ -112,38 +112,47 @@ class TestFixDecMicro32 {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixDecMicro32.raw(Int.MAX_VALUE), 1 * FixDecMicro32.raw(Int.MAX_VALUE))
+		assertEquals(FixDecMicro32.raw(Int.MAX_VALUE), FixDecMicro32.raw(Int.MAX_VALUE) / 1)
 		assertEquals(FixDecMicro32.raw(Int.MIN_VALUE), 1 * FixDecMicro32.raw(Int.MIN_VALUE))
+		assertEquals(FixDecMicro32.raw(Int.MIN_VALUE), FixDecMicro32.raw(Int.MIN_VALUE) / 1)
 		assertEquals(FixDecMicro32.raw(Int.MIN_VALUE + 1), -1 * FixDecMicro32.raw(Int.MAX_VALUE))
+		assertEquals(FixDecMicro32.raw(Int.MIN_VALUE + 1), FixDecMicro32.raw(Int.MAX_VALUE) / -1)
 		assertThrows(FixedPointException::class.java) { -1 * FixDecMicro32.raw(Int.MIN_VALUE) }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.raw(Int.MIN_VALUE) / -1 }
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixDecMicro32.from(a * b), FixDecMicro32.from(a) * FixDecMicro32.from(b))
 			assertEquals(FixDecMicro32.from(a * b), FixDecMicro32.from(a) * b)
 			assertEquals(FixDecMicro32.from(a * b), b * FixDecMicro32.from(a))
+			if (b != 0L) assertEquals(FixDecMicro32.from(a), FixDecMicro32.from(a * b) / b)
+			if (a != 0L) assertEquals(FixDecMicro32.from(b), FixDecMicro32.from(a * b) / a)
 		}
 		testValues(-2147, 0)
-		testValues(-1181, 0)
-		testValues(-294, 0)
-		testValues(-256, 0)
-		testValues(-134, 0)
-		testValues(-37, 0)
-		testValues(-35, 0)
-		testValues(0, 0)
-		testValues(1, 0)
-		testValues(51, 0)
-		testValues(70, 0)
-		testValues(158, 0)
-		testValues(239, 0)
-		testValues(2147, 0)
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-1181) * 70 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-294) * -37 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-256) * -1181 }
+		testValues(-134, 1)
+		testValues(-37, -37)
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-35) * 2147 }
+		testValues(0, -2147)
+		testValues(1, -134)
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(51) * -294 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(70) * 70 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(158) * -37 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(239) * 158 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(2147) * -37 }
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixDecMicro32.ZERO < FixDecMicro32.ONE)
+		assertTrue(0 < FixDecMicro32.ONE)
 		assertFalse(FixDecMicro32.ZERO > FixDecMicro32.ONE)
+		assertFalse(0 > FixDecMicro32.ONE)
 		assertFalse(FixDecMicro32.ONE < FixDecMicro32.ONE)
+		assertFalse(FixDecMicro32.ONE < 1)
 		assertFalse(FixDecMicro32.ONE > FixDecMicro32.ONE)
 		assertTrue(FixDecMicro32.ONE <= FixDecMicro32.ONE)
 		assertTrue(FixDecMicro32.ONE >= FixDecMicro32.ONE)
@@ -153,22 +162,40 @@ class TestFixDecMicro32 {
 		assertEquals(FixDecMicro32.from(12), FixDecMicro32.from(12))
 		assertNotEquals(FixDecMicro32.from(12), FixDecMicro32.from(12) - minDelta)
 		assertTrue(FixDecMicro32.from(1.0E-6) < FixDecMicro32.from(1.0E-6) + minDelta)
+		assertTrue(1.0E-6 < FixDecMicro32.from(1.0E-6) + minDelta)
 		assertFalse(FixDecMicro32.from(4.101245270674489E-4) < FixDecMicro32.from(4.101245270674489E-4) - minDelta)
+		assertFalse(4.101245270674489E-4 < FixDecMicro32.from(4.101245270674489E-4) - minDelta)
 		assertTrue(FixDecMicro32.from(4.101245270674489E-4) < FixDecMicro32.from(4.101245270674489E-4) + minDelta)
+		assertTrue(4.101245270674489E-4 < FixDecMicro32.from(4.101245270674489E-4) + minDelta)
 		assertFalse(FixDecMicro32.from(0.0014602674387652094) < FixDecMicro32.from(0.0014602674387652094) - minDelta)
+		assertFalse(0.0014602674387652094 < FixDecMicro32.from(0.0014602674387652094) - minDelta)
 		assertTrue(FixDecMicro32.from(0.0014602674387652094) < FixDecMicro32.from(0.0014602674387652094) + minDelta)
+		assertTrue(0.0014602674387652094 < FixDecMicro32.from(0.0014602674387652094) + minDelta)
 		assertFalse(FixDecMicro32.from(0.008314038763645868) < FixDecMicro32.from(0.008314038763645868) - minDelta)
+		assertFalse(0.008314038763645868 < FixDecMicro32.from(0.008314038763645868) - minDelta)
 		assertTrue(FixDecMicro32.from(0.008314038763645868) < FixDecMicro32.from(0.008314038763645868) + minDelta)
+		assertTrue(0.008314038763645868 < FixDecMicro32.from(0.008314038763645868) + minDelta)
 		assertFalse(FixDecMicro32.from(0.06313960308834927) < FixDecMicro32.from(0.06313960308834927) - minDelta)
+		assertFalse(0.06313960308834927 < FixDecMicro32.from(0.06313960308834927) - minDelta)
 		assertTrue(FixDecMicro32.from(0.06313960308834927) < FixDecMicro32.from(0.06313960308834927) + minDelta)
+		assertTrue(0.06313960308834927 < FixDecMicro32.from(0.06313960308834927) + minDelta)
 		assertFalse(FixDecMicro32.from(0.18938331340622416) < FixDecMicro32.from(0.18938331340622416) - minDelta)
+		assertFalse(0.18938331340622416 < FixDecMicro32.from(0.18938331340622416) - minDelta)
 		assertTrue(FixDecMicro32.from(0.18938331340622416) < FixDecMicro32.from(0.18938331340622416) + minDelta)
+		assertTrue(0.18938331340622416 < FixDecMicro32.from(0.18938331340622416) + minDelta)
 		assertFalse(FixDecMicro32.from(2.75487661886147) < FixDecMicro32.from(2.75487661886147) - minDelta)
+		assertFalse(2.75487661886147 < FixDecMicro32.from(2.75487661886147) - minDelta)
 		assertTrue(FixDecMicro32.from(2.75487661886147) < FixDecMicro32.from(2.75487661886147) + minDelta)
+		assertTrue(2.75487661886147 < FixDecMicro32.from(2.75487661886147) + minDelta)
 		assertFalse(FixDecMicro32.from(10.653674356901822) < FixDecMicro32.from(10.653674356901822) - minDelta)
+		assertFalse(10.653674356901822 < FixDecMicro32.from(10.653674356901822) - minDelta)
 		assertTrue(FixDecMicro32.from(10.653674356901822) < FixDecMicro32.from(10.653674356901822) + minDelta)
+		assertTrue(10.653674356901822 < FixDecMicro32.from(10.653674356901822) + minDelta)
 		assertFalse(FixDecMicro32.from(150.2659312211488) < FixDecMicro32.from(150.2659312211488) - minDelta)
+		assertFalse(150.2659312211488 < FixDecMicro32.from(150.2659312211488) - minDelta)
 		assertTrue(FixDecMicro32.from(150.2659312211488) < FixDecMicro32.from(150.2659312211488) + minDelta)
+		assertTrue(150.2659312211488 < FixDecMicro32.from(150.2659312211488) + minDelta)
 		assertFalse(FixDecMicro32.from(2147.483647) < FixDecMicro32.from(2147.483647) - minDelta)
+		assertFalse(2147.483647 < FixDecMicro32.from(2147.483647) - minDelta)
 	}
 }

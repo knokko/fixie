@@ -73,27 +73,34 @@ class TestFixUncheckedCenti8 {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixUncheckedCenti8.raw(Byte.MAX_VALUE), 1 * FixUncheckedCenti8.raw(Byte.MAX_VALUE))
+		assertEquals(FixUncheckedCenti8.raw(Byte.MAX_VALUE), FixUncheckedCenti8.raw(Byte.MAX_VALUE) / 1)
 		assertEquals(FixUncheckedCenti8.raw(Byte.MIN_VALUE), 1 * FixUncheckedCenti8.raw(Byte.MIN_VALUE))
+		assertEquals(FixUncheckedCenti8.raw(Byte.MIN_VALUE), FixUncheckedCenti8.raw(Byte.MIN_VALUE) / 1)
 		assertEquals(FixUncheckedCenti8.raw((Byte.MIN_VALUE + 1).toByte()), -1 * FixUncheckedCenti8.raw(Byte.MAX_VALUE))
+		assertEquals(FixUncheckedCenti8.raw((Byte.MIN_VALUE + 1).toByte()), FixUncheckedCenti8.raw(Byte.MAX_VALUE) / -1)
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixUncheckedCenti8.from(a * b), FixUncheckedCenti8.from(a) * FixUncheckedCenti8.from(b))
 			assertEquals(FixUncheckedCenti8.from(a * b), FixUncheckedCenti8.from(a) * b)
 			assertEquals(FixUncheckedCenti8.from(a * b), b * FixUncheckedCenti8.from(a))
+			if (b != 0L) assertEquals(FixUncheckedCenti8.from(a), FixUncheckedCenti8.from(a * b) / b)
+			if (a != 0L) assertEquals(FixUncheckedCenti8.from(b), FixUncheckedCenti8.from(a * b) / a)
 		}
 		testValues(-4, 0)
-		testValues(0, 0)
-		testValues(1, 0)
-		testValues(4, 0)
+		testValues(0, 1)
+		testValues(1, -4)
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixUncheckedCenti8.ZERO < FixUncheckedCenti8.ONE)
+		assertTrue(0 < FixUncheckedCenti8.ONE)
 		assertFalse(FixUncheckedCenti8.ZERO > FixUncheckedCenti8.ONE)
+		assertFalse(0 > FixUncheckedCenti8.ONE)
 		assertFalse(FixUncheckedCenti8.ONE < FixUncheckedCenti8.ONE)
+		assertFalse(FixUncheckedCenti8.ONE < 1)
 		assertFalse(FixUncheckedCenti8.ONE > FixUncheckedCenti8.ONE)
 		assertTrue(FixUncheckedCenti8.ONE <= FixUncheckedCenti8.ONE)
 		assertTrue(FixUncheckedCenti8.ONE >= FixUncheckedCenti8.ONE)
@@ -103,6 +110,8 @@ class TestFixUncheckedCenti8 {
 		assertEquals(FixUncheckedCenti8.from(3), FixUncheckedCenti8.from(3))
 		assertNotEquals(FixUncheckedCenti8.from(3), FixUncheckedCenti8.from(3) - minDelta)
 		assertTrue(FixUncheckedCenti8.from(0.03333333333333333) < FixUncheckedCenti8.from(0.03333333333333333) + minDelta)
+		assertTrue(0.03333333333333333 < FixUncheckedCenti8.from(0.03333333333333333) + minDelta)
 		assertFalse(FixUncheckedCenti8.from(4.233333333333333) < FixUncheckedCenti8.from(4.233333333333333) - minDelta)
+		assertFalse(4.233333333333333 < FixUncheckedCenti8.from(4.233333333333333) - minDelta)
 	}
 }

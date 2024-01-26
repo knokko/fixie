@@ -62,24 +62,30 @@ class TestFixUncheckedMilli16U {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixUncheckedMilli16U.raw(UShort.MAX_VALUE), 1 * FixUncheckedMilli16U.raw(UShort.MAX_VALUE))
+		assertEquals(FixUncheckedMilli16U.raw(UShort.MAX_VALUE), FixUncheckedMilli16U.raw(UShort.MAX_VALUE) / 1)
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixUncheckedMilli16U.from(a * b), FixUncheckedMilli16U.from(a) * FixUncheckedMilli16U.from(b))
 			assertEquals(FixUncheckedMilli16U.from(a * b), FixUncheckedMilli16U.from(a) * b)
 			assertEquals(FixUncheckedMilli16U.from(a * b), b * FixUncheckedMilli16U.from(a))
+			if (b != 0L) assertEquals(FixUncheckedMilli16U.from(a), FixUncheckedMilli16U.from(a * b) / b)
+			if (a != 0L) assertEquals(FixUncheckedMilli16U.from(b), FixUncheckedMilli16U.from(a * b) / a)
 		}
 		testValues(0, 0)
-		testValues(1, 0)
+		testValues(1, 65)
 		testValues(65, 0)
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixUncheckedMilli16U.ZERO < FixUncheckedMilli16U.ONE)
+		assertTrue(0 < FixUncheckedMilli16U.ONE)
 		assertFalse(FixUncheckedMilli16U.ZERO > FixUncheckedMilli16U.ONE)
+		assertFalse(0 > FixUncheckedMilli16U.ONE)
 		assertFalse(FixUncheckedMilli16U.ONE < FixUncheckedMilli16U.ONE)
+		assertFalse(FixUncheckedMilli16U.ONE < 1)
 		assertFalse(FixUncheckedMilli16U.ONE > FixUncheckedMilli16U.ONE)
 		assertTrue(FixUncheckedMilli16U.ONE <= FixUncheckedMilli16U.ONE)
 		assertTrue(FixUncheckedMilli16U.ONE >= FixUncheckedMilli16U.ONE)
@@ -89,10 +95,16 @@ class TestFixUncheckedMilli16U {
 		assertEquals(FixUncheckedMilli16U.from(12), FixUncheckedMilli16U.from(12))
 		assertNotEquals(FixUncheckedMilli16U.from(12), FixUncheckedMilli16U.from(12) - minDelta)
 		assertTrue(FixUncheckedMilli16U.from(0.001) < FixUncheckedMilli16U.from(0.001) + minDelta)
+		assertTrue(0.001 < FixUncheckedMilli16U.from(0.001) + minDelta)
 		assertFalse(FixUncheckedMilli16U.from(0.41012452706744895) < FixUncheckedMilli16U.from(0.41012452706744895) - minDelta)
+		assertFalse(0.41012452706744895 < FixUncheckedMilli16U.from(0.41012452706744895) - minDelta)
 		assertTrue(FixUncheckedMilli16U.from(0.41012452706744895) < FixUncheckedMilli16U.from(0.41012452706744895) + minDelta)
+		assertTrue(0.41012452706744895 < FixUncheckedMilli16U.from(0.41012452706744895) + minDelta)
 		assertFalse(FixUncheckedMilli16U.from(1.4602674387652097) < FixUncheckedMilli16U.from(1.4602674387652097) - minDelta)
+		assertFalse(1.4602674387652097 < FixUncheckedMilli16U.from(1.4602674387652097) - minDelta)
 		assertTrue(FixUncheckedMilli16U.from(1.4602674387652097) < FixUncheckedMilli16U.from(1.4602674387652097) + minDelta)
+		assertTrue(1.4602674387652097 < FixUncheckedMilli16U.from(1.4602674387652097) + minDelta)
 		assertFalse(FixUncheckedMilli16U.from(65.535) < FixUncheckedMilli16U.from(65.535) - minDelta)
+		assertFalse(65.535 < FixUncheckedMilli16U.from(65.535) - minDelta)
 	}
 }

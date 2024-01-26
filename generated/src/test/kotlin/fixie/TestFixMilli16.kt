@@ -85,30 +85,39 @@ class TestFixMilli16 {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixMilli16.raw(Short.MAX_VALUE), 1 * FixMilli16.raw(Short.MAX_VALUE))
+		assertEquals(FixMilli16.raw(Short.MAX_VALUE), FixMilli16.raw(Short.MAX_VALUE) / 1)
 		assertEquals(FixMilli16.raw(Short.MIN_VALUE), 1 * FixMilli16.raw(Short.MIN_VALUE))
+		assertEquals(FixMilli16.raw(Short.MIN_VALUE), FixMilli16.raw(Short.MIN_VALUE) / 1)
 		assertEquals(FixMilli16.raw((Short.MIN_VALUE + 1).toShort()), -1 * FixMilli16.raw(Short.MAX_VALUE))
+		assertEquals(FixMilli16.raw((Short.MIN_VALUE + 1).toShort()), FixMilli16.raw(Short.MAX_VALUE) / -1)
 		assertThrows(FixedPointException::class.java) { -1 * FixMilli16.raw(Short.MIN_VALUE) }
+		assertThrows(FixedPointException::class.java) { FixMilli16.raw(Short.MIN_VALUE) / -1 }
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixMilli16.from(a * b), FixMilli16.from(a) * FixMilli16.from(b))
 			assertEquals(FixMilli16.from(a * b), FixMilli16.from(a) * b)
 			assertEquals(FixMilli16.from(a * b), b * FixMilli16.from(a))
+			if (b != 0L) assertEquals(FixMilli16.from(a), FixMilli16.from(a * b) / b)
+			if (a != 0L) assertEquals(FixMilli16.from(b), FixMilli16.from(a * b) / a)
 		}
 		assertThrows(FixedPointException::class.java) { FixMilli16.from(-32) * 4 }
-		testValues(0, 4)
+		testValues(0, 1)
 		testValues(1, 4)
-		testValues(4, 4)
-		testValues(7, 4)
-		assertThrows(FixedPointException::class.java) { FixMilli16.from(32) * 4 }
+		assertThrows(FixedPointException::class.java) { FixMilli16.from(4) * 32 }
+		assertThrows(FixedPointException::class.java) { FixMilli16.from(7) * -32 }
+		assertThrows(FixedPointException::class.java) { FixMilli16.from(32) * 32 }
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixMilli16.ZERO < FixMilli16.ONE)
+		assertTrue(0 < FixMilli16.ONE)
 		assertFalse(FixMilli16.ZERO > FixMilli16.ONE)
+		assertFalse(0 > FixMilli16.ONE)
 		assertFalse(FixMilli16.ONE < FixMilli16.ONE)
+		assertFalse(FixMilli16.ONE < 1)
 		assertFalse(FixMilli16.ONE > FixMilli16.ONE)
 		assertTrue(FixMilli16.ONE <= FixMilli16.ONE)
 		assertTrue(FixMilli16.ONE >= FixMilli16.ONE)
@@ -118,10 +127,16 @@ class TestFixMilli16 {
 		assertEquals(FixMilli16.from(12), FixMilli16.from(12))
 		assertNotEquals(FixMilli16.from(12), FixMilli16.from(12) - minDelta)
 		assertTrue(FixMilli16.from(0.001) < FixMilli16.from(0.001) + minDelta)
+		assertTrue(0.001 < FixMilli16.from(0.001) + minDelta)
 		assertFalse(FixMilli16.from(0.41012452706744895) < FixMilli16.from(0.41012452706744895) - minDelta)
+		assertFalse(0.41012452706744895 < FixMilli16.from(0.41012452706744895) - minDelta)
 		assertTrue(FixMilli16.from(0.41012452706744895) < FixMilli16.from(0.41012452706744895) + minDelta)
+		assertTrue(0.41012452706744895 < FixMilli16.from(0.41012452706744895) + minDelta)
 		assertFalse(FixMilli16.from(1.4602674387652097) < FixMilli16.from(1.4602674387652097) - minDelta)
+		assertFalse(1.4602674387652097 < FixMilli16.from(1.4602674387652097) - minDelta)
 		assertTrue(FixMilli16.from(1.4602674387652097) < FixMilli16.from(1.4602674387652097) + minDelta)
+		assertTrue(1.4602674387652097 < FixMilli16.from(1.4602674387652097) + minDelta)
 		assertFalse(FixMilli16.from(32.766999999999996) < FixMilli16.from(32.766999999999996) - minDelta)
+		assertFalse(32.766999999999996 < FixMilli16.from(32.766999999999996) - minDelta)
 	}
 }

@@ -58,24 +58,30 @@ class TestFixUncheckedCenti8U {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixUncheckedCenti8U.raw(UByte.MAX_VALUE), 1 * FixUncheckedCenti8U.raw(UByte.MAX_VALUE))
+		assertEquals(FixUncheckedCenti8U.raw(UByte.MAX_VALUE), FixUncheckedCenti8U.raw(UByte.MAX_VALUE) / 1)
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixUncheckedCenti8U.from(a * b), FixUncheckedCenti8U.from(a) * FixUncheckedCenti8U.from(b))
 			assertEquals(FixUncheckedCenti8U.from(a * b), FixUncheckedCenti8U.from(a) * b)
 			assertEquals(FixUncheckedCenti8U.from(a * b), b * FixUncheckedCenti8U.from(a))
+			if (b != 0L) assertEquals(FixUncheckedCenti8U.from(a), FixUncheckedCenti8U.from(a * b) / b)
+			if (a != 0L) assertEquals(FixUncheckedCenti8U.from(b), FixUncheckedCenti8U.from(a * b) / a)
 		}
 		testValues(0, 0)
-		testValues(1, 0)
+		testValues(1, 8)
 		testValues(8, 0)
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixUncheckedCenti8U.ZERO < FixUncheckedCenti8U.ONE)
+		assertTrue(0 < FixUncheckedCenti8U.ONE)
 		assertFalse(FixUncheckedCenti8U.ZERO > FixUncheckedCenti8U.ONE)
+		assertFalse(0 > FixUncheckedCenti8U.ONE)
 		assertFalse(FixUncheckedCenti8U.ONE < FixUncheckedCenti8U.ONE)
+		assertFalse(FixUncheckedCenti8U.ONE < 1)
 		assertFalse(FixUncheckedCenti8U.ONE > FixUncheckedCenti8U.ONE)
 		assertTrue(FixUncheckedCenti8U.ONE <= FixUncheckedCenti8U.ONE)
 		assertTrue(FixUncheckedCenti8U.ONE >= FixUncheckedCenti8U.ONE)
@@ -85,6 +91,8 @@ class TestFixUncheckedCenti8U {
 		assertEquals(FixUncheckedCenti8U.from(6), FixUncheckedCenti8U.from(6))
 		assertNotEquals(FixUncheckedCenti8U.from(6), FixUncheckedCenti8U.from(6) - minDelta)
 		assertTrue(FixUncheckedCenti8U.from(0.03333333333333333) < FixUncheckedCenti8U.from(0.03333333333333333) + minDelta)
+		assertTrue(0.03333333333333333 < FixUncheckedCenti8U.from(0.03333333333333333) + minDelta)
 		assertFalse(FixUncheckedCenti8U.from(8.5) < FixUncheckedCenti8U.from(8.5) - minDelta)
+		assertFalse(8.5 < FixUncheckedCenti8U.from(8.5) - minDelta)
 	}
 }

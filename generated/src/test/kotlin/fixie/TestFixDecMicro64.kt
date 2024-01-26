@@ -207,88 +207,97 @@ class TestFixDecMicro64 {
 	}
 
 	@Test
-	fun testMultiplication() {
+	fun testMultiplicationAndDivision() {
 		assertEquals(FixDecMicro64.raw(Long.MAX_VALUE), 1 * FixDecMicro64.raw(Long.MAX_VALUE))
+		assertEquals(FixDecMicro64.raw(Long.MAX_VALUE), FixDecMicro64.raw(Long.MAX_VALUE) / 1)
 		assertEquals(FixDecMicro64.raw(Long.MIN_VALUE), 1 * FixDecMicro64.raw(Long.MIN_VALUE))
+		assertEquals(FixDecMicro64.raw(Long.MIN_VALUE), FixDecMicro64.raw(Long.MIN_VALUE) / 1)
 		assertEquals(FixDecMicro64.raw(Long.MIN_VALUE + 1), -1 * FixDecMicro64.raw(Long.MAX_VALUE))
+		assertEquals(FixDecMicro64.raw(Long.MIN_VALUE + 1), FixDecMicro64.raw(Long.MAX_VALUE) / -1)
 		assertThrows(FixedPointException::class.java) { -1 * FixDecMicro64.raw(Long.MIN_VALUE) }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.raw(Long.MIN_VALUE) / -1 }
 
 		fun testValues(a: Long, b: Long) {
 			assertEquals(FixDecMicro64.from(a * b), FixDecMicro64.from(a) * FixDecMicro64.from(b))
 			assertEquals(FixDecMicro64.from(a * b), FixDecMicro64.from(a) * b)
 			assertEquals(FixDecMicro64.from(a * b), b * FixDecMicro64.from(a))
+			if (b != 0L) assertEquals(FixDecMicro64.from(a), FixDecMicro64.from(a * b) / b)
+			if (a != 0L) assertEquals(FixDecMicro64.from(b), FixDecMicro64.from(a * b) / a)
 		}
 		testValues(-9223372036854, 0)
-		testValues(-5059045360529, 0)
-		testValues(-3140930909013, 0)
-		testValues(-911319367812, 0)
-		testValues(-609868891566, 0)
-		testValues(-136839608708, 0)
-		testValues(-52056635328, 0)
-		testValues(-9829268785, 0)
-		testValues(-4560337848, 0)
-		testValues(-2528868325, 0)
-		testValues(-1366906173, 0)
-		testValues(-585805685, 0)
-		testValues(-88370421, 0)
-		testValues(-81756778, 0)
-		testValues(-51198987, 0)
-		testValues(-19856954, 0)
-		testValues(-6383639, 0)
-		testValues(-1339836, 0)
-		testValues(-622138, 0)
-		testValues(-574320, 0)
-		testValues(-89960, 0)
-		testValues(-70434, 0)
-		testValues(-62676, 0)
-		testValues(-18139, 0)
-		testValues(-2937, 0)
-		testValues(-1190, 0)
-		testValues(-468, 0)
-		testValues(-451, 0)
-		testValues(-395, 0)
-		testValues(-81, 0)
-		testValues(-6, 0)
-		testValues(0, 0)
-		testValues(1, 0)
-		testValues(12, 0)
-		testValues(38, 0)
-		testValues(42, 0)
-		testValues(65, 0)
-		testValues(544, 0)
-		testValues(1096, 0)
-		testValues(1969, 0)
-		testValues(5686, 0)
-		testValues(20438, 0)
-		testValues(32830, 0)
-		testValues(228136, 0)
-		testValues(251783, 0)
-		testValues(1082069, 0)
-		testValues(1625155, 0)
-		testValues(3279758, 0)
-		testValues(4576916, 0)
-		testValues(25732843, 0)
-		testValues(38783000, 0)
-		testValues(200720101, 0)
-		testValues(243980368, 0)
-		testValues(278055773, 0)
-		testValues(369381973, 0)
-		testValues(6130620204, 0)
-		testValues(10588374717, 0)
-		testValues(50275406242, 0)
-		testValues(66942017193, 0)
-		testValues(76129392498, 0)
-		testValues(481844066680, 0)
-		testValues(2040591839720, 0)
-		testValues(2211791693185, 0)
-		testValues(9223372036854, 0)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-5059045360529) * 228136 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-3140930909013) * -52056635328 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-911319367812) * -2528868325 }
+		testValues(-609868891566, 12)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-136839608708) * -9829268785 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-52056635328) * 4576916 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-9829268785) * 5686 }
+		testValues(-4560337848, -451)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-2528868325) * 6130620204 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-1366906173) * -19856954 }
+		testValues(-585805685, 5686)
+		testValues(-88370421, 38)
+		testValues(-81756778, 1)
+		testValues(-51198987, 20438)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-19856954) * 243980368 }
+		testValues(-6383639, -62676)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-1339836) * 25732843 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-622138) * -911319367812 }
+		testValues(-574320, -1339836)
+		testValues(-89960, 1969)
+		testValues(-70434, -468)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-62676) * 2040591839720 }
+		testValues(-18139, -89960)
+		testValues(-2937, -622138)
+		testValues(-1190, 42)
+		testValues(-468, -89960)
+		testValues(-451, 5686)
+		testValues(-395, 42)
+		testValues(-81, 32830)
+		testValues(-6, -574320)
+		testValues(0, -2937)
+		testValues(1, -52056635328)
+		testValues(12, 12)
+		testValues(38, -89960)
+		testValues(42, -622138)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(65) * 2211791693185 }
+		testValues(544, -18139)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(1096) * 76129392498 }
+		testValues(1969, -81756778)
+		testValues(5686, 1969)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(20438) * -911319367812 }
+		testValues(32830, 243980368)
+		testValues(228136, -19856954)
+		testValues(251783, 4576916)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(1082069) * 9223372036854 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(1625155) * 369381973 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(3279758) * -609868891566 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(4576916) * 3279758 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(25732843) * 2040591839720 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(38783000) * -9829268785 }
+		testValues(200720101, 65)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(243980368) * 278055773 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(278055773) * 4576916 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(369381973) * -911319367812 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(6130620204) * -9223372036854 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(10588374717) * 1625155 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(50275406242) * -5059045360529 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(66942017193) * -585805685 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(76129392498) * -3140930909013 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(481844066680) * -88370421 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(2040591839720) * 2040591839720 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(2211791693185) * 1969 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(9223372036854) * 1625155 }
 	}
 
 	@Test
 	fun testCompareTo() {
 		assertTrue(FixDecMicro64.ZERO < FixDecMicro64.ONE)
+		assertTrue(0 < FixDecMicro64.ONE)
 		assertFalse(FixDecMicro64.ZERO > FixDecMicro64.ONE)
+		assertFalse(0 > FixDecMicro64.ONE)
 		assertFalse(FixDecMicro64.ONE < FixDecMicro64.ONE)
+		assertFalse(FixDecMicro64.ONE < 1)
 		assertFalse(FixDecMicro64.ONE > FixDecMicro64.ONE)
 		assertTrue(FixDecMicro64.ONE <= FixDecMicro64.ONE)
 		assertTrue(FixDecMicro64.ONE >= FixDecMicro64.ONE)
@@ -298,46 +307,88 @@ class TestFixDecMicro64 {
 		assertEquals(FixDecMicro64.from(12), FixDecMicro64.from(12))
 		assertNotEquals(FixDecMicro64.from(12), FixDecMicro64.from(12) - minDelta)
 		assertTrue(FixDecMicro64.from(1.0E-6) < FixDecMicro64.from(1.0E-6) + minDelta)
+		assertTrue(1.0E-6 < FixDecMicro64.from(1.0E-6) + minDelta)
 		assertFalse(FixDecMicro64.from(4.101245270674489E-4) < FixDecMicro64.from(4.101245270674489E-4) - minDelta)
+		assertFalse(4.101245270674489E-4 < FixDecMicro64.from(4.101245270674489E-4) - minDelta)
 		assertTrue(FixDecMicro64.from(4.101245270674489E-4) < FixDecMicro64.from(4.101245270674489E-4) + minDelta)
+		assertTrue(4.101245270674489E-4 < FixDecMicro64.from(4.101245270674489E-4) + minDelta)
 		assertFalse(FixDecMicro64.from(0.0014602674387652094) < FixDecMicro64.from(0.0014602674387652094) - minDelta)
+		assertFalse(0.0014602674387652094 < FixDecMicro64.from(0.0014602674387652094) - minDelta)
 		assertTrue(FixDecMicro64.from(0.0014602674387652094) < FixDecMicro64.from(0.0014602674387652094) + minDelta)
+		assertTrue(0.0014602674387652094 < FixDecMicro64.from(0.0014602674387652094) + minDelta)
 		assertFalse(FixDecMicro64.from(0.008314038763645868) < FixDecMicro64.from(0.008314038763645868) - minDelta)
+		assertFalse(0.008314038763645868 < FixDecMicro64.from(0.008314038763645868) - minDelta)
 		assertTrue(FixDecMicro64.from(0.008314038763645868) < FixDecMicro64.from(0.008314038763645868) + minDelta)
+		assertTrue(0.008314038763645868 < FixDecMicro64.from(0.008314038763645868) + minDelta)
 		assertFalse(FixDecMicro64.from(0.06313960308834927) < FixDecMicro64.from(0.06313960308834927) - minDelta)
+		assertFalse(0.06313960308834927 < FixDecMicro64.from(0.06313960308834927) - minDelta)
 		assertTrue(FixDecMicro64.from(0.06313960308834927) < FixDecMicro64.from(0.06313960308834927) + minDelta)
+		assertTrue(0.06313960308834927 < FixDecMicro64.from(0.06313960308834927) + minDelta)
 		assertFalse(FixDecMicro64.from(0.18938331340622416) < FixDecMicro64.from(0.18938331340622416) - minDelta)
+		assertFalse(0.18938331340622416 < FixDecMicro64.from(0.18938331340622416) - minDelta)
 		assertTrue(FixDecMicro64.from(0.18938331340622416) < FixDecMicro64.from(0.18938331340622416) + minDelta)
+		assertTrue(0.18938331340622416 < FixDecMicro64.from(0.18938331340622416) + minDelta)
 		assertFalse(FixDecMicro64.from(2.75487661886147) < FixDecMicro64.from(2.75487661886147) - minDelta)
+		assertFalse(2.75487661886147 < FixDecMicro64.from(2.75487661886147) - minDelta)
 		assertTrue(FixDecMicro64.from(2.75487661886147) < FixDecMicro64.from(2.75487661886147) + minDelta)
+		assertTrue(2.75487661886147 < FixDecMicro64.from(2.75487661886147) + minDelta)
 		assertFalse(FixDecMicro64.from(10.653674356901822) < FixDecMicro64.from(10.653674356901822) - minDelta)
+		assertFalse(10.653674356901822 < FixDecMicro64.from(10.653674356901822) - minDelta)
 		assertTrue(FixDecMicro64.from(10.653674356901822) < FixDecMicro64.from(10.653674356901822) + minDelta)
+		assertTrue(10.653674356901822 < FixDecMicro64.from(10.653674356901822) + minDelta)
 		assertFalse(FixDecMicro64.from(150.2659312211488) < FixDecMicro64.from(150.2659312211488) - minDelta)
+		assertFalse(150.2659312211488 < FixDecMicro64.from(150.2659312211488) - minDelta)
 		assertTrue(FixDecMicro64.from(150.2659312211488) < FixDecMicro64.from(150.2659312211488) + minDelta)
+		assertTrue(150.2659312211488 < FixDecMicro64.from(150.2659312211488) + minDelta)
 		assertFalse(FixDecMicro64.from(3538.6818839055695) < FixDecMicro64.from(3538.6818839055695) - minDelta)
+		assertFalse(3538.6818839055695 < FixDecMicro64.from(3538.6818839055695) - minDelta)
 		assertTrue(FixDecMicro64.from(3538.6818839055695) < FixDecMicro64.from(3538.6818839055695) + minDelta)
+		assertTrue(3538.6818839055695 < FixDecMicro64.from(3538.6818839055695) + minDelta)
 		assertFalse(FixDecMicro64.from(13398.287795781996) < FixDecMicro64.from(13398.287795781996) - minDelta)
+		assertFalse(13398.287795781996 < FixDecMicro64.from(13398.287795781996) - minDelta)
 		assertTrue(FixDecMicro64.from(13398.287795781996) < FixDecMicro64.from(13398.287795781996) + minDelta)
+		assertTrue(13398.287795781996 < FixDecMicro64.from(13398.287795781996) + minDelta)
 		assertFalse(FixDecMicro64.from(116205.6652627973) < FixDecMicro64.from(116205.6652627973) - minDelta)
+		assertFalse(116205.6652627973 < FixDecMicro64.from(116205.6652627973) - minDelta)
 		assertTrue(FixDecMicro64.from(116205.6652627973) < FixDecMicro64.from(116205.6652627973) + minDelta)
+		assertTrue(116205.6652627973 < FixDecMicro64.from(116205.6652627973) + minDelta)
 		assertFalse(FixDecMicro64.from(633470.5910724404) < FixDecMicro64.from(633470.5910724404) - minDelta)
+		assertFalse(633470.5910724404 < FixDecMicro64.from(633470.5910724404) - minDelta)
 		assertTrue(FixDecMicro64.from(633470.5910724404) < FixDecMicro64.from(633470.5910724404) + minDelta)
+		assertTrue(633470.5910724404 < FixDecMicro64.from(633470.5910724404) + minDelta)
 		assertFalse(FixDecMicro64.from(1.677804772430343E7) < FixDecMicro64.from(1.677804772430343E7) - minDelta)
+		assertFalse(1.677804772430343E7 < FixDecMicro64.from(1.677804772430343E7) - minDelta)
 		assertTrue(FixDecMicro64.from(1.677804772430343E7) < FixDecMicro64.from(1.677804772430343E7) + minDelta)
+		assertTrue(1.677804772430343E7 < FixDecMicro64.from(1.677804772430343E7) + minDelta)
 		assertFalse(FixDecMicro64.from(2.514267349675139E7) < FixDecMicro64.from(2.514267349675139E7) - minDelta)
+		assertFalse(2.514267349675139E7 < FixDecMicro64.from(2.514267349675139E7) - minDelta)
 		assertTrue(FixDecMicro64.from(2.514267349675139E7) < FixDecMicro64.from(2.514267349675139E7) + minDelta)
+		assertTrue(2.514267349675139E7 < FixDecMicro64.from(2.514267349675139E7) + minDelta)
 		assertFalse(FixDecMicro64.from(9.984003659123064E8) < FixDecMicro64.from(9.984003659123064E8) - minDelta)
+		assertFalse(9.984003659123064E8 < FixDecMicro64.from(9.984003659123064E8) - minDelta)
 		assertTrue(FixDecMicro64.from(9.984003659123064E8) < FixDecMicro64.from(9.984003659123064E8) + minDelta)
+		assertTrue(9.984003659123064E8 < FixDecMicro64.from(9.984003659123064E8) + minDelta)
 		assertFalse(FixDecMicro64.from(1.5781531304854264E9) < FixDecMicro64.from(1.5781531304854264E9) - minDelta)
+		assertFalse(1.5781531304854264E9 < FixDecMicro64.from(1.5781531304854264E9) - minDelta)
 		assertTrue(FixDecMicro64.from(1.5781531304854264E9) < FixDecMicro64.from(1.5781531304854264E9) + minDelta)
+		assertTrue(1.5781531304854264E9 < FixDecMicro64.from(1.5781531304854264E9) + minDelta)
 		assertFalse(FixDecMicro64.from(5.640193457810576E10) < FixDecMicro64.from(5.640193457810576E10) - minDelta)
+		assertFalse(5.640193457810576E10 < FixDecMicro64.from(5.640193457810576E10) - minDelta)
 		assertTrue(FixDecMicro64.from(5.640193457810576E10) < FixDecMicro64.from(5.640193457810576E10) + minDelta)
+		assertTrue(5.640193457810576E10 < FixDecMicro64.from(5.640193457810576E10) + minDelta)
 		assertFalse(FixDecMicro64.from(7.235694787278354E10) < FixDecMicro64.from(7.235694787278354E10) - minDelta)
+		assertFalse(7.235694787278354E10 < FixDecMicro64.from(7.235694787278354E10) - minDelta)
 		assertTrue(FixDecMicro64.from(7.235694787278354E10) < FixDecMicro64.from(7.235694787278354E10) + minDelta)
+		assertTrue(7.235694787278354E10 < FixDecMicro64.from(7.235694787278354E10) + minDelta)
 		assertFalse(FixDecMicro64.from(1.4840878533077163E12) < FixDecMicro64.from(1.4840878533077163E12) - minDelta)
+		assertFalse(1.4840878533077163E12 < FixDecMicro64.from(1.4840878533077163E12) - minDelta)
 		assertTrue(FixDecMicro64.from(1.4840878533077163E12) < FixDecMicro64.from(1.4840878533077163E12) + minDelta)
+		assertTrue(1.4840878533077163E12 < FixDecMicro64.from(1.4840878533077163E12) + minDelta)
 		assertFalse(FixDecMicro64.from(3.729431280082279E12) < FixDecMicro64.from(3.729431280082279E12) - minDelta)
+		assertFalse(3.729431280082279E12 < FixDecMicro64.from(3.729431280082279E12) - minDelta)
 		assertTrue(FixDecMicro64.from(3.729431280082279E12) < FixDecMicro64.from(3.729431280082279E12) + minDelta)
+		assertTrue(3.729431280082279E12 < FixDecMicro64.from(3.729431280082279E12) + minDelta)
 		assertFalse(FixDecMicro64.from(9.223372036854775E12) < FixDecMicro64.from(9.223372036854775E12) - minDelta)
+		assertFalse(9.223372036854775E12 < FixDecMicro64.from(9.223372036854775E12) - minDelta)
 	}
 }

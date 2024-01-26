@@ -123,20 +123,20 @@ class TestFixMicro32 {
 			assertEquals(FixMicro32.from(a * b), FixMicro32.from(a) * b)
 			assertEquals(FixMicro32.from(a * b), b * FixMicro32.from(a))
 		}
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(-2048) * -37 }
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(-1212) * -195 }
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(-656) * 70 }
+		testValues(-2048, 0)
+		testValues(-1212, 0)
+		testValues(-656, 0)
 		testValues(-195, 0)
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(-49) * 2047 }
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(-37) * -1212 }
-		testValues(-35, -35)
-		testValues(0, -656)
-		testValues(1, -656)
+		testValues(-49, 0)
+		testValues(-37, 0)
+		testValues(-35, 0)
+		testValues(0, 0)
+		testValues(1, 0)
 		testValues(51, 0)
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(70) * -49 }
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(158) * 70 }
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(239) * 70 }
-		assertThrows(FixedPointException::class.java) { FixMicro32.from(2047) * 239 }
+		testValues(70, 0)
+		testValues(158, 0)
+		testValues(239, 0)
+		testValues(2047, 0)
 	}
 
 	@Test

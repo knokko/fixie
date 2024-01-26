@@ -82,14 +82,14 @@ class TestFixMicro32U {
 			assertEquals(FixMicro32U.from(a * b), FixMicro32U.from(a) * b)
 			assertEquals(FixMicro32U.from(a * b), b * FixMicro32U.from(a))
 		}
-		testValues(0, 165)
-		testValues(1, 1881)
-		assertThrows(FixedPointException::class.java) { FixMicro32U.from(42) * 134 }
-		testValues(134, 1)
-		testValues(165, 0)
-		testValues(231, 1)
-		assertThrows(FixedPointException::class.java) { FixMicro32U.from(1493) * 42 }
-		assertThrows(FixedPointException::class.java) { FixMicro32U.from(1881) * 4095 }
+		testValues(0, 1493)
+		testValues(1, 1493)
+		assertThrows(FixedPointException::class.java) { FixMicro32U.from(42) * 1493 }
+		assertThrows(FixedPointException::class.java) { FixMicro32U.from(134) * 1493 }
+		assertThrows(FixedPointException::class.java) { FixMicro32U.from(165) * 1493 }
+		assertThrows(FixedPointException::class.java) { FixMicro32U.from(231) * 1493 }
+		assertThrows(FixedPointException::class.java) { FixMicro32U.from(1493) * 1493 }
+		assertThrows(FixedPointException::class.java) { FixMicro32U.from(1881) * 1493 }
 		assertThrows(FixedPointException::class.java) { FixMicro32U.from(4095) * 1493 }
 	}
 

@@ -68,8 +68,8 @@ class TestFixCenti8U {
 			assertEquals(FixCenti8U.from(a * b), FixCenti8U.from(a) * b)
 			assertEquals(FixCenti8U.from(a * b), b * FixCenti8U.from(a))
 		}
-		testValues(0, 1)
-		testValues(1, 8)
+		testValues(0, 0)
+		testValues(1, 0)
 		testValues(8, 0)
 	}
 

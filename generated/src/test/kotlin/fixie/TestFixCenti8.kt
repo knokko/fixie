@@ -85,10 +85,10 @@ class TestFixCenti8 {
 			assertEquals(FixCenti8.from(a * b), FixCenti8.from(a) * b)
 			assertEquals(FixCenti8.from(a * b), b * FixCenti8.from(a))
 		}
-		testValues(-4, 1)
-		testValues(0, 4)
+		testValues(-4, 0)
+		testValues(0, 0)
 		testValues(1, 0)
-		testValues(4, 1)
+		testValues(4, 0)
 	}
 
 	@Test

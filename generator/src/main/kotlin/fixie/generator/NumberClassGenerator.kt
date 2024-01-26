@@ -16,8 +16,10 @@ class NumberClassGenerator(
         generateArithmetic()
         // TODO Generate toString
         generateCompanionObject()
+        generateArrayClass()
         writer.println("}")
         generateExtensionFunctions()
+        generateMathFunctions()
     }
 
     private fun generateClassPrefix() {
@@ -297,6 +299,26 @@ class NumberClassGenerator(
         writer.println("\t}")
     }
 
+    private fun generateArrayClass() {
+        writer.println()
+        writer.println("\t@JvmInline")
+        if (!number.internalType.signed) writer.println("\t@OptIn(ExperimentalUnsignedTypes::class)")
+        writer.println("\tvalue class Array private constructor(val raw: ${number.internalType}Array) {")
+        writer.println()
+        writer.println("\t\tconstructor(size: Int) : this(${number.internalType}Array(size))")
+        writer.println()
+        writer.println("\t\toperator fun get(index: Int) = ${number.className}(raw[index])")
+        writer.println()
+        writer.println("\t\toperator fun set(index: Int, value: ${number.className}) {")
+        writer.println("\t\t\traw[index] = value.raw")
+        writer.println("\t\t}")
+        writer.println()
+        writer.println("\t\tfun fill(value: ${number.className}) {")
+        writer.println("\t\t\traw.fill(value.raw)")
+        writer.println("\t\t}")
+        writer.println("\t}")
+    }
+
     private fun generateExtensionFunctions() {
         generateArithmeticExtensionFunctions("plus", "+")
         generateArithmeticExtensionFunctions("minus", "-")
@@ -309,5 +331,22 @@ class NumberClassGenerator(
             if (number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
             writer.println("operator fun $typeName.$methodName(right: ${number.className}) = ${number.className}.from(this) $operator right")
         }
+    }
+
+    private fun generateMathFunctions() {
+        if (number.internalType.numBytes >= 4) {
+            if (number.internalType.signed) generateUnaryMathFunction("abs")
+            // TODO Support smaller types
+            generateBinaryMathFunction("min")
+            generateBinaryMathFunction("max")
+        }
+    }
+
+    private fun generateUnaryMathFunction(name: String) {
+        writer.println("fun $name(value: ${number.className}) = ${number.className}.raw(kotlin.math.$name(value.raw))")
+    }
+
+    private fun generateBinaryMathFunction(name: String) {
+        writer.println("fun $name(a: ${number.className}, b: ${number.className}) = ${number.className}.raw(kotlin.math.$name(a.raw, b.raw))")
     }
 }

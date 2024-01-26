@@ -123,20 +123,20 @@ class TestFixDecMicro32 {
 			assertEquals(FixDecMicro32.from(a * b), FixDecMicro32.from(a) * b)
 			assertEquals(FixDecMicro32.from(a * b), b * FixDecMicro32.from(a))
 		}
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-2147) * -35 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-1181) * -35 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-294) * 70 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-256) * 51 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-134) * -2147 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-37) * -2147 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(-35) * -256 }
-		testValues(0, -256)
-		testValues(1, -294)
-		testValues(51, 1)
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(70) * -1181 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(158) * -37 }
-		testValues(239, 1)
-		assertThrows(FixedPointException::class.java) { FixDecMicro32.from(2147) * 239 }
+		testValues(-2147, 0)
+		testValues(-1181, 0)
+		testValues(-294, 0)
+		testValues(-256, 0)
+		testValues(-134, 0)
+		testValues(-37, 0)
+		testValues(-35, 0)
+		testValues(0, 0)
+		testValues(1, 0)
+		testValues(51, 0)
+		testValues(70, 0)
+		testValues(158, 0)
+		testValues(239, 0)
+		testValues(2147, 0)
 	}
 
 	@Test

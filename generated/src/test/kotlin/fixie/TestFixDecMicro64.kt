@@ -218,70 +218,70 @@ class TestFixDecMicro64 {
 			assertEquals(FixDecMicro64.from(a * b), FixDecMicro64.from(a) * b)
 			assertEquals(FixDecMicro64.from(a * b), b * FixDecMicro64.from(a))
 		}
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-9223372036854) * -9829268785 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-5059045360529) * 3279758 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-3140930909013) * 10588374717 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-911319367812) * 9223372036854 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-609868891566) * 278055773 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-136839608708) * -451 }
-		testValues(-52056635328, 38)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-9829268785) * 481844066680 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-4560337848) * 1082069 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-2528868325) * -89960 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-1366906173) * -81756778 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-585805685) * 3279758 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-88370421) * -81756778 }
-		testValues(-81756778, -2937)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-51198987) * -9223372036854 }
-		testValues(-19856954, 1969)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-6383639) * 76129392498 }
-		testValues(-1339836, -468)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-622138) * -81756778 }
-		testValues(-574320, -1190)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-89960) * 200720101 }
-		testValues(-70434, -1339836)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-62676) * 2211791693185 }
-		testValues(-18139, -1339836)
-		testValues(-2937, 200720101)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(-1190) * 66942017193 }
-		testValues(-468, -1339836)
-		testValues(-451, 1625155)
-		testValues(-395, -585805685)
-		testValues(-81, -1339836)
-		testValues(-6, -136839608708)
-		testValues(0, 10588374717)
-		testValues(1, -18139)
-		testValues(12, 4576916)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(38) * -3140930909013 }
-		testValues(42, 38783000)
-		testValues(65, 76129392498)
-		testValues(544, 38783000)
-		testValues(1096, 1082069)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(1969) * 481844066680 }
-		testValues(5686, 4576916)
-		testValues(20438, 544)
-		testValues(32830, 1096)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(228136) * -9829268785 }
-		testValues(251783, -574320)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(1082069) * -51198987 }
-		testValues(1625155, -18139)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(3279758) * 481844066680 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(4576916) * 243980368 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(25732843) * -4560337848 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(38783000) * -3140930909013 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(200720101) * 1625155 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(243980368) * 228136 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(278055773) * -51198987 }
-		testValues(369381973, -395)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(6130620204) * -6383639 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(10588374717) * -574320 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(50275406242) * -51198987 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(66942017193) * -9829268785 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(76129392498) * 228136 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(481844066680) * 42 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(2040591839720) * -468 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(2211791693185) * -9223372036854 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64.from(9223372036854) * 5686 }
+		testValues(-9223372036854, 0)
+		testValues(-5059045360529, 0)
+		testValues(-3140930909013, 0)
+		testValues(-911319367812, 0)
+		testValues(-609868891566, 0)
+		testValues(-136839608708, 0)
+		testValues(-52056635328, 0)
+		testValues(-9829268785, 0)
+		testValues(-4560337848, 0)
+		testValues(-2528868325, 0)
+		testValues(-1366906173, 0)
+		testValues(-585805685, 0)
+		testValues(-88370421, 0)
+		testValues(-81756778, 0)
+		testValues(-51198987, 0)
+		testValues(-19856954, 0)
+		testValues(-6383639, 0)
+		testValues(-1339836, 0)
+		testValues(-622138, 0)
+		testValues(-574320, 0)
+		testValues(-89960, 0)
+		testValues(-70434, 0)
+		testValues(-62676, 0)
+		testValues(-18139, 0)
+		testValues(-2937, 0)
+		testValues(-1190, 0)
+		testValues(-468, 0)
+		testValues(-451, 0)
+		testValues(-395, 0)
+		testValues(-81, 0)
+		testValues(-6, 0)
+		testValues(0, 0)
+		testValues(1, 0)
+		testValues(12, 0)
+		testValues(38, 0)
+		testValues(42, 0)
+		testValues(65, 0)
+		testValues(544, 0)
+		testValues(1096, 0)
+		testValues(1969, 0)
+		testValues(5686, 0)
+		testValues(20438, 0)
+		testValues(32830, 0)
+		testValues(228136, 0)
+		testValues(251783, 0)
+		testValues(1082069, 0)
+		testValues(1625155, 0)
+		testValues(3279758, 0)
+		testValues(4576916, 0)
+		testValues(25732843, 0)
+		testValues(38783000, 0)
+		testValues(200720101, 0)
+		testValues(243980368, 0)
+		testValues(278055773, 0)
+		testValues(369381973, 0)
+		testValues(6130620204, 0)
+		testValues(10588374717, 0)
+		testValues(50275406242, 0)
+		testValues(66942017193, 0)
+		testValues(76129392498, 0)
+		testValues(481844066680, 0)
+		testValues(2040591839720, 0)
+		testValues(2211791693185, 0)
+		testValues(9223372036854, 0)
 	}
 
 	@Test

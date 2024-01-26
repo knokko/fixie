@@ -70,8 +70,8 @@ class TestFixUncheckedMilli16U {
 			assertEquals(FixUncheckedMilli16U.from(a * b), FixUncheckedMilli16U.from(a) * b)
 			assertEquals(FixUncheckedMilli16U.from(a * b), b * FixUncheckedMilli16U.from(a))
 		}
-		testValues(0, 1)
-		testValues(1, 65)
+		testValues(0, 0)
+		testValues(1, 0)
 		testValues(65, 0)
 	}
 

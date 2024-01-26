@@ -94,8 +94,10 @@ class TestFixUncheckedMilli16 {
 			assertEquals(FixUncheckedMilli16.from(a * b), FixUncheckedMilli16.from(a) * b)
 			assertEquals(FixUncheckedMilli16.from(a * b), b * FixUncheckedMilli16.from(a))
 		}
-		testValues(0, 1)
-		testValues(1, 0)
+		testValues(0, 4)
+		testValues(1, 4)
+		testValues(4, 4)
+		testValues(7, 4)
 	}
 
 	@Test

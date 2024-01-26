@@ -72,7 +72,7 @@ class TestFixMilli16U {
 			assertEquals(FixMilli16U.from(a * b), FixMilli16U.from(a) * b)
 			assertEquals(FixMilli16U.from(a * b), b * FixMilli16U.from(a))
 		}
-		testValues(0, 65)
+		testValues(0, 0)
 		testValues(1, 0)
 		testValues(65, 0)
 	}

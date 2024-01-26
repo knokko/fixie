@@ -96,12 +96,12 @@ class TestFixMilli16 {
 			assertEquals(FixMilli16.from(a * b), FixMilli16.from(a) * b)
 			assertEquals(FixMilli16.from(a * b), b * FixMilli16.from(a))
 		}
-		assertThrows(FixedPointException::class.java) { FixMilli16.from(-32) * 32 }
-		testValues(0, 32)
-		testValues(1, 32)
-		testValues(4, 1)
-		assertThrows(FixedPointException::class.java) { FixMilli16.from(7) * -32 }
-		testValues(32, 0)
+		assertThrows(FixedPointException::class.java) { FixMilli16.from(-32) * 4 }
+		testValues(0, 4)
+		testValues(1, 4)
+		testValues(4, 4)
+		testValues(7, 4)
+		assertThrows(FixedPointException::class.java) { FixMilli16.from(32) * 4 }
 	}
 
 	@Test

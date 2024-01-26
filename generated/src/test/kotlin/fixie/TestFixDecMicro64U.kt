@@ -124,39 +124,39 @@ class TestFixDecMicro64U {
 			assertEquals(FixDecMicro64U.from(a * b), FixDecMicro64U.from(a) * b)
 			assertEquals(FixDecMicro64U.from(a * b), b * FixDecMicro64U.from(a))
 		}
-		testValues(0, 1389655)
-		testValues(1, 1389655)
-		testValues(42, 165)
-		testValues(134, 44002482883)
-		testValues(165, 39192496)
-		testValues(231, 1493)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1493) * 1222091827510 }
-		testValues(1881, 39192496)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(4505) * 12211872545 }
-		testValues(11152, 39192496)
-		testValues(11484, 1)
-		testValues(21231, 329768868)
-		testValues(252026, 32234314)
-		testValues(301591, 231)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1389655) * 364448964103 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1970917) * 12211872545 }
-		testValues(6075644, 0)
-		testValues(13371719, 11152)
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(13620980) * 1222091827510 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(32234314) * 1970917 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(39192496) * 1389655 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(329768868) * 44002482883 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1474163511) * 2854741395 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(2854741395) * 301591 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(5116806831) * 252026 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(12211872545) * 1881 }
-		testValues(44002482883, 165)
+		testValues(0, 71711606273)
+		testValues(1, 71711606273)
+		testValues(42, 71711606273)
+		testValues(134, 71711606273)
+		testValues(165, 71711606273)
+		testValues(231, 71711606273)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1493) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1881) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(4505) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(11152) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(11484) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(21231) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(252026) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(301591) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1389655) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1970917) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(6075644) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(13371719) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(13620980) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(32234314) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(39192496) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(329768868) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1474163511) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(2854741395) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(5116806831) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(12211872545) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(44002482883) * 71711606273 }
 		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(71711606273) * 71711606273 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(364448964103) * 5116806831 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(500434653899) * 1493 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1222091827510) * 11152 }
-		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(2644929701422) * 1970917 }
-		testValues(18446744073709, 0)
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(364448964103) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(500434653899) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(1222091827510) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(2644929701422) * 71711606273 }
+		assertThrows(FixedPointException::class.java) { FixDecMicro64U.from(18446744073709) * 71711606273 }
 	}
 
 	@Test

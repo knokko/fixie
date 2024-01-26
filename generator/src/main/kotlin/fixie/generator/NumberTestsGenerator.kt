@@ -221,7 +221,7 @@ class NumberTestsGenerator(
 
         val sequence = generateTestSequence(minIntValue, maxIntValue, 6, 2, 20242401118)
         for (a in sequence) {
-            val b = sequence.random()
+            val b = sequence.random(Random(26012024235))
             val fits = try {
                 Math.multiplyExact(a, b) in minIntValue..maxIntValue
             } catch (overflow: ArithmeticException) { false }

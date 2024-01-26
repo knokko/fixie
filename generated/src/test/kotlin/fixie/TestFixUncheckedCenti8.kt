@@ -83,10 +83,10 @@ class TestFixUncheckedCenti8 {
 			assertEquals(FixUncheckedCenti8.from(a * b), FixUncheckedCenti8.from(a) * b)
 			assertEquals(FixUncheckedCenti8.from(a * b), b * FixUncheckedCenti8.from(a))
 		}
-		testValues(-4, 1)
-		testValues(0, 1)
-		testValues(1, 1)
-		testValues(4, 1)
+		testValues(-4, 0)
+		testValues(0, 0)
+		testValues(1, 0)
+		testValues(4, 0)
 	}
 
 	@Test

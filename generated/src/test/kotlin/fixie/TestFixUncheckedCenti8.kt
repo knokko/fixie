@@ -163,4 +163,18 @@ class TestFixUncheckedCenti8 {
 		assertTrue(FixUncheckedCenti8.raw(Byte.MIN_VALUE) > Byte.MIN_VALUE.toFloat())
 		assertTrue(FixUncheckedCenti8.raw(Byte.MIN_VALUE) > Byte.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixUncheckedCenti8.Array(2) { FixUncheckedCenti8.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixUncheckedCenti8.ONE, testArray[0])
+		assertEquals(FixUncheckedCenti8.ONE, testArray[1])
+		testArray[1] = FixUncheckedCenti8.ZERO
+		assertEquals(FixUncheckedCenti8.ONE, testArray[0])
+		assertEquals(FixUncheckedCenti8.ZERO, testArray[1])
+		testArray.fill(FixUncheckedCenti8.ZERO)
+		assertEquals(FixUncheckedCenti8.ZERO, testArray[0])
+		assertEquals(FixUncheckedCenti8.ZERO, testArray[1])
+	}
 }

@@ -609,4 +609,18 @@ class TestFixDecMicro64 {
 		assertTrue(FixDecMicro64.raw(Long.MIN_VALUE) > Long.MIN_VALUE.toFloat())
 		assertTrue(FixDecMicro64.raw(Long.MIN_VALUE) > Long.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixDecMicro64.Array(2) { FixDecMicro64.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixDecMicro64.ONE, testArray[0])
+		assertEquals(FixDecMicro64.ONE, testArray[1])
+		testArray[1] = FixDecMicro64.ZERO
+		assertEquals(FixDecMicro64.ONE, testArray[0])
+		assertEquals(FixDecMicro64.ZERO, testArray[1])
+		testArray.fill(FixDecMicro64.ZERO)
+		assertEquals(FixDecMicro64.ZERO, testArray[0])
+		assertEquals(FixDecMicro64.ZERO, testArray[1])
+	}
 }

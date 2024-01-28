@@ -183,4 +183,18 @@ class TestFixUncheckedMilli16 {
 		assertTrue(FixUncheckedMilli16.raw(Short.MIN_VALUE) > Short.MIN_VALUE.toFloat())
 		assertTrue(FixUncheckedMilli16.raw(Short.MIN_VALUE) > Short.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixUncheckedMilli16.Array(2) { FixUncheckedMilli16.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixUncheckedMilli16.ONE, testArray[0])
+		assertEquals(FixUncheckedMilli16.ONE, testArray[1])
+		testArray[1] = FixUncheckedMilli16.ZERO
+		assertEquals(FixUncheckedMilli16.ONE, testArray[0])
+		assertEquals(FixUncheckedMilli16.ZERO, testArray[1])
+		testArray.fill(FixUncheckedMilli16.ZERO)
+		assertEquals(FixUncheckedMilli16.ZERO, testArray[0])
+		assertEquals(FixUncheckedMilli16.ZERO, testArray[1])
+	}
 }

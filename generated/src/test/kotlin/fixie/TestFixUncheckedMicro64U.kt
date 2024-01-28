@@ -294,4 +294,18 @@ class TestFixUncheckedMicro64U {
 		assertTrue(FixUncheckedMicro64U.ZERO > Long.MIN_VALUE.toFloat())
 		assertTrue(FixUncheckedMicro64U.ZERO > Long.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixUncheckedMicro64U.Array(2) { FixUncheckedMicro64U.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixUncheckedMicro64U.ONE, testArray[0])
+		assertEquals(FixUncheckedMicro64U.ONE, testArray[1])
+		testArray[1] = FixUncheckedMicro64U.ZERO
+		assertEquals(FixUncheckedMicro64U.ONE, testArray[0])
+		assertEquals(FixUncheckedMicro64U.ZERO, testArray[1])
+		testArray.fill(FixUncheckedMicro64U.ZERO)
+		assertEquals(FixUncheckedMicro64U.ZERO, testArray[0])
+		assertEquals(FixUncheckedMicro64U.ZERO, testArray[1])
+	}
 }

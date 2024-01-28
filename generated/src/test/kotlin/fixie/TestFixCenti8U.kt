@@ -284,4 +284,18 @@ class TestFixCenti8U {
 		assertTrue(FixCenti8U.ZERO > Long.MIN_VALUE.toFloat())
 		assertTrue(FixCenti8U.ZERO > Long.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixCenti8U.Array(2) { FixCenti8U.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixCenti8U.ONE, testArray[0])
+		assertEquals(FixCenti8U.ONE, testArray[1])
+		testArray[1] = FixCenti8U.ZERO
+		assertEquals(FixCenti8U.ONE, testArray[0])
+		assertEquals(FixCenti8U.ZERO, testArray[1])
+		testArray.fill(FixCenti8U.ZERO)
+		assertEquals(FixCenti8U.ZERO, testArray[0])
+		assertEquals(FixCenti8U.ZERO, testArray[1])
+	}
 }

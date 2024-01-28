@@ -24,7 +24,7 @@ class NumberTestsGenerator(
         generateAdditionAndSubtraction()
         generateMultiplicationAndDivision()
         generateCompareTo()
-        // TODO Test Array class
+        generateArrayClass()
         // TODO Test helper functions
         writer.println("}")
     }
@@ -498,6 +498,23 @@ class NumberTestsGenerator(
             writer.println("\t\tassertTrue(${number.className}.ZERO > Long.MIN_VALUE.toDouble())")
         }
 
+        writer.println("\t}")
+    }
+
+    private fun generateArrayClass() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testArrayClass() {")
+        writer.println("\t\tval testArray = ${number.className}.Array(2) { ${number.className}.ONE }")
+        writer.println("\t\tassertEquals(2, testArray.size)")
+        writer.println("\t\tassertEquals(${number.className}.ONE, testArray[0])")
+        writer.println("\t\tassertEquals(${number.className}.ONE, testArray[1])")
+        writer.println("\t\ttestArray[1] = ${number.className}.ZERO")
+        writer.println("\t\tassertEquals(${number.className}.ONE, testArray[0])")
+        writer.println("\t\tassertEquals(${number.className}.ZERO, testArray[1])")
+        writer.println("\t\ttestArray.fill(${number.className}.ZERO)")
+        writer.println("\t\tassertEquals(${number.className}.ZERO, testArray[0])")
+        writer.println("\t\tassertEquals(${number.className}.ZERO, testArray[1])")
         writer.println("\t}")
     }
 }

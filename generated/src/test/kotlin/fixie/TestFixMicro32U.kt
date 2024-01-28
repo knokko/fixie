@@ -336,4 +336,18 @@ class TestFixMicro32U {
 		assertTrue(FixMicro32U.ZERO > Long.MIN_VALUE.toFloat())
 		assertTrue(FixMicro32U.ZERO > Long.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixMicro32U.Array(2) { FixMicro32U.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixMicro32U.ONE, testArray[0])
+		assertEquals(FixMicro32U.ONE, testArray[1])
+		testArray[1] = FixMicro32U.ZERO
+		assertEquals(FixMicro32U.ONE, testArray[0])
+		assertEquals(FixMicro32U.ZERO, testArray[1])
+		testArray.fill(FixMicro32U.ZERO)
+		assertEquals(FixMicro32U.ZERO, testArray[0])
+		assertEquals(FixMicro32U.ZERO, testArray[1])
+	}
 }

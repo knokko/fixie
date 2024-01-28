@@ -295,4 +295,18 @@ class TestFixMilli16U {
 		assertTrue(FixMilli16U.ZERO > Long.MIN_VALUE.toFloat())
 		assertTrue(FixMilli16U.ZERO > Long.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixMilli16U.Array(2) { FixMilli16U.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixMilli16U.ONE, testArray[0])
+		assertEquals(FixMilli16U.ONE, testArray[1])
+		testArray[1] = FixMilli16U.ZERO
+		assertEquals(FixMilli16U.ONE, testArray[0])
+		assertEquals(FixMilli16U.ZERO, testArray[1])
+		testArray.fill(FixMilli16U.ZERO)
+		assertEquals(FixMilli16U.ZERO, testArray[0])
+		assertEquals(FixMilli16U.ZERO, testArray[1])
+	}
 }

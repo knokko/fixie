@@ -141,4 +141,18 @@ class TestFixUncheckedCenti8U {
 		assertTrue(FixUncheckedCenti8U.ZERO > Long.MIN_VALUE.toFloat())
 		assertTrue(FixUncheckedCenti8U.ZERO > Long.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixUncheckedCenti8U.Array(2) { FixUncheckedCenti8U.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixUncheckedCenti8U.ONE, testArray[0])
+		assertEquals(FixUncheckedCenti8U.ONE, testArray[1])
+		testArray[1] = FixUncheckedCenti8U.ZERO
+		assertEquals(FixUncheckedCenti8U.ONE, testArray[0])
+		assertEquals(FixUncheckedCenti8U.ZERO, testArray[1])
+		testArray.fill(FixUncheckedCenti8U.ZERO)
+		assertEquals(FixUncheckedCenti8U.ZERO, testArray[0])
+		assertEquals(FixUncheckedCenti8U.ZERO, testArray[1])
+	}
 }

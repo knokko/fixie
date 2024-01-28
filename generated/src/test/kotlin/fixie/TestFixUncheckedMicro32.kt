@@ -240,4 +240,18 @@ class TestFixUncheckedMicro32 {
 		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > Int.MIN_VALUE.toFloat())
 		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > Int.MIN_VALUE.toDouble())
 	}
+
+	@Test
+	fun testArrayClass() {
+		val testArray = FixUncheckedMicro32.Array(2) { FixUncheckedMicro32.ONE }
+		assertEquals(2, testArray.size)
+		assertEquals(FixUncheckedMicro32.ONE, testArray[0])
+		assertEquals(FixUncheckedMicro32.ONE, testArray[1])
+		testArray[1] = FixUncheckedMicro32.ZERO
+		assertEquals(FixUncheckedMicro32.ONE, testArray[0])
+		assertEquals(FixUncheckedMicro32.ZERO, testArray[1])
+		testArray.fill(FixUncheckedMicro32.ZERO)
+		assertEquals(FixUncheckedMicro32.ZERO, testArray[0])
+		assertEquals(FixUncheckedMicro32.ZERO, testArray[1])
+	}
 }

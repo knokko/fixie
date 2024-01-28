@@ -1,13 +1,31 @@
 package fixie
 
+import kotlin.math.absoluteValue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
 class TestFixMicro64U {
 
+	fun assertEquals(a: FixMicro64U, b: FixMicro64U, maxDelta: FixMicro64U) {
+		val rawDifference = a.raw.toLong() - b.raw.toLong()
+		if (rawDifference.absoluteValue > maxDelta.raw.toLong()) assertEquals(a, b)
+	}
+
+	@Test
+	fun testToString() {
+		assertEquals("0", FixMicro64U.ZERO.toString())
+		assertEquals("1", FixMicro64U.ONE.toString())
+		assertTrue((FixMicro64U.ONE / 3).toString().startsWith("0.33"))
+		assertTrue((FixMicro64U.from(17592186044414) + FixMicro64U.ONE / 3).toString().endsWith((FixMicro64U.ONE / 3).toString().substring(1)))
+	}
+
 	@Test
 	fun testIntConversion() {
+		val one = 1
+		assertEquals(FixMicro64U.ONE, FixMicro64U.from(one))
+
 		fun testValue(value: Int) = assertEquals(value, FixMicro64U.from(value).toInt())
+		fun testOverflow(value: Int) = assertThrows(FixedPointException::class.java) { FixMicro64U.from(value) }
 		testValue(0)
 		testValue(1)
 		testValue(1042)
@@ -17,11 +35,22 @@ class TestFixMicro64U {
 		testValue(9763729)
 		testValue(55681182)
 		testValue(2147483647)
+
+		testOverflow(-2147483648)
+		testOverflow(-978689185)
+		testOverflow(-974146)
+		testOverflow(-740009)
+		testOverflow(-16299)
+		testOverflow(-1)
 	}
 
 	@Test
 	fun testLongConversion() {
+		val one = 1L
+		assertEquals(FixMicro64U.ONE, FixMicro64U.from(one))
+
 		fun testValue(value: Long) = assertEquals(value, FixMicro64U.from(value).toLong())
+		fun testOverflow(value: Long) = assertThrows(FixedPointException::class.java) { FixMicro64U.from(value) }
 		testValue(0)
 		testValue(1)
 		testValue(1042)
@@ -35,10 +64,29 @@ class TestFixMicro64U {
 		testValue(274799541850)
 		testValue(2548601958618)
 		testValue(17592186044415)
+
+		testOverflow(Long.MIN_VALUE)
+		testOverflow(-589153389781491222)
+		testOverflow(-43117419028065805)
+		testOverflow(-785861820617605)
+		testOverflow(-19482330338386)
+		testOverflow(-34771906616)
+		testOverflow(-6550113726)
+		testOverflow(-448440224)
+		testOverflow(-2065398)
+		testOverflow(-11740)
+		testOverflow(-7239)
+		testOverflow(-1)
+
+		testOverflow(17592186044416)
+		testOverflow(21145859950714074)
+		testOverflow(960891641846565667)
+		testOverflow(9223372036854775807)
 	}
 
 	@Test
 	fun testFloatConversion() {
+		assertEquals(FixMicro64U.ONE, FixMicro64U.from(1f))
 		val delta = 1.9073486E-6f
 		assertEquals(9.536743E-7f, FixMicro64U.from(9.536743E-7f).toFloat(), delta)
 		assertEquals(5.7965175E-5f, FixMicro64U.from(5.7965175E-5f).toFloat(), delta)
@@ -56,10 +104,30 @@ class TestFixMicro64U {
 		assertEquals(7.1891963E9f, FixMicro64U.from(7.1891963E9f).toFloat(), delta)
 		assertEquals(3.67286419E11f, FixMicro64U.from(3.67286419E11f).toFloat(), delta)
 		assertEquals(1.7592186E13f, FixMicro64U.from(1.7592186E13f).toFloat(), delta)
+
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.75939456E13f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.75939456E13f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.78244471E15f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.78244471E15f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.47284204E17f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.47284204E17f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(7.965114E18f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-7.965114E18f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.6861364E20f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.6861364E20f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(9.4039506E21f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-9.4039506E21f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(4.3492374E22f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-4.3492374E22f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(2.703149E23f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-2.703149E23f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(3.0948501E26f) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-3.0948501E26f) }
 	}
 
 	@Test
 	fun testDoubleConversion() {
+		assertEquals(FixMicro64U.ONE, FixMicro64U.from(1.0))
 		val delta = 1.9073486328125E-6
 		assertEquals(9.5367431640625E-7, FixMicro64U.from(9.5367431640625E-7).toDouble(), delta)
 		assertEquals(5.7965173783582514E-5, FixMicro64U.from(5.7965173783582514E-5).toDouble(), delta)
@@ -77,6 +145,25 @@ class TestFixMicro64U {
 		assertEquals(7.18919617871774E9, FixMicro64U.from(7.18919617871774E9).toDouble(), delta)
 		assertEquals(3.672864068723384E11, FixMicro64U.from(3.672864068723384E11).toDouble(), delta)
 		assertEquals(1.7592186044416E13, FixMicro64U.from(1.7592186044416E13).toDouble(), delta)
+
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.759394526302044E13) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.759394526302044E13) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.7824447774120342E15) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.7824447774120342E15) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.47284211297711648E17) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.47284211297711648E17) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(7.9651141257471631E18) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-7.9651141257471631E18) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1.6861364574277802E20) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-1.6861364574277802E20) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(9.403950409145377E21) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-9.403950409145377E21) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(4.349237425815448E22) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-4.349237425815448E22) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(2.703149008278399E23) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-2.703149008278399E23) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(3.0948500982134507E26) }
+		assertThrows(FixedPointException::class.java) { FixMicro64U.from(-3.0948500982134507E26) }
 	}
 
 	@Test
@@ -87,6 +174,7 @@ class TestFixMicro64U {
 			assertEquals(a, c - b)
 			assertEquals(b, c - a)
 		}
+
 		fun testValues(a: Long, b: Long, c: Long) {
 			testValues(FixMicro64U.from(a), FixMicro64U.from(b), FixMicro64U.from(c))
 			assertEquals(FixMicro64U.from(c), FixMicro64U.from(a) + b)
@@ -94,23 +182,126 @@ class TestFixMicro64U {
 			assertEquals(FixMicro64U.from(a), FixMicro64U.from(c) - b)
 			assertEquals(FixMicro64U.from(b), c - FixMicro64U.from(a))
 		}
+
 		testValues(FixMicro64U.raw(ULong.MIN_VALUE), FixMicro64U.ONE, FixMicro64U.raw(ULong.MIN_VALUE + 1048576u))
-		testValues(0, 4250525201524, 4250525201524)
-		testValues(1, 1572318993297, 1572318993298)
-		testValues(10117, 7411942889936, 7411942900053)
-		testValues(66285, 3226197163462, 3226197229747)
-		testValues(113321, 2893313220199, 2893313333520)
-		testValues(153631, 6516544959997, 6516545113628)
-		testValues(5394758, 7007231189724, 7007236584482)
-		testValues(6243102, 5660921831307, 5660928074409)
-		testValues(233265371, 6901093181789, 6901326447160)
-		testValues(234625011, 1048454354665, 1048688979676)
-		testValues(671394804, 3891241045956, 3891912440760)
-		testValues(7327972687, 4838156837950, 4845484810637)
-		testValues(35152253539, 8091245289848, 8126397543387)
-		testValues(696692891188, 732640427031, 1429333318219)
-		testValues(8796093022207, 1359795396451, 10155888418658)
+		testValues(0, 4250525057011, 4250525057011)
+		testValues(1, 10368412007889, 10368412007890)
+		testValues(3567, 7413514302721, 7413514306288)
+		testValues(3788, 3227693447452, 3227693451240)
+		testValues(9103, 2897431613820, 2897431622923)
+		testValues(9886, 6517855509209, 6517855519095)
+		testValues(53441, 7019025497658, 7019025551099)
+		testValues(469344, 5855368344539, 5855368813883)
+		testValues(5279943, 153142072892, 153147352835)
+		testValues(10532273, 5883999019372, 5884009551645)
+		testValues(98281323, 9851092484661, 9851190765984)
+		testValues(143170306, 489387658565, 489530828871)
+		testValues(2251333916, 1513687685477, 1515939019393)
+		testValues(3899907567, 1004726788763, 1008626696330)
+		testValues(126403199838, 6263954489360, 6390357689198)
+		testValues(143594785468, 7533489241863, 7677084027331)
+		testValues(2185542315817, 12982086833824, 15167629149641)
+		testValues(3480974189933, 5846705752447, 9327679942380)
+		testValues(17592186044415, 0, 17592186044415)
 		testValues(FixMicro64U.raw(ULong.MAX_VALUE - 1048576u), FixMicro64U.ONE, FixMicro64U.raw(ULong.MAX_VALUE))
+
+		fun testOverflowPlus(a: Int, b: Int) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + b }
+			assertThrows(FixedPointException::class.java) { a + FixMicro64U.from(b) }
+		}
+
+		fun testOverflowMinus(a: Int, b: Int) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - b }
+			assertThrows(FixedPointException::class.java) { a - FixMicro64U.from(b) }
+		}
+
+		fun testOverflowPlus(a: Long, b: Long) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + b }
+			assertThrows(FixedPointException::class.java) { a + FixMicro64U.from(b) }
+		}
+
+		fun testOverflowMinus(a: Long, b: Long) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - b }
+			assertThrows(FixedPointException::class.java) { a - FixMicro64U.from(b) }
+		}
+
+		fun testOverflowPlus(a: Float, b: Float) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + b }
+			assertThrows(FixedPointException::class.java) { a + FixMicro64U.from(b) }
+		}
+
+		fun testOverflowMinus(a: Float, b: Float) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - b }
+			assertThrows(FixedPointException::class.java) { a - FixMicro64U.from(b) }
+		}
+
+		fun testOverflowPlus(a: Double, b: Double) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) + b }
+			assertThrows(FixedPointException::class.java) { a + FixMicro64U.from(b) }
+		}
+
+		fun testOverflowMinus(a: Double, b: Double) {
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - FixMicro64U.from(b) }
+			assertThrows(FixedPointException::class.java) { FixMicro64U.from(a) - b }
+			assertThrows(FixedPointException::class.java) { a - FixMicro64U.from(b) }
+		}
+
+		testOverflowPlus(0L, 17592186044416L)
+		testOverflowPlus(0L, 35184372088833L)
+		testOverflowMinus(0, 1)
+		testOverflowMinus(0L, 1L)
+		testOverflowMinus(0, 4)
+		testOverflowMinus(0L, 4L)
+		testOverflowPlus(1L, 17592186044415L)
+		testOverflowMinus(1, 2)
+		testOverflowMinus(1L, 2L)
+		testOverflowMinus(1.0f, 2.0f)
+		testOverflowMinus(1.0, 2.0)
+		testOverflowMinus(1, 9)
+		testOverflowMinus(1L, 9L)
+		testOverflowMinus(1.0f, 9.0f)
+		testOverflowMinus(1.0, 9.0)
+		testOverflowPlus(171418L, 17592185872998L)
+		testOverflowMinus(171418, 171419)
+		testOverflowMinus(171418L, 171419L)
+		testOverflowMinus(171418.0, 171419.0)
+		testOverflowMinus(171418L, 29384816400L)
+		testOverflowPlus(358643L, 17592185685773L)
+		testOverflowPlus(358643L, 5828150627650749636L)
+		testOverflowMinus(358643, 358644)
+		testOverflowMinus(358643L, 358644L)
+		testOverflowMinus(358643.0, 358644.0)
+		testOverflowMinus(358643L, 128626236025L)
+		testOverflowPlus(18806101L, 17592167238315L)
+		testOverflowPlus(18806101L, 2402320383157592976L)
+		testOverflowMinus(18806101, 18806102)
+		testOverflowMinus(18806101L, 18806102L)
+		testOverflowMinus(1.8806101E7, 1.8806102E7)
+		testOverflowMinus(18806101L, 353669510046609L)
+		testOverflowPlus(511305813L, 17591674738603L)
+		testOverflowMinus(511305813, 511305814)
+		testOverflowMinus(511305813L, 511305814L)
+		testOverflowMinus(5.11305813E8, 5.11305814E8)
+		testOverflowMinus(511305813L, 261433636452814225L)
+		testOverflowPlus(114750512288L, 17477435532128L)
+		testOverflowPlus(1.14750512288E11, 1.7477435532128E13)
+		testOverflowMinus(114750512288L, 114750512289L)
+		testOverflowMinus(1.14750512288E11, 1.14750512289E11)
+		testOverflowPlus(17592186044415L, 1L)
+		testOverflowPlus(17592186044415L, 4L)
+		testOverflowMinus(17592186044415L, 17592186044416L)
+		testOverflowMinus(1.7592186044415E13, 1.7592186044416E13)
+		testOverflowMinus(17592186044415L, 35184372088833L)
+		testOverflowMinus(1.7592186E13f, 3.5184372E13f)
+		testOverflowMinus(1.7592186044415E13, 3.5184372088833E13)
+		assertEquals(FixMicro64U.raw(18446744073708100036u), FixMicro64U.raw(645572u) + 17592186044414)
 	}
 
 	@Test
@@ -128,6 +319,13 @@ class TestFixMicro64U {
 			assertEquals(FixMicro64U.from(a * b), b * FixMicro64U.from(a))
 			if (b != 0L) assertEquals(FixMicro64U.from(a), FixMicro64U.from(a * b) / b)
 			if (a != 0L) assertEquals(FixMicro64U.from(b), FixMicro64U.from(a * b) / a)
+			if (a != 0L && a.toInt().toLong() == a) {
+				assertEquals(FixMicro64U.from(b), FixMicro64U.from(a * b) / a.toInt())
+			}
+			if (b.toInt().toLong() == b) {
+				assertEquals(FixMicro64U.from(a * b), FixMicro64U.from(a) * b.toInt())
+				assertEquals(FixMicro64U.from(a * b), b.toInt() * FixMicro64U.from(a))
+			}
 		}
 		testValues(0, 71711606273)
 		testValues(1, 231)
@@ -162,6 +360,7 @@ class TestFixMicro64U {
 		assertThrows(FixedPointException::class.java) { FixMicro64U.from(1222091827510) * 252026 }
 		assertThrows(FixedPointException::class.java) { FixMicro64U.from(2644929701422) * 4505 }
 		assertThrows(FixedPointException::class.java) { FixMicro64U.from(17592186044415) * 364448964103 }
+		assertEquals(FixMicro64U.raw(796336u), (FixMicro64U.raw(796336u) * FixMicro64U.raw(691445u)) / FixMicro64U.raw(691445u), FixMicro64U.raw(10485u))
 	}
 
 	@Test
@@ -264,5 +463,18 @@ class TestFixMicro64U {
 		assertTrue(3.5566628266165547E12 < FixMicro64U.from(3.5566628266165547E12) + minDelta)
 		assertFalse(FixMicro64U.from(1.7592186044416E13) < FixMicro64U.from(1.7592186044416E13) - minDelta)
 		assertFalse(1.7592186044416E13 < FixMicro64U.from(1.7592186044416E13) - minDelta)
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) >= 17592186044415)
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) > 17592186044415)
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) < 17592186044416)
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) < 1.7609778230460414E13)
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) < ULong.MAX_VALUE)
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) < ULong.MAX_VALUE.toFloat())
+		assertTrue(FixMicro64U.raw(ULong.MAX_VALUE) < ULong.MAX_VALUE.toDouble())
+		assertTrue(FixMicro64U.ZERO > -1)
+		assertTrue(FixMicro64U.ZERO > -0.001f)
+		assertTrue(FixMicro64U.ZERO > -0.001)
+		assertTrue(FixMicro64U.ZERO > Long.MIN_VALUE)
+		assertTrue(FixMicro64U.ZERO > Long.MIN_VALUE.toFloat())
+		assertTrue(FixMicro64U.ZERO > Long.MIN_VALUE.toDouble())
 	}
 }

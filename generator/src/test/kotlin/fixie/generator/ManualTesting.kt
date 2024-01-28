@@ -30,6 +30,18 @@ fun main() {
         checkOverflow = false
     ))
     generate(NumberClass(
+        className = "FixUncheckedMicro64U",
+        internalType = IntType(false, 8),
+        oneValue = BigInteger.valueOf(1024L * 1024L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
+        className = "FixUncheckedMicro32U",
+        internalType = IntType(false, 4),
+        oneValue = BigInteger.valueOf(1024L * 1024L),
+        checkOverflow = false
+    ))
+    generate(NumberClass(
         className = "FixDecMicro64",
         internalType = IntType(true, 8),
         oneValue = BigInteger.valueOf(1000L * 1000L),

@@ -1,12 +1,31 @@
 package fixie
 
+import kotlin.math.absoluteValue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 
 class TestFixUncheckedMicro32 {
 
+	fun assertEquals(a: FixUncheckedMicro32, b: FixUncheckedMicro32, maxDelta: FixUncheckedMicro32) {
+		val rawDifference = a.raw - b.raw
+		if (rawDifference.absoluteValue > maxDelta.raw) assertEquals(a, b)
+	}
+
+	@Test
+	fun testToString() {
+		assertEquals("0", FixUncheckedMicro32.ZERO.toString())
+		assertEquals("1", FixUncheckedMicro32.ONE.toString())
+		assertTrue((FixUncheckedMicro32.ONE / 3).toString().startsWith("0.33"))
+		assertEquals("-1", (-FixUncheckedMicro32.ONE).toString())
+		assertTrue((FixUncheckedMicro32.ONE / -3).toString().startsWith("-0.33"))
+		assertTrue((FixUncheckedMicro32.from(2046) + FixUncheckedMicro32.ONE / 3).toString().endsWith((FixUncheckedMicro32.ONE / 3).toString().substring(1)))
+	}
+
 	@Test
 	fun testIntConversion() {
+		val one = 1
+		assertEquals(FixUncheckedMicro32.ONE, FixUncheckedMicro32.from(one))
+
 		fun testValue(value: Int) = assertEquals(value, FixUncheckedMicro32.from(value).toInt())
 		testValue(-2048)
 		testValue(-701)
@@ -18,6 +37,9 @@ class TestFixUncheckedMicro32 {
 
 	@Test
 	fun testLongConversion() {
+		val one = 1L
+		assertEquals(FixUncheckedMicro32.ONE, FixUncheckedMicro32.from(one))
+
 		fun testValue(value: Long) = assertEquals(value, FixUncheckedMicro32.from(value).toLong())
 		testValue(-2048)
 		testValue(-701)
@@ -29,6 +51,7 @@ class TestFixUncheckedMicro32 {
 
 	@Test
 	fun testFloatConversion() {
+		assertEquals(FixUncheckedMicro32.ONE, FixUncheckedMicro32.from(1f))
 		val delta = 1.9073486E-6f
 		assertEquals(9.536743E-7f, FixUncheckedMicro32.from(9.536743E-7f).toFloat(), delta)
 		assertEquals(-9.536743E-7f, FixUncheckedMicro32.from(-9.536743E-7f).toFloat(), delta)
@@ -50,6 +73,7 @@ class TestFixUncheckedMicro32 {
 
 	@Test
 	fun testDoubleConversion() {
+		assertEquals(FixUncheckedMicro32.ONE, FixUncheckedMicro32.from(1.0))
 		val delta = 1.9073486328125E-6
 		assertEquals(9.5367431640625E-7, FixUncheckedMicro32.from(9.5367431640625E-7).toDouble(), delta)
 		assertEquals(-9.5367431640625E-7, FixUncheckedMicro32.from(-9.5367431640625E-7).toDouble(), delta)
@@ -95,6 +119,7 @@ class TestFixUncheckedMicro32 {
 			assertEquals(a, c - b)
 			assertEquals(b, c - a)
 		}
+
 		fun testValues(a: Long, b: Long, c: Long) {
 			testValues(FixUncheckedMicro32.from(a), FixUncheckedMicro32.from(b), FixUncheckedMicro32.from(c))
 			assertEquals(FixUncheckedMicro32.from(c), FixUncheckedMicro32.from(a) + b)
@@ -102,12 +127,20 @@ class TestFixUncheckedMicro32 {
 			assertEquals(FixUncheckedMicro32.from(a), FixUncheckedMicro32.from(c) - b)
 			assertEquals(FixUncheckedMicro32.from(b), c - FixUncheckedMicro32.from(a))
 		}
+
 		testValues(FixUncheckedMicro32.raw(Int.MIN_VALUE), FixUncheckedMicro32.ONE, FixUncheckedMicro32.raw(Int.MIN_VALUE + 1048576))
-		testValues(-2048, 4, -2044)
-		testValues(0, 123, 123)
-		testValues(1, 1005, 1006)
-		testValues(1023, 1020, 2043)
+		testValues(-2048, 422, -1626)
+		testValues(-1351, 854, -497)
+		testValues(-1138, 143, -995)
+		testValues(-97, 1550, 1453)
+		testValues(-47, 721, 674)
+		testValues(0, 738, 738)
+		testValues(1, 1616, 1617)
+		testValues(366, 1193, 1559)
+		testValues(407, 72, 479)
+		testValues(2047, 0, 2047)
 		testValues(FixUncheckedMicro32.raw(Int.MAX_VALUE - 1048576), FixUncheckedMicro32.ONE, FixUncheckedMicro32.raw(Int.MAX_VALUE))
+		assertEquals(FixUncheckedMicro32.raw(2146371848), FixUncheckedMicro32.raw(-63224) + 2047)
 	}
 
 	@Test
@@ -125,12 +158,20 @@ class TestFixUncheckedMicro32 {
 			assertEquals(FixUncheckedMicro32.from(a * b), b * FixUncheckedMicro32.from(a))
 			if (b != 0L) assertEquals(FixUncheckedMicro32.from(a), FixUncheckedMicro32.from(a * b) / b)
 			if (a != 0L) assertEquals(FixUncheckedMicro32.from(b), FixUncheckedMicro32.from(a * b) / a)
+			if (a != 0L && a.toInt().toLong() == a) {
+				assertEquals(FixUncheckedMicro32.from(b), FixUncheckedMicro32.from(a * b) / a.toInt())
+			}
+			if (b.toInt().toLong() == b) {
+				assertEquals(FixUncheckedMicro32.from(a * b), FixUncheckedMicro32.from(a) * b.toInt())
+				assertEquals(FixUncheckedMicro32.from(a * b), b.toInt() * FixUncheckedMicro32.from(a))
+			}
 		}
 		testValues(-2048, 0)
 		testValues(-49, 1)
 		testValues(-37, -37)
 		testValues(0, -2048)
 		testValues(1, -49)
+		assertEquals(FixUncheckedMicro32.raw(-865232), (FixUncheckedMicro32.raw(-865232) * FixUncheckedMicro32.raw(953370)) / FixUncheckedMicro32.raw(953370), FixUncheckedMicro32.raw(10485))
 	}
 
 	@Test
@@ -185,5 +226,18 @@ class TestFixUncheckedMicro32 {
 		assertTrue(143.3047592364777 < FixUncheckedMicro32.from(143.3047592364777) + minDelta)
 		assertFalse(FixUncheckedMicro32.from(2047.9999990463257) < FixUncheckedMicro32.from(2047.9999990463257) - minDelta)
 		assertFalse(2047.9999990463257 < FixUncheckedMicro32.from(2047.9999990463257) - minDelta)
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) >= 2047)
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) > 2047)
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) < 2048)
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) < 2050.048)
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) < Int.MAX_VALUE)
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) < Int.MAX_VALUE.toFloat())
+		assertTrue(FixUncheckedMicro32.raw(Int.MAX_VALUE) < Int.MAX_VALUE.toDouble())
+		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) <= -2048)
+		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > -2049)
+		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > -2051.049)
+		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > Int.MIN_VALUE)
+		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > Int.MIN_VALUE.toFloat())
+		assertTrue(FixUncheckedMicro32.raw(Int.MIN_VALUE) > Int.MIN_VALUE.toDouble())
 	}
 }

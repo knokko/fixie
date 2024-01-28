@@ -8,11 +8,19 @@ fun addExact(left: UByte, right: UByte) = if (UByte.MAX_VALUE - right >= left) (
 @Throws(ArithmeticException::class)
 fun subtractExact(left: UByte, right: UByte) = if (left >= right) (left - right).toUByte() else throw ArithmeticException()
 
+fun min(a: UByte, b: UByte) = if (a <= b) a else b
+
+fun max(a: UByte, b: UByte) = if (a >= b) a else b
+
 @Throws(ArithmeticException::class)
 fun addExact(left: UShort, right: UShort) = if (UShort.MAX_VALUE - right >= left) (left + right).toUShort() else throw ArithmeticException()
 
 @Throws(ArithmeticException::class)
 fun subtractExact(left: UShort, right: UShort) = if (left >= right) (left - right).toUShort() else throw ArithmeticException()
+
+fun min(a: UShort, b: UShort) = if (a <= b) a else b
+
+fun max(a: UShort, b: UShort) = if (a >= b) a else b
 
 @Throws(ArithmeticException::class)
 fun addExact(left: UInt, right: UInt) = if (UInt.MAX_VALUE - right >= left) left + right else throw ArithmeticException()
@@ -47,6 +55,12 @@ fun multiplyExact(left: Byte, right: Byte): Byte {
     return intResult.toByte()
 }
 
+fun min(a: Byte, b: Byte) = if (a <= b) a else b
+
+fun max(a: Byte, b: Byte) = if (a >= b) a else b
+
+fun abs(value: Byte) = if (value == Byte.MIN_VALUE) throw ArithmeticException() else if (value < 0) (-value).toByte() else value
+
 @Throws(ArithmeticException::class)
 fun addExact(left: Short, right: Short): Short {
     val intResult = left.toInt() + right.toInt()
@@ -68,14 +82,29 @@ fun multiplyExact(left: Short, right: Short): Short {
     return intResult.toShort()
 }
 
+fun min(a: Short, b: Short) = if (a <= b) a else b
+
+fun max(a: Short, b: Short) = if (a >= b) a else b
+
+fun abs(value: Short) = if (value == Short.MIN_VALUE) throw ArithmeticException() else if (value < 0) (-value).toShort() else value
+
 @Throws(ArithmeticException::class)
 fun multiplyExact(left: Byte, right: UByte) = toUByteExact(left.toInt() * right.toInt())
+
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: UByte, right: UByte) = toUByteExact(left.toInt() * right.toInt())
 
 @Throws(ArithmeticException::class)
 fun multiplyExact(left: Short, right: UShort) = toUShortExact(left.toInt() * right.toInt())
 
 @Throws(ArithmeticException::class)
+fun multiplyExact(left: UShort, right: UShort) = toUShortExact(left.toInt() * right.toInt())
+
+@Throws(ArithmeticException::class)
 fun multiplyExact(left: Int, right: UInt) = toUIntExact(left.toLong() * right.toLong())
+
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: UInt, right: UInt) = toUIntExact(left.toLong() * right.toLong())
 
 @Throws(ArithmeticException::class)
 fun multiplyExact(left: Int, right: ULong): ULong {
@@ -95,6 +124,14 @@ fun multiplyExact(left: Long, right: ULong): ULong {
     return result
 }
 
+@Throws(ArithmeticException::class)
+fun multiplyExact(left: ULong, right: ULong): ULong {
+    if (left == 0uL || right == 0uL) return 0uL
+    val result = left * right
+    if (result / left != right) throw ArithmeticException()
+    return result
+}
+
 fun multiplyHigh(x: ULong, y: ULong): ULong {
     // Ripped from Math.multiplyHigh
     val x1 = x shr 32
@@ -108,27 +145,27 @@ fun multiplyHigh(x: ULong, y: ULong): ULong {
     return ((b shr 32) + k shr 32) + a
 }
 
-@Throws(ArithmeticException::class)
+@Throws(FixedPointException::class)
 fun toByteExact(value: Int): Byte {
-    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) throw ArithmeticException()
+    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) throw FixedPointException("Can't convert $value to Byte")
     return value.toByte()
 }
 
 @Throws(ArithmeticException::class)
 fun toByteExact(value: Long): Byte {
-    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) throw ArithmeticException()
+    if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) throw FixedPointException("Can't convert $value to Byte")
     return value.toByte()
 }
 
 @Throws(ArithmeticException::class)
 fun toShortExact(value: Int): Short {
-    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) throw ArithmeticException()
+    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) throw FixedPointException("Can't convert $value to Short")
     return value.toShort()
 }
 
 @Throws(ArithmeticException::class)
 fun toShortExact(value: Long): Short {
-    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) throw ArithmeticException()
+    if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) throw FixedPointException("Can't convert $value to Short")
     return value.toShort()
 }
 
@@ -145,6 +182,12 @@ fun toUByteExact(value: UInt): UByte{
 }
 
 @Throws(ArithmeticException::class)
+fun toUByteExact(value: ULong): UByte {
+    if (value > UByte.MAX_VALUE.toULong()) throw ArithmeticException()
+    return value.toUByte()
+}
+
+@Throws(ArithmeticException::class)
 fun toUShortExact(value: Int): UShort {
     if (value < 0 || value > UShort.MAX_VALUE.toInt()) throw ArithmeticException()
     return value.toUShort()
@@ -153,6 +196,12 @@ fun toUShortExact(value: Int): UShort {
 @Throws(ArithmeticException::class)
 fun toUShortExact(value: UInt): UShort {
     if (value > UShort.MAX_VALUE.toUInt()) throw ArithmeticException()
+    return value.toUShort()
+}
+
+@Throws(ArithmeticException::class)
+fun toUShortExact(value: ULong): UShort {
+    if (value > UShort.MAX_VALUE.toULong()) throw ArithmeticException()
     return value.toUShort()
 }
 

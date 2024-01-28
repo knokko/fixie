@@ -197,4 +197,29 @@ class TestFixUncheckedMilli16 {
 		assertEquals(FixUncheckedMilli16.ZERO, testArray[0])
 		assertEquals(FixUncheckedMilli16.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixUncheckedMilli16.ZERO, abs(FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.ONE, abs(FixUncheckedMilli16.ONE))
+		assertEquals(FixUncheckedMilli16.ONE, abs(-FixUncheckedMilli16.ONE))
+		assertEquals(FixUncheckedMilli16.raw(Short.MAX_VALUE), abs(FixUncheckedMilli16.raw(Short.MAX_VALUE)))
+		assertEquals(FixUncheckedMilli16.raw(Short.MAX_VALUE), abs(-FixUncheckedMilli16.raw(Short.MAX_VALUE)))
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedMilli16.ZERO, min(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.ZERO, max(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.ZERO, min(FixUncheckedMilli16.ONE, FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.ONE, max(FixUncheckedMilli16.ONE, FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.ZERO, min(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.ONE))
+		assertEquals(FixUncheckedMilli16.ONE, max(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.ONE))
+		assertEquals(FixUncheckedMilli16.ZERO, min(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.raw(Short.MAX_VALUE)))
+		assertEquals(FixUncheckedMilli16.raw(Short.MAX_VALUE), max(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.raw(Short.MAX_VALUE)))
+		assertEquals(-FixUncheckedMilli16.ONE, min(-FixUncheckedMilli16.ONE, FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.ZERO, max(-FixUncheckedMilli16.ONE, FixUncheckedMilli16.ZERO))
+		assertEquals(FixUncheckedMilli16.raw(Short.MIN_VALUE), min(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.raw(Short.MIN_VALUE)))
+		assertEquals(FixUncheckedMilli16.ZERO, max(FixUncheckedMilli16.ZERO, FixUncheckedMilli16.raw(Short.MIN_VALUE)))
+	}
 }

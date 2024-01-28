@@ -298,4 +298,16 @@ class TestFixCenti8U {
 		assertEquals(FixCenti8U.ZERO, testArray[0])
 		assertEquals(FixCenti8U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixCenti8U.ZERO, min(FixCenti8U.ZERO, FixCenti8U.ZERO))
+		assertEquals(FixCenti8U.ZERO, max(FixCenti8U.ZERO, FixCenti8U.ZERO))
+		assertEquals(FixCenti8U.ZERO, min(FixCenti8U.ONE, FixCenti8U.ZERO))
+		assertEquals(FixCenti8U.ONE, max(FixCenti8U.ONE, FixCenti8U.ZERO))
+		assertEquals(FixCenti8U.ZERO, min(FixCenti8U.ZERO, FixCenti8U.ONE))
+		assertEquals(FixCenti8U.ONE, max(FixCenti8U.ZERO, FixCenti8U.ONE))
+		assertEquals(FixCenti8U.ZERO, min(FixCenti8U.ZERO, FixCenti8U.raw(UByte.MAX_VALUE)))
+		assertEquals(FixCenti8U.raw(UByte.MAX_VALUE), max(FixCenti8U.ZERO, FixCenti8U.raw(UByte.MAX_VALUE)))
+	}
 }

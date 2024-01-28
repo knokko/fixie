@@ -25,7 +25,7 @@ class NumberTestsGenerator(
         generateMultiplicationAndDivision()
         generateCompareTo()
         generateArrayClass()
-        // TODO Test helper functions
+        generateHelperFunctions()
         writer.println("}")
     }
 
@@ -515,6 +515,52 @@ class NumberTestsGenerator(
         writer.println("\t\ttestArray.fill(${number.className}.ZERO)")
         writer.println("\t\tassertEquals(${number.className}.ZERO, testArray[0])")
         writer.println("\t\tassertEquals(${number.className}.ZERO, testArray[1])")
+        writer.println("\t}")
+    }
+
+    private fun generateHelperFunctions() {
+        generateAbs()
+        generateMinMax()
+    }
+
+    private fun generateAbs() {
+        if (!number.internalType.signed) return
+
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testAbs() {")
+        writer.println("\t\tassertEquals(${number.className}.ZERO, abs(${number.className}.ZERO))")
+        writer.println("\t\tassertEquals(${number.className}.ONE, abs(${number.className}.ONE))")
+        writer.println("\t\tassertEquals(${number.className}.ONE, abs(-${number.className}.ONE))")
+        writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MAX_VALUE), abs(${number.className}.raw(${number.internalType}.MAX_VALUE)))")
+        writer.println("\t\tassertEquals(${number.className}.raw(${number.internalType}.MAX_VALUE), abs(-${number.className}.raw(${number.internalType}.MAX_VALUE)))")
+        if (number.checkOverflow) {
+            writer.println("\t\tassertThrows(FixedPointException::class.java) { abs(${number.className}.raw(${number.internalType}.MIN_VALUE)) }")
+        }
+        writer.println("\t}")
+    }
+
+    private fun generateMinMax() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testMinMax() {")
+
+        fun generate(a: String, b: String, minA: Boolean) {
+            val smallest = if (minA) a else b
+            val largest = if (minA) b else a
+            writer.println("\t\tassertEquals($smallest, min($a, $b))")
+            writer.println("\t\tassertEquals($largest, max($a, $b))")
+        }
+
+        generate("${number.className}.ZERO", "${number.className}.ZERO", false)
+        generate("${number.className}.ONE", "${number.className}.ZERO", false)
+        generate("${number.className}.ZERO", "${number.className}.ONE", true)
+        generate("${number.className}.ZERO", "${number.className}.raw(${number.internalType}.MAX_VALUE)", true)
+        if (number.internalType.signed) {
+            generate("-${number.className}.ONE", "${number.className}.ZERO", true)
+            generate("${number.className}.ZERO", "${number.className}.raw(${number.internalType}.MIN_VALUE)", false)
+        }
+
         writer.println("\t}")
     }
 }

@@ -426,4 +426,29 @@ class TestFixUncheckedMicro64 {
 		assertEquals(FixUncheckedMicro64.ZERO, testArray[0])
 		assertEquals(FixUncheckedMicro64.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixUncheckedMicro64.ZERO, abs(FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.ONE, abs(FixUncheckedMicro64.ONE))
+		assertEquals(FixUncheckedMicro64.ONE, abs(-FixUncheckedMicro64.ONE))
+		assertEquals(FixUncheckedMicro64.raw(Long.MAX_VALUE), abs(FixUncheckedMicro64.raw(Long.MAX_VALUE)))
+		assertEquals(FixUncheckedMicro64.raw(Long.MAX_VALUE), abs(-FixUncheckedMicro64.raw(Long.MAX_VALUE)))
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedMicro64.ZERO, min(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.ZERO, max(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.ZERO, min(FixUncheckedMicro64.ONE, FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.ONE, max(FixUncheckedMicro64.ONE, FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.ZERO, min(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.ONE))
+		assertEquals(FixUncheckedMicro64.ONE, max(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.ONE))
+		assertEquals(FixUncheckedMicro64.ZERO, min(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.raw(Long.MAX_VALUE)))
+		assertEquals(FixUncheckedMicro64.raw(Long.MAX_VALUE), max(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.raw(Long.MAX_VALUE)))
+		assertEquals(-FixUncheckedMicro64.ONE, min(-FixUncheckedMicro64.ONE, FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.ZERO, max(-FixUncheckedMicro64.ONE, FixUncheckedMicro64.ZERO))
+		assertEquals(FixUncheckedMicro64.raw(Long.MIN_VALUE), min(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.raw(Long.MIN_VALUE)))
+		assertEquals(FixUncheckedMicro64.ZERO, max(FixUncheckedMicro64.ZERO, FixUncheckedMicro64.raw(Long.MIN_VALUE)))
+	}
 }

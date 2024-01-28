@@ -309,4 +309,16 @@ class TestFixMilli16U {
 		assertEquals(FixMilli16U.ZERO, testArray[0])
 		assertEquals(FixMilli16U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixMilli16U.ZERO, min(FixMilli16U.ZERO, FixMilli16U.ZERO))
+		assertEquals(FixMilli16U.ZERO, max(FixMilli16U.ZERO, FixMilli16U.ZERO))
+		assertEquals(FixMilli16U.ZERO, min(FixMilli16U.ONE, FixMilli16U.ZERO))
+		assertEquals(FixMilli16U.ONE, max(FixMilli16U.ONE, FixMilli16U.ZERO))
+		assertEquals(FixMilli16U.ZERO, min(FixMilli16U.ZERO, FixMilli16U.ONE))
+		assertEquals(FixMilli16U.ONE, max(FixMilli16U.ZERO, FixMilli16U.ONE))
+		assertEquals(FixMilli16U.ZERO, min(FixMilli16U.ZERO, FixMilli16U.raw(UShort.MAX_VALUE)))
+		assertEquals(FixMilli16U.raw(UShort.MAX_VALUE), max(FixMilli16U.ZERO, FixMilli16U.raw(UShort.MAX_VALUE)))
+	}
 }

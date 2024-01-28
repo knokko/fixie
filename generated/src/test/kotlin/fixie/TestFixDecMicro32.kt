@@ -426,4 +426,30 @@ class TestFixDecMicro32 {
 		assertEquals(FixDecMicro32.ZERO, testArray[0])
 		assertEquals(FixDecMicro32.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixDecMicro32.ZERO, abs(FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.ONE, abs(FixDecMicro32.ONE))
+		assertEquals(FixDecMicro32.ONE, abs(-FixDecMicro32.ONE))
+		assertEquals(FixDecMicro32.raw(Int.MAX_VALUE), abs(FixDecMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(FixDecMicro32.raw(Int.MAX_VALUE), abs(-FixDecMicro32.raw(Int.MAX_VALUE)))
+		assertThrows(FixedPointException::class.java) { abs(FixDecMicro32.raw(Int.MIN_VALUE)) }
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixDecMicro32.ZERO, min(FixDecMicro32.ZERO, FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.ZERO, max(FixDecMicro32.ZERO, FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.ZERO, min(FixDecMicro32.ONE, FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.ONE, max(FixDecMicro32.ONE, FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.ZERO, min(FixDecMicro32.ZERO, FixDecMicro32.ONE))
+		assertEquals(FixDecMicro32.ONE, max(FixDecMicro32.ZERO, FixDecMicro32.ONE))
+		assertEquals(FixDecMicro32.ZERO, min(FixDecMicro32.ZERO, FixDecMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(FixDecMicro32.raw(Int.MAX_VALUE), max(FixDecMicro32.ZERO, FixDecMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(-FixDecMicro32.ONE, min(-FixDecMicro32.ONE, FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.ZERO, max(-FixDecMicro32.ONE, FixDecMicro32.ZERO))
+		assertEquals(FixDecMicro32.raw(Int.MIN_VALUE), min(FixDecMicro32.ZERO, FixDecMicro32.raw(Int.MIN_VALUE)))
+		assertEquals(FixDecMicro32.ZERO, max(FixDecMicro32.ZERO, FixDecMicro32.raw(Int.MIN_VALUE)))
+	}
 }

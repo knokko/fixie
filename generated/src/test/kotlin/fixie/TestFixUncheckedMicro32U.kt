@@ -204,4 +204,16 @@ class TestFixUncheckedMicro32U {
 		assertEquals(FixUncheckedMicro32U.ZERO, testArray[0])
 		assertEquals(FixUncheckedMicro32U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedMicro32U.ZERO, min(FixUncheckedMicro32U.ZERO, FixUncheckedMicro32U.ZERO))
+		assertEquals(FixUncheckedMicro32U.ZERO, max(FixUncheckedMicro32U.ZERO, FixUncheckedMicro32U.ZERO))
+		assertEquals(FixUncheckedMicro32U.ZERO, min(FixUncheckedMicro32U.ONE, FixUncheckedMicro32U.ZERO))
+		assertEquals(FixUncheckedMicro32U.ONE, max(FixUncheckedMicro32U.ONE, FixUncheckedMicro32U.ZERO))
+		assertEquals(FixUncheckedMicro32U.ZERO, min(FixUncheckedMicro32U.ZERO, FixUncheckedMicro32U.ONE))
+		assertEquals(FixUncheckedMicro32U.ONE, max(FixUncheckedMicro32U.ZERO, FixUncheckedMicro32U.ONE))
+		assertEquals(FixUncheckedMicro32U.ZERO, min(FixUncheckedMicro32U.ZERO, FixUncheckedMicro32U.raw(UInt.MAX_VALUE)))
+		assertEquals(FixUncheckedMicro32U.raw(UInt.MAX_VALUE), max(FixUncheckedMicro32U.ZERO, FixUncheckedMicro32U.raw(UInt.MAX_VALUE)))
+	}
 }

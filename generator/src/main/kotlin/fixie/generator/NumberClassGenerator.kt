@@ -540,16 +540,15 @@ class NumberClassGenerator(
     }
 
     private fun generateMathFunctions() {
-        // TODO Handle exceptions
         val prefix = if (number.internalType.numBytes >= 4) "kotlin.math." else ""
-        if (number.internalType.signed) generateUnaryMathFunction("abs", prefix)
+        if (number.internalType.signed) {
+            writer.println()
+            if (number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
+            writer.println("fun abs(value: ${number.className}) = if (value.raw != ${number.internalType}.MIN_VALUE) ${number.className}.raw(${prefix}abs(value.raw))")
+            writer.println("\t\telse throw FixedPointException(\"Can't represent abs of min value\")")
+        }
         generateBinaryMathFunction("min", prefix)
         generateBinaryMathFunction("max", prefix)
-    }
-
-    private fun generateUnaryMathFunction(name: String, prefix: String) {
-        writer.println()
-        writer.println("fun $name(value: ${number.className}) = ${number.className}.raw($prefix$name(value.raw))")
     }
 
     private fun generateBinaryMathFunction(name: String, prefix: String) {

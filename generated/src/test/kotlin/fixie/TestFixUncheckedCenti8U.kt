@@ -155,4 +155,16 @@ class TestFixUncheckedCenti8U {
 		assertEquals(FixUncheckedCenti8U.ZERO, testArray[0])
 		assertEquals(FixUncheckedCenti8U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedCenti8U.ZERO, min(FixUncheckedCenti8U.ZERO, FixUncheckedCenti8U.ZERO))
+		assertEquals(FixUncheckedCenti8U.ZERO, max(FixUncheckedCenti8U.ZERO, FixUncheckedCenti8U.ZERO))
+		assertEquals(FixUncheckedCenti8U.ZERO, min(FixUncheckedCenti8U.ONE, FixUncheckedCenti8U.ZERO))
+		assertEquals(FixUncheckedCenti8U.ONE, max(FixUncheckedCenti8U.ONE, FixUncheckedCenti8U.ZERO))
+		assertEquals(FixUncheckedCenti8U.ZERO, min(FixUncheckedCenti8U.ZERO, FixUncheckedCenti8U.ONE))
+		assertEquals(FixUncheckedCenti8U.ONE, max(FixUncheckedCenti8U.ZERO, FixUncheckedCenti8U.ONE))
+		assertEquals(FixUncheckedCenti8U.ZERO, min(FixUncheckedCenti8U.ZERO, FixUncheckedCenti8U.raw(UByte.MAX_VALUE)))
+		assertEquals(FixUncheckedCenti8U.raw(UByte.MAX_VALUE), max(FixUncheckedCenti8U.ZERO, FixUncheckedCenti8U.raw(UByte.MAX_VALUE)))
+	}
 }

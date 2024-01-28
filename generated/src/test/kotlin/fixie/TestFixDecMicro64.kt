@@ -623,4 +623,30 @@ class TestFixDecMicro64 {
 		assertEquals(FixDecMicro64.ZERO, testArray[0])
 		assertEquals(FixDecMicro64.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixDecMicro64.ZERO, abs(FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.ONE, abs(FixDecMicro64.ONE))
+		assertEquals(FixDecMicro64.ONE, abs(-FixDecMicro64.ONE))
+		assertEquals(FixDecMicro64.raw(Long.MAX_VALUE), abs(FixDecMicro64.raw(Long.MAX_VALUE)))
+		assertEquals(FixDecMicro64.raw(Long.MAX_VALUE), abs(-FixDecMicro64.raw(Long.MAX_VALUE)))
+		assertThrows(FixedPointException::class.java) { abs(FixDecMicro64.raw(Long.MIN_VALUE)) }
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixDecMicro64.ZERO, min(FixDecMicro64.ZERO, FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.ZERO, max(FixDecMicro64.ZERO, FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.ZERO, min(FixDecMicro64.ONE, FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.ONE, max(FixDecMicro64.ONE, FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.ZERO, min(FixDecMicro64.ZERO, FixDecMicro64.ONE))
+		assertEquals(FixDecMicro64.ONE, max(FixDecMicro64.ZERO, FixDecMicro64.ONE))
+		assertEquals(FixDecMicro64.ZERO, min(FixDecMicro64.ZERO, FixDecMicro64.raw(Long.MAX_VALUE)))
+		assertEquals(FixDecMicro64.raw(Long.MAX_VALUE), max(FixDecMicro64.ZERO, FixDecMicro64.raw(Long.MAX_VALUE)))
+		assertEquals(-FixDecMicro64.ONE, min(-FixDecMicro64.ONE, FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.ZERO, max(-FixDecMicro64.ONE, FixDecMicro64.ZERO))
+		assertEquals(FixDecMicro64.raw(Long.MIN_VALUE), min(FixDecMicro64.ZERO, FixDecMicro64.raw(Long.MIN_VALUE)))
+		assertEquals(FixDecMicro64.ZERO, max(FixDecMicro64.ZERO, FixDecMicro64.raw(Long.MIN_VALUE)))
+	}
 }

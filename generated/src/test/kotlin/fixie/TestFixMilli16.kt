@@ -355,4 +355,30 @@ class TestFixMilli16 {
 		assertEquals(FixMilli16.ZERO, testArray[0])
 		assertEquals(FixMilli16.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixMilli16.ZERO, abs(FixMilli16.ZERO))
+		assertEquals(FixMilli16.ONE, abs(FixMilli16.ONE))
+		assertEquals(FixMilli16.ONE, abs(-FixMilli16.ONE))
+		assertEquals(FixMilli16.raw(Short.MAX_VALUE), abs(FixMilli16.raw(Short.MAX_VALUE)))
+		assertEquals(FixMilli16.raw(Short.MAX_VALUE), abs(-FixMilli16.raw(Short.MAX_VALUE)))
+		assertThrows(FixedPointException::class.java) { abs(FixMilli16.raw(Short.MIN_VALUE)) }
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixMilli16.ZERO, min(FixMilli16.ZERO, FixMilli16.ZERO))
+		assertEquals(FixMilli16.ZERO, max(FixMilli16.ZERO, FixMilli16.ZERO))
+		assertEquals(FixMilli16.ZERO, min(FixMilli16.ONE, FixMilli16.ZERO))
+		assertEquals(FixMilli16.ONE, max(FixMilli16.ONE, FixMilli16.ZERO))
+		assertEquals(FixMilli16.ZERO, min(FixMilli16.ZERO, FixMilli16.ONE))
+		assertEquals(FixMilli16.ONE, max(FixMilli16.ZERO, FixMilli16.ONE))
+		assertEquals(FixMilli16.ZERO, min(FixMilli16.ZERO, FixMilli16.raw(Short.MAX_VALUE)))
+		assertEquals(FixMilli16.raw(Short.MAX_VALUE), max(FixMilli16.ZERO, FixMilli16.raw(Short.MAX_VALUE)))
+		assertEquals(-FixMilli16.ONE, min(-FixMilli16.ONE, FixMilli16.ZERO))
+		assertEquals(FixMilli16.ZERO, max(-FixMilli16.ONE, FixMilli16.ZERO))
+		assertEquals(FixMilli16.raw(Short.MIN_VALUE), min(FixMilli16.ZERO, FixMilli16.raw(Short.MIN_VALUE)))
+		assertEquals(FixMilli16.ZERO, max(FixMilli16.ZERO, FixMilli16.raw(Short.MIN_VALUE)))
+	}
 }

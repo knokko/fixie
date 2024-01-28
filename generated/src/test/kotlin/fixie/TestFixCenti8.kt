@@ -336,4 +336,30 @@ class TestFixCenti8 {
 		assertEquals(FixCenti8.ZERO, testArray[0])
 		assertEquals(FixCenti8.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixCenti8.ZERO, abs(FixCenti8.ZERO))
+		assertEquals(FixCenti8.ONE, abs(FixCenti8.ONE))
+		assertEquals(FixCenti8.ONE, abs(-FixCenti8.ONE))
+		assertEquals(FixCenti8.raw(Byte.MAX_VALUE), abs(FixCenti8.raw(Byte.MAX_VALUE)))
+		assertEquals(FixCenti8.raw(Byte.MAX_VALUE), abs(-FixCenti8.raw(Byte.MAX_VALUE)))
+		assertThrows(FixedPointException::class.java) { abs(FixCenti8.raw(Byte.MIN_VALUE)) }
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixCenti8.ZERO, min(FixCenti8.ZERO, FixCenti8.ZERO))
+		assertEquals(FixCenti8.ZERO, max(FixCenti8.ZERO, FixCenti8.ZERO))
+		assertEquals(FixCenti8.ZERO, min(FixCenti8.ONE, FixCenti8.ZERO))
+		assertEquals(FixCenti8.ONE, max(FixCenti8.ONE, FixCenti8.ZERO))
+		assertEquals(FixCenti8.ZERO, min(FixCenti8.ZERO, FixCenti8.ONE))
+		assertEquals(FixCenti8.ONE, max(FixCenti8.ZERO, FixCenti8.ONE))
+		assertEquals(FixCenti8.ZERO, min(FixCenti8.ZERO, FixCenti8.raw(Byte.MAX_VALUE)))
+		assertEquals(FixCenti8.raw(Byte.MAX_VALUE), max(FixCenti8.ZERO, FixCenti8.raw(Byte.MAX_VALUE)))
+		assertEquals(-FixCenti8.ONE, min(-FixCenti8.ONE, FixCenti8.ZERO))
+		assertEquals(FixCenti8.ZERO, max(-FixCenti8.ONE, FixCenti8.ZERO))
+		assertEquals(FixCenti8.raw(Byte.MIN_VALUE), min(FixCenti8.ZERO, FixCenti8.raw(Byte.MIN_VALUE)))
+		assertEquals(FixCenti8.ZERO, max(FixCenti8.ZERO, FixCenti8.raw(Byte.MIN_VALUE)))
+	}
 }

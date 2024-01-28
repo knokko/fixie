@@ -350,4 +350,16 @@ class TestFixMicro32U {
 		assertEquals(FixMicro32U.ZERO, testArray[0])
 		assertEquals(FixMicro32U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixMicro32U.ZERO, min(FixMicro32U.ZERO, FixMicro32U.ZERO))
+		assertEquals(FixMicro32U.ZERO, max(FixMicro32U.ZERO, FixMicro32U.ZERO))
+		assertEquals(FixMicro32U.ZERO, min(FixMicro32U.ONE, FixMicro32U.ZERO))
+		assertEquals(FixMicro32U.ONE, max(FixMicro32U.ONE, FixMicro32U.ZERO))
+		assertEquals(FixMicro32U.ZERO, min(FixMicro32U.ZERO, FixMicro32U.ONE))
+		assertEquals(FixMicro32U.ONE, max(FixMicro32U.ZERO, FixMicro32U.ONE))
+		assertEquals(FixMicro32U.ZERO, min(FixMicro32U.ZERO, FixMicro32U.raw(UInt.MAX_VALUE)))
+		assertEquals(FixMicro32U.raw(UInt.MAX_VALUE), max(FixMicro32U.ZERO, FixMicro32U.raw(UInt.MAX_VALUE)))
+	}
 }

@@ -177,4 +177,29 @@ class TestFixUncheckedCenti8 {
 		assertEquals(FixUncheckedCenti8.ZERO, testArray[0])
 		assertEquals(FixUncheckedCenti8.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixUncheckedCenti8.ZERO, abs(FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.ONE, abs(FixUncheckedCenti8.ONE))
+		assertEquals(FixUncheckedCenti8.ONE, abs(-FixUncheckedCenti8.ONE))
+		assertEquals(FixUncheckedCenti8.raw(Byte.MAX_VALUE), abs(FixUncheckedCenti8.raw(Byte.MAX_VALUE)))
+		assertEquals(FixUncheckedCenti8.raw(Byte.MAX_VALUE), abs(-FixUncheckedCenti8.raw(Byte.MAX_VALUE)))
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedCenti8.ZERO, min(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.ZERO, max(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.ZERO, min(FixUncheckedCenti8.ONE, FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.ONE, max(FixUncheckedCenti8.ONE, FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.ZERO, min(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.ONE))
+		assertEquals(FixUncheckedCenti8.ONE, max(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.ONE))
+		assertEquals(FixUncheckedCenti8.ZERO, min(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.raw(Byte.MAX_VALUE)))
+		assertEquals(FixUncheckedCenti8.raw(Byte.MAX_VALUE), max(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.raw(Byte.MAX_VALUE)))
+		assertEquals(-FixUncheckedCenti8.ONE, min(-FixUncheckedCenti8.ONE, FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.ZERO, max(-FixUncheckedCenti8.ONE, FixUncheckedCenti8.ZERO))
+		assertEquals(FixUncheckedCenti8.raw(Byte.MIN_VALUE), min(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.raw(Byte.MIN_VALUE)))
+		assertEquals(FixUncheckedCenti8.ZERO, max(FixUncheckedCenti8.ZERO, FixUncheckedCenti8.raw(Byte.MIN_VALUE)))
+	}
 }

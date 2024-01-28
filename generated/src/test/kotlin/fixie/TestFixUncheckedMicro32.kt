@@ -254,4 +254,29 @@ class TestFixUncheckedMicro32 {
 		assertEquals(FixUncheckedMicro32.ZERO, testArray[0])
 		assertEquals(FixUncheckedMicro32.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixUncheckedMicro32.ZERO, abs(FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.ONE, abs(FixUncheckedMicro32.ONE))
+		assertEquals(FixUncheckedMicro32.ONE, abs(-FixUncheckedMicro32.ONE))
+		assertEquals(FixUncheckedMicro32.raw(Int.MAX_VALUE), abs(FixUncheckedMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(FixUncheckedMicro32.raw(Int.MAX_VALUE), abs(-FixUncheckedMicro32.raw(Int.MAX_VALUE)))
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedMicro32.ZERO, min(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.ZERO, max(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.ZERO, min(FixUncheckedMicro32.ONE, FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.ONE, max(FixUncheckedMicro32.ONE, FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.ZERO, min(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.ONE))
+		assertEquals(FixUncheckedMicro32.ONE, max(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.ONE))
+		assertEquals(FixUncheckedMicro32.ZERO, min(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(FixUncheckedMicro32.raw(Int.MAX_VALUE), max(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(-FixUncheckedMicro32.ONE, min(-FixUncheckedMicro32.ONE, FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.ZERO, max(-FixUncheckedMicro32.ONE, FixUncheckedMicro32.ZERO))
+		assertEquals(FixUncheckedMicro32.raw(Int.MIN_VALUE), min(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.raw(Int.MIN_VALUE)))
+		assertEquals(FixUncheckedMicro32.ZERO, max(FixUncheckedMicro32.ZERO, FixUncheckedMicro32.raw(Int.MIN_VALUE)))
+	}
 }

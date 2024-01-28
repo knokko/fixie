@@ -424,4 +424,30 @@ class TestFixMicro32 {
 		assertEquals(FixMicro32.ZERO, testArray[0])
 		assertEquals(FixMicro32.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testAbs() {
+		assertEquals(FixMicro32.ZERO, abs(FixMicro32.ZERO))
+		assertEquals(FixMicro32.ONE, abs(FixMicro32.ONE))
+		assertEquals(FixMicro32.ONE, abs(-FixMicro32.ONE))
+		assertEquals(FixMicro32.raw(Int.MAX_VALUE), abs(FixMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(FixMicro32.raw(Int.MAX_VALUE), abs(-FixMicro32.raw(Int.MAX_VALUE)))
+		assertThrows(FixedPointException::class.java) { abs(FixMicro32.raw(Int.MIN_VALUE)) }
+	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixMicro32.ZERO, min(FixMicro32.ZERO, FixMicro32.ZERO))
+		assertEquals(FixMicro32.ZERO, max(FixMicro32.ZERO, FixMicro32.ZERO))
+		assertEquals(FixMicro32.ZERO, min(FixMicro32.ONE, FixMicro32.ZERO))
+		assertEquals(FixMicro32.ONE, max(FixMicro32.ONE, FixMicro32.ZERO))
+		assertEquals(FixMicro32.ZERO, min(FixMicro32.ZERO, FixMicro32.ONE))
+		assertEquals(FixMicro32.ONE, max(FixMicro32.ZERO, FixMicro32.ONE))
+		assertEquals(FixMicro32.ZERO, min(FixMicro32.ZERO, FixMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(FixMicro32.raw(Int.MAX_VALUE), max(FixMicro32.ZERO, FixMicro32.raw(Int.MAX_VALUE)))
+		assertEquals(-FixMicro32.ONE, min(-FixMicro32.ONE, FixMicro32.ZERO))
+		assertEquals(FixMicro32.ZERO, max(-FixMicro32.ONE, FixMicro32.ZERO))
+		assertEquals(FixMicro32.raw(Int.MIN_VALUE), min(FixMicro32.ZERO, FixMicro32.raw(Int.MIN_VALUE)))
+		assertEquals(FixMicro32.ZERO, max(FixMicro32.ZERO, FixMicro32.raw(Int.MIN_VALUE)))
+	}
 }

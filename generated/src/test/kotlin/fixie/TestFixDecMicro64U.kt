@@ -491,4 +491,16 @@ class TestFixDecMicro64U {
 		assertEquals(FixDecMicro64U.ZERO, testArray[0])
 		assertEquals(FixDecMicro64U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixDecMicro64U.ZERO, min(FixDecMicro64U.ZERO, FixDecMicro64U.ZERO))
+		assertEquals(FixDecMicro64U.ZERO, max(FixDecMicro64U.ZERO, FixDecMicro64U.ZERO))
+		assertEquals(FixDecMicro64U.ZERO, min(FixDecMicro64U.ONE, FixDecMicro64U.ZERO))
+		assertEquals(FixDecMicro64U.ONE, max(FixDecMicro64U.ONE, FixDecMicro64U.ZERO))
+		assertEquals(FixDecMicro64U.ZERO, min(FixDecMicro64U.ZERO, FixDecMicro64U.ONE))
+		assertEquals(FixDecMicro64U.ONE, max(FixDecMicro64U.ZERO, FixDecMicro64U.ONE))
+		assertEquals(FixDecMicro64U.ZERO, min(FixDecMicro64U.ZERO, FixDecMicro64U.raw(ULong.MAX_VALUE)))
+		assertEquals(FixDecMicro64U.raw(ULong.MAX_VALUE), max(FixDecMicro64U.ZERO, FixDecMicro64U.raw(ULong.MAX_VALUE)))
+	}
 }

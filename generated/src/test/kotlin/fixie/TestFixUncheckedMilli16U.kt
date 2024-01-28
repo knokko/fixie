@@ -167,4 +167,16 @@ class TestFixUncheckedMilli16U {
 		assertEquals(FixUncheckedMilli16U.ZERO, testArray[0])
 		assertEquals(FixUncheckedMilli16U.ZERO, testArray[1])
 	}
+
+	@Test
+	fun testMinMax() {
+		assertEquals(FixUncheckedMilli16U.ZERO, min(FixUncheckedMilli16U.ZERO, FixUncheckedMilli16U.ZERO))
+		assertEquals(FixUncheckedMilli16U.ZERO, max(FixUncheckedMilli16U.ZERO, FixUncheckedMilli16U.ZERO))
+		assertEquals(FixUncheckedMilli16U.ZERO, min(FixUncheckedMilli16U.ONE, FixUncheckedMilli16U.ZERO))
+		assertEquals(FixUncheckedMilli16U.ONE, max(FixUncheckedMilli16U.ONE, FixUncheckedMilli16U.ZERO))
+		assertEquals(FixUncheckedMilli16U.ZERO, min(FixUncheckedMilli16U.ZERO, FixUncheckedMilli16U.ONE))
+		assertEquals(FixUncheckedMilli16U.ONE, max(FixUncheckedMilli16U.ZERO, FixUncheckedMilli16U.ONE))
+		assertEquals(FixUncheckedMilli16U.ZERO, min(FixUncheckedMilli16U.ZERO, FixUncheckedMilli16U.raw(UShort.MAX_VALUE)))
+		assertEquals(FixUncheckedMilli16U.raw(UShort.MAX_VALUE), max(FixUncheckedMilli16U.ZERO, FixUncheckedMilli16U.raw(UShort.MAX_VALUE)))
+	}
 }

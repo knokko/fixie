@@ -42,6 +42,12 @@ project(':generated') {
     }
 }
 
+project(':generator') {
+    dependencies {
+        implementation project(':')
+    }
+}
+
 project(':benchmarks') {
     dependencies {
         implementation project(':')

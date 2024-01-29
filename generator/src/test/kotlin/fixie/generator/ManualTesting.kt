@@ -1,5 +1,6 @@
 package fixie.generator
 
+import fixie.DistanceUnit
 import java.io.File
 import java.io.PrintWriter
 import java.math.BigInteger
@@ -125,6 +126,33 @@ fun main() {
         oneValue = BigInteger.valueOf(30L),
         checkOverflow = false
     ))
+
+    val fixDist = NumberClass(
+        "FixDisplacement",
+        internalType = IntType(true, 2),
+        oneValue = BigInteger.valueOf(1024),
+        checkOverflow = false
+    )
+    generate(fixDist)
+    generate(DisplacementClass(
+        className = "Displacement",
+        number = fixDist,
+        oneUnit = DistanceUnit.METER,
+        displayUnit = DistanceUnit.METER,
+        createNumberExtensions = true
+    ))
+}
+
+private fun generate(displacement: DisplacementClass) {
+    val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${displacement.className}.kt"))
+    DisplacementClassGenerator(writer, displacement).generate()
+    writer.flush()
+    writer.close()
+
+    val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${displacement.className}.kt"))
+    DisplacementTestsGenerator(testWriter, displacement).generate()
+    testWriter.flush()
+    testWriter.close()
 }
 
 private fun generate(number: NumberClass) {

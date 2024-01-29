@@ -10,8 +10,6 @@ class NumberTestsGenerator(
         private val number: NumberClass
 ) {
 
-    private val testClassName = "Test${number.className}"
-
     fun generate() {
         generateClassPrefix()
         generateAssertEquals()
@@ -80,7 +78,7 @@ class NumberTestsGenerator(
         writer.println("import org.junit.jupiter.api.Test")
         writer.println("import org.junit.jupiter.api.Assertions.*")
         writer.println()
-        writer.println("class $testClassName {")
+        writer.println("class Test${number.className} {")
     }
 
     private fun generateAssertEquals() {

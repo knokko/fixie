@@ -528,7 +528,8 @@ class NumberClassGenerator(
         for (typeName in arrayOf("Int", "Long", "Float", "Double")) {
             writer.println()
             if (number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
-            writer.println("operator fun $typeName.$methodName(right: ${number.className}) = ${number.className}.from(this) $operator right")
+            if (operator == "*") writer.println("operator fun $typeName.times(right: ${number.className}) = right * this")
+            else writer.println("operator fun $typeName.$methodName(right: ${number.className}) = ${number.className}.from(this) $operator right")
         }
     }
 

@@ -15,7 +15,9 @@ class DisplacementTestsGenerator(
         generateCompanionConstructors()
         generateCompareTo()
         generateArithmetic()
+        generateAreaClass()
         generateExtensionFunctions()
+        generateMathFunctions()
         writer.println("}")
     }
 
@@ -88,16 +90,31 @@ class DisplacementTestsGenerator(
         writer.println("\t\tassertEquals(${displacement.className}.raw(73), ${displacement.className}.raw(70) + ${displacement.className}.raw(3))")
         writer.println("\t\tassertEquals(${displacement.className}.raw(20), ${displacement.className}.raw(61) - ${displacement.className}.raw(41))")
         writer.println("\t\tassertEquals(${displacement.className}.raw(63), ${displacement.className}.raw(3) * 21)")
+        writer.println("\t\tassertEquals(${displacement.className}.raw(63), ${displacement.className}.raw(3) * ${displacement.number.className}.from(21))")
         writer.println("\t\tassertEquals(${displacement.className}.raw(63), ${displacement.className}.raw(3) * 21L)")
         writer.println("\t\tassertEquals(${displacement.className}.raw(63), ${displacement.className}.raw(3) * 21f)")
         writer.println("\t\tassertEquals(${displacement.className}.raw(63), ${displacement.className}.raw(3) * 21.0)")
         writer.println("\t\tassertEquals(${displacement.className}.raw(20), ${displacement.className}.raw(40) / 2)")
+        writer.println("\t\tassertEquals(${displacement.className}.raw(20), ${displacement.className}.raw(40) / ${displacement.number.className}.from(2))")
+        writer.println("\t\tassertEquals(${displacement.number.className}.from(20), ${displacement.className}.raw(40) / ${displacement.className}.raw(2))")
         writer.println("\t\tassertEquals(${displacement.className}.raw(20), ${displacement.className}.raw(40) / 2L)")
         writer.println("\t\tassertEquals(${displacement.className}.raw(20), ${displacement.className}.raw(50) / 2.5f)")
         writer.println("\t\tassertEquals(${displacement.className}.raw(20), ${displacement.className}.raw(50) / 2.5)")
         if (displacement.number.internalType.signed) {
             writer.println("\t\tassertEquals(${displacement.className}.raw(-43), -${displacement.className}.raw(43))")
         }
+        writer.println("\t}")
+    }
+
+    private fun generateAreaClass() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testAreaClass() {")
+        writer.println("\t\tval one = ${displacement.className}.${displacement.oneUnit}")
+        writer.println("\t\tassertEquals((2 * one) * (2 * one), one * (2 * one) + (2 * one) * one)")
+        writer.println("\t\tassertEquals(one * one, (2 * one) * one - one * one)")
+        writer.println("\t\tassertEquals(5 * one, sqrt((3 * one) * (3 * one) + (4 * one) * (4 * one)))")
+        writer.println("\t\tassertEquals(${displacement.number.className}.from(2), (2 * one * one) / (one * one))")
         writer.println("\t}")
     }
 
@@ -115,6 +132,15 @@ class DisplacementTestsGenerator(
             writer.println("\t\tassertEquals(0.5 * ${displacement.className}.${displacement.oneUnit}, 0.5f.${displacement.oneUnit.abbreviation})")
             writer.println("\t\tassertEquals(0.5 * ${displacement.className}.${displacement.oneUnit}, 0.5.${displacement.oneUnit.abbreviation})")
         }
+        writer.println("\t}")
+    }
+
+    private fun generateMathFunctions() {
+        writer.println()
+        writer.println("\t@Test")
+        writer.println("\tfun testMathFunctions() {")
+        writer.println("\t\tassertEquals(${displacement.className}.raw(4), min(${displacement.className}.raw(6), ${displacement.className}.raw(4)))")
+        writer.println("\t\tassertEquals(${displacement.className}.raw(6), max(${displacement.className}.raw(6), ${displacement.className}.raw(4)))")
         writer.println("\t}")
     }
 }

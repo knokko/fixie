@@ -49,7 +49,7 @@ class NumberTestsGenerator(
         val sequence = mutableListOf(minValue, maxValue)
 
         var value = minValue
-        while (value < maxValue / growFactor) {
+        while (value < maxValue / growFactor && value < maxValue) {
             if (value != minValue) {
                 val marginFactor = 1.0 + 0.7 * (growFactor - 1.0)
                 for (counter in 0 until density) {

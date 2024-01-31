@@ -113,6 +113,15 @@ class NumberTestsGenerator(
         // Cancellation check
         val maxIntValue = number.internalType.getMaxValue() / number.oneValue
         writer.println("\t\tassertTrue((${number.className}.from(${maxIntValue - BigInteger.ONE}) + ${number.className}.ONE / 3).toString().endsWith((${number.className}.ONE / 3).toString().substring(1)))")
+
+        // Test numbers like 0.0x
+        if (number.oneValue.remainder(BigInteger.valueOf(16)) == BigInteger.ZERO) {
+            writer.println("\t\tassertEquals(\"0.0625\", (${number.className}.ONE / 16).toString())")
+        }
+        if (number.oneValue.remainder(BigInteger.valueOf(100)) == BigInteger.ZERO) {
+            writer.println("\t\tassertEquals(\"0.01\", (${number.className}.ONE / 100).toString())")
+        }
+
         writer.println("\t}")
     }
 

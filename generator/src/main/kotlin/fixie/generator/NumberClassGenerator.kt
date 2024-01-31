@@ -40,38 +40,46 @@ class NumberClassGenerator(
                 "Comparable<${number.className}> {")
     }
 
-    private fun isPowerOf10(value: BigInteger): Boolean {
+    private fun isPowerOf10(value: BigInteger): Int? {
         var candidate = BigInteger.ONE
+        var exponent = 0
         for (power in 0 until 25) {
-            if (value == candidate) return true
+            if (value == candidate) return exponent
             candidate *= BigInteger.TEN
+            exponent += 1
         }
-        return false
+        return null
     }
 
-    private fun highestPowerOf10Below(value: BigInteger): BigInteger {
+    private fun highestPowerOf10Below(value: BigInteger): Pair<BigInteger, Int> {
         var candidate = BigInteger.ONE
+        var exponent = 0
         while (candidate < value) {
             candidate *= BigInteger.TEN
+            exponent += 1
         }
-        return candidate / BigInteger.TEN
+        return Pair(candidate / BigInteger.TEN, exponent - 1)
     }
 
     private fun generateToString() {
         writer.println()
         writer.println("\toverride fun toString(): String {")
         writer.println("\t\tval intPart = raw / RAW_ONE")
-        if (isPowerOf10(number.oneValue)) {
-            writer.println("\t\tvar fractPart = \".\" + (raw % RAW_ONE).toString().replace(\"-\", \"\")")
+        val maybe10Power = isPowerOf10(number.oneValue)
+        if (maybe10Power != null) {
+            writer.println("\t\tvar fractPart = (raw % RAW_ONE).toString().replace(\"-\", \"\")")
+            writer.println("\t\twhile (fractPart.length < $maybe10Power) fractPart = \"0\$fractPart\"")
         } else {
-            val power = highestPowerOf10Below(number.oneValue)
+            val (power, exponent) = highestPowerOf10Below(number.oneValue)
             val toLong = if (number.internalType.numBytes == 8 && number.internalType.signed) "" else ".toLong()"
             writer.println("\t\tval bigFract = BigInteger.valueOf((raw % RAW_ONE)$toLong) * BigInteger.valueOf($power)")
             writer.println("\t\tval results = bigFract.divideAndRemainder(BigInteger.valueOf(RAW_ONE$toLong))")
             writer.println("\t\tvar fractNumber = results[0]")
             writer.println("\t\tif (results[1] >= BigInteger.valueOf(${number.oneValue / BigInteger.TWO})) fractNumber += BigInteger.ONE")
-            writer.println("\t\tvar fractPart = \".\" + fractNumber.toString().replace(\"-\", \"\")")
+            writer.println("\t\tvar fractPart = fractNumber.toString().replace(\"-\", \"\")")
+            writer.println("\t\twhile (fractPart.length < $exponent) fractPart = \"0\$fractPart\"")
         }
+        writer.println("\t\tfractPart = \".\$fractPart\"")
         writer.println("\t\twhile (fractPart.endsWith('0')) fractPart = fractPart.substring(0 until fractPart.length - 1)")
         writer.println("\t\tif (fractPart == \".\") fractPart = \"\"")
         if (number.internalType.signed) {

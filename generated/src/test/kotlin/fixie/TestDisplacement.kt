@@ -48,14 +48,26 @@ class TestDisplacement {
 		assertEquals(Displacement.raw(73), Displacement.raw(70) + Displacement.raw(3))
 		assertEquals(Displacement.raw(20), Displacement.raw(61) - Displacement.raw(41))
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21)
+		assertEquals(Displacement.raw(63), Displacement.raw(3) * FixDisplacement.from(21))
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21L)
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21f)
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21.0)
 		assertEquals(Displacement.raw(20), Displacement.raw(40) / 2)
+		assertEquals(Displacement.raw(20), Displacement.raw(40) / FixDisplacement.from(2))
+		assertEquals(FixDisplacement.from(20), Displacement.raw(40) / Displacement.raw(2))
 		assertEquals(Displacement.raw(20), Displacement.raw(40) / 2L)
 		assertEquals(Displacement.raw(20), Displacement.raw(50) / 2.5f)
 		assertEquals(Displacement.raw(20), Displacement.raw(50) / 2.5)
 		assertEquals(Displacement.raw(-43), -Displacement.raw(43))
+	}
+
+	@Test
+	fun testAreaClass() {
+		val one = Displacement.METER
+		assertEquals((2 * one) * (2 * one), one * (2 * one) + (2 * one) * one)
+		assertEquals(one * one, (2 * one) * one - one * one)
+		assertEquals(5 * one, sqrt((3 * one) * (3 * one) + (4 * one) * (4 * one)))
+		assertEquals(FixDisplacement.from(2), (2 * one * one) / (one * one))
 	}
 
 	@Test
@@ -68,5 +80,11 @@ class TestDisplacement {
 		assertEquals(Displacement.METER, 1L.m)
 		assertEquals(0.5 * Displacement.METER, 0.5f.m)
 		assertEquals(0.5 * Displacement.METER, 0.5.m)
+	}
+
+	@Test
+	fun testMathFunctions() {
+		assertEquals(Displacement.raw(4), min(Displacement.raw(6), Displacement.raw(4)))
+		assertEquals(Displacement.raw(6), max(Displacement.raw(6), Displacement.raw(4)))
 	}
 }

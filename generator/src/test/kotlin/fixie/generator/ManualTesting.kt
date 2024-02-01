@@ -129,9 +129,9 @@ fun main() {
 
     val fixDist = NumberClass(
         "FixDisplacement",
-        internalType = IntType(true, 2),
-        oneValue = BigInteger.valueOf(1024),
-        checkOverflow = false
+        internalType = IntType(true, 4),
+        oneValue = BigInteger.valueOf(1000 * 100),
+        checkOverflow = true
     )
     generate(fixDist)
     generate(DisplacementClass(

@@ -15,7 +15,7 @@ object Geometry {
         )
 
         // When the line segment distance is larger than the radius, there is no collision
-        if (fullDistance >= cr) return false
+        if (fullDistance > cr) return false
 
         val totalMovement = sqrt(cvx * cvx + cvy * cvy)
 

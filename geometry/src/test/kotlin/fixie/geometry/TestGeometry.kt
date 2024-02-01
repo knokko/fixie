@@ -18,15 +18,6 @@ class TestGeometry {
     }
 
     @Test
-    fun testDistanceBetweenPointAndLineSegmentPrecision() {
-        val linePoint = Position.origin()
-        Geometry.distanceBetweenPointAndLineSegment(
-            0.02852.m, 0.10005.m, LineSegment(-20.m, 0.m, 100.m, 0.m), linePoint
-        )
-        println("linePoint is $linePoint")
-    }
-
-    @Test
     fun testDistanceBetweenPointAndLineSegment() {
         val rng = Random.Default
         for (counter in 0 until 10) {

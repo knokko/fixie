@@ -19,6 +19,7 @@ class TestFixUncheckedMicro32 {
 		assertEquals("-1", (-FixUncheckedMicro32.ONE).toString())
 		assertTrue((FixUncheckedMicro32.ONE / -3).toString().startsWith("-0.33"))
 		assertTrue((FixUncheckedMicro32.from(2046) + FixUncheckedMicro32.ONE / 3).toString().endsWith((FixUncheckedMicro32.ONE / 3).toString().substring(1)))
+		assertEquals("0.0625", (FixUncheckedMicro32.ONE / 16).toString())
 	}
 
 	@Test

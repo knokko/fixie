@@ -17,6 +17,7 @@ class TestFixMicro64U {
 		assertEquals("1", FixMicro64U.ONE.toString())
 		assertTrue((FixMicro64U.ONE / 3).toString().startsWith("0.33"))
 		assertTrue((FixMicro64U.from(17592186044414) + FixMicro64U.ONE / 3).toString().endsWith((FixMicro64U.ONE / 3).toString().substring(1)))
+		assertEquals("0.0625", (FixMicro64U.ONE / 16).toString())
 	}
 
 	@Test

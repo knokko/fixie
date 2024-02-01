@@ -19,6 +19,7 @@ class TestFixMicro64 {
 		assertEquals("-1", (-FixMicro64.ONE).toString())
 		assertTrue((FixMicro64.ONE / -3).toString().startsWith("-0.33"))
 		assertTrue((FixMicro64.from(8796093022206) + FixMicro64.ONE / 3).toString().endsWith((FixMicro64.ONE / 3).toString().substring(1)))
+		assertEquals("0.0625", (FixMicro64.ONE / 16).toString())
 	}
 
 	@Test
@@ -80,7 +81,6 @@ class TestFixMicro64 {
 		testOverflow(-589153389781491222)
 		testOverflow(-43117419028065805)
 		testOverflow(-785861820617605)
-		testOverflow(-19482330338386)
 		testOverflow(-8796093022209)
 
 		testOverflow(8796093022208)

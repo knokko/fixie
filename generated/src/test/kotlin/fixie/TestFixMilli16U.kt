@@ -17,6 +17,7 @@ class TestFixMilli16U {
 		assertEquals("1", FixMilli16U.ONE.toString())
 		assertTrue((FixMilli16U.ONE / 3).toString().startsWith("0.3"))
 		assertTrue((FixMilli16U.from(64) + FixMilli16U.ONE / 3).toString().endsWith((FixMilli16U.ONE / 3).toString().substring(1)))
+		assertEquals("0.01", (FixMilli16U.ONE / 100).toString())
 	}
 
 	@Test

@@ -17,6 +17,7 @@ class TestFixUncheckedMilli16U {
 		assertEquals("1", FixUncheckedMilli16U.ONE.toString())
 		assertTrue((FixUncheckedMilli16U.ONE / 3).toString().startsWith("0.3"))
 		assertTrue((FixUncheckedMilli16U.from(64) + FixUncheckedMilli16U.ONE / 3).toString().endsWith((FixUncheckedMilli16U.ONE / 3).toString().substring(1)))
+		assertEquals("0.01", (FixUncheckedMilli16U.ONE / 100).toString())
 	}
 
 	@Test

@@ -17,6 +17,8 @@ class TestFixDecMicro32U {
 		assertEquals("1", FixDecMicro32U.ONE.toString())
 		assertTrue((FixDecMicro32U.ONE / 3).toString().startsWith("0.33"))
 		assertTrue((FixDecMicro32U.from(4293) + FixDecMicro32U.ONE / 3).toString().endsWith((FixDecMicro32U.ONE / 3).toString().substring(1)))
+		assertEquals("0.0625", (FixDecMicro32U.ONE / 16).toString())
+		assertEquals("0.01", (FixDecMicro32U.ONE / 100).toString())
 	}
 
 	@Test

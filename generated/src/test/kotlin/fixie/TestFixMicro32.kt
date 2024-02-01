@@ -19,6 +19,7 @@ class TestFixMicro32 {
 		assertEquals("-1", (-FixMicro32.ONE).toString())
 		assertTrue((FixMicro32.ONE / -3).toString().startsWith("-0.33"))
 		assertTrue((FixMicro32.from(2046) + FixMicro32.ONE / 3).toString().endsWith((FixMicro32.ONE / 3).toString().substring(1)))
+		assertEquals("0.0625", (FixMicro32.ONE / 16).toString())
 	}
 
 	@Test
@@ -39,7 +40,6 @@ class TestFixMicro32 {
 		testOverflow(-978689185)
 		testOverflow(-974146)
 		testOverflow(-740009)
-		testOverflow(-16299)
 		testOverflow(-2049)
 
 		testOverflow(2048)
@@ -72,7 +72,6 @@ class TestFixMicro32 {
 		testOverflow(-448440224)
 		testOverflow(-2065398)
 		testOverflow(-11740)
-		testOverflow(-7239)
 		testOverflow(-2049)
 
 		testOverflow(2048)

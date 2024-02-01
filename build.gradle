@@ -26,6 +26,7 @@ allprojects {
     }
 
     dependencies {
+        implementation 'com.github.knokko:sample-profiler:v1.0.0'
         testImplementation platform('org.junit:junit-bom:5.10.1')
         testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -52,6 +53,20 @@ project(':benchmarks') {
     dependencies {
         implementation project(':')
         implementation project(':generated')
-        implementation 'com.github.knokko:sample-profiler:v1.0.0'
+    }
+}
+
+project(':geometry') {
+    dependencies {
+        implementation project(':')
+        implementation project(':generated')
+    }
+}
+
+project(':physics') {
+    dependencies {
+        implementation project(':')
+        implementation project(':generated')
+        implementation project(':geometry')
     }
 }

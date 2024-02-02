@@ -65,6 +65,7 @@ class Scene {
 
         var deltaX = velocity.x * stepDuration / 1000
         var deltaY = velocity.y * stepDuration / 1000
+        val originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         velocity.y -= (9.8 * stepDuration).mm
 
         var didIntersect = false
@@ -89,11 +90,33 @@ class Scene {
             val normalX = (position.x - lastTileIntersection.x) / entity.properties.radius
             val normalY = (position.y - lastTileIntersection.y) / entity.properties.radius
 
-            val opposingFactor = (normalX * velocity.x + normalY * velocity.y) * entity.properties.bounceConstant
-            val frictionFactor = (normalY * velocity.x - normalX * velocity.y) * entity.properties.frictionConstant
+            val bounceConstant = 1.01 * entity.properties.bounceConstant
+            val frictionConstant = 0.02 * entity.properties.frictionConstant
 
-            velocity.x -= opposingFactor * normalX + frictionFactor * normalY * 0.015
-            velocity.y -= opposingFactor * normalY - frictionFactor * normalX * 0.015
+            val opposingFactor = bounceConstant * (normalX * velocity.x + normalY * velocity.y)
+            val frictionFactor = frictionConstant * (normalY * velocity.x - normalX * velocity.y)
+
+            velocity.x -= opposingFactor * normalX + frictionFactor * normalY
+            velocity.y -= opposingFactor * normalY - frictionFactor * normalX
+
+            val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
+            val remainingBudget = 1 - finalDelta / originalDelta
+            deltaX = remainingBudget * velocity.x * stepDuration / 1000
+            deltaY = remainingBudget * velocity.y * stepDuration / 1000
+
+            for (tile in tiles) {
+                if (Geometry.sweepCircleToLineSegment(
+                        position.x, position.y, deltaX, deltaY, entity.properties.radius,
+                        tile.startX, tile.startY, tile.lengthX, tile.lengthY,
+                        entityIntersection, tileIntersection
+                    )) {
+                    deltaX = entityIntersection.x - position.x
+                    deltaY = entityIntersection.y - position.y
+                }
+            }
+
+            position.x += deltaX
+            position.y += deltaY
         }
     }
 

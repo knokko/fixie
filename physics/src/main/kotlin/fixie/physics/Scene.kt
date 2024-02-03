@@ -5,7 +5,7 @@ import fixie.geometry.Geometry
 import fixie.geometry.LineSegment
 import fixie.geometry.Position
 import java.util.*
-import kotlin.ConcurrentModificationException
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class Scene {
 
@@ -18,6 +18,9 @@ class Scene {
 
     private val tiles = mutableListOf<Tile>()
     private val entities = mutableListOf<Entity>()
+
+    private val entitiesToSpawn = ConcurrentLinkedQueue<EntitySpawnRequest>()
+    private val tilesToPlace = ConcurrentLinkedQueue<TilePlaceRequest>()
 
     private var entityPositions = Array(10) { Position.origin() }
     private var entityVelocities = Array(10) { Velocity.zero() }
@@ -41,7 +44,78 @@ class Scene {
         }
     }
 
+    private fun canSpawn(x: Displacement, y: Displacement, properties: EntityProperties): Boolean {
+        for (tile in tiles) {
+            if (Geometry.distanceBetweenPointAndLineSegment(
+                    x, y, tile.collider, lastTileIntersection
+            ) <= properties.radius) return false
+        }
+
+        var index = 0
+        for (entity in entities) {
+            val dx = x - entityPositions[index].x
+            val dy = y - entityPositions[index].y
+            val combinedRadius = properties.radius + entity.properties.radius
+            if (dx * dx + dy * dy <= combinedRadius * combinedRadius) return false
+            index += 1
+        }
+
+        for (entity in confirmedEntities) {
+            val dx = x - entity.x
+            val dy = y - entity.y
+            val combinedRadius = properties.radius + entity.properties.radius
+            if (dx * dx + dy * dy <= combinedRadius * combinedRadius) return false
+        }
+
+        return true
+    }
+
+    private val confirmedEntities = mutableListOf<EntitySpawnRequest>()
+
+    private fun processEntitySpawnRequests() {
+        do {
+            val request = entitiesToSpawn.poll()
+            if (request != null) {
+                if (canSpawn(request.x, request.y, request.properties)) confirmedEntities.add(request)
+                else request.processed = true
+            }
+        } while (request != null)
+    }
+
+    private fun canPlace(collider: LineSegment): Boolean {
+        var index = 0
+        for (entity in entities) {
+            if (Geometry.distanceBetweenPointAndLineSegment(
+                entityPositions[index].x, entityPositions[index].y, collider, tileIntersection
+            ) <= entity.properties.radius) return false
+            index += 1
+        }
+
+        for (entity in confirmedEntities) {
+            if (Geometry.distanceBetweenPointAndLineSegment(
+                entity.x, entity.y, collider, tileIntersection
+            ) <= entity.properties.radius) return false
+        }
+
+        return true
+    }
+
+    private val confirmedTiles = mutableListOf<TilePlaceRequest>()
+
+    private fun processTilePlaceRequests() {
+        do {
+            val request = tilesToPlace.poll()
+            if (request != null) {
+                if (canPlace(request.collider)) confirmedTiles.add(request)
+                else request.processed = true
+            }
+        } while (request != null)
+    }
+
     private fun copyStateAfterUpdate() {
+        processEntitySpawnRequests()
+        processTilePlaceRequests()
+
         synchronized(this) {
             var index = 0
             for (entity in entities) {
@@ -51,6 +125,31 @@ class Scene {
                 entity.velocity.y = entityVelocities[index].y
                 index += 1
             }
+
+            for (request in confirmedEntities) {
+                val id = UUID.randomUUID()
+                entities.add(Entity(
+                    id = id,
+                    properties = request.properties,
+                    position = Position(request.x, request.y),
+                    velocity = Velocity(request.velocityX, request.velocityY)
+                ))
+                request.id = id
+                request.processed = true
+            }
+            confirmedEntities.clear()
+
+            for (request in confirmedTiles) {
+                val id = UUID.randomUUID()
+                tiles.add(Tile(
+                    id = id,
+                    collider = request.collider,
+                    properties = request.properties
+                ))
+                request.id = id
+                request.processed = true
+            }
+
             updateThread = null
         }
     }
@@ -141,21 +240,12 @@ class Scene {
         copyStateAfterUpdate()
     }
 
-    fun spawnEntity(properties: EntityProperties, x: Displacement, y: Displacement, vx: Displacement, vy: Displacement): UUID {
-        if (updateThread != null && Thread.currentThread() != updateThread) throw ConcurrentModificationException()
-
-        // TODO Postpone this to next update?
-        val id = UUID.randomUUID()
-        entities.add(Entity(id, properties, Position(x, y), Velocity(vx, vy)))
-        return id
+    fun spawnEntity(request: EntitySpawnRequest) {
+        entitiesToSpawn.add(request)
     }
 
-    fun addTile(collider: LineSegment, properties: TileProperties) {
-        if (updateThread != null && Thread.currentThread() != updateThread) throw ConcurrentModificationException()
-
-        // TODO Forbid entity intersections?
-
-        tiles.add(Tile(UUID.randomUUID(), collider, properties))
+    fun addTile(request: TilePlaceRequest) {
+        tilesToPlace.add(request)
     }
 
     fun read(query: SceneQuery) {
@@ -173,6 +263,7 @@ class Scene {
             index = 0
             for (entity in entities) {
                 val qe = query.entities[index]
+                qe.id = entity.id
                 qe.properties = entity.properties
                 qe.position.x = entity.position.x
                 qe.position.y = entity.position.y

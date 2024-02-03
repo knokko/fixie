@@ -84,6 +84,9 @@ class TestDisplacement {
 
 	@Test
 	fun testMathFunctions() {
+		assertEquals(Displacement.raw(0), abs(Displacement.raw(0)))
+		assertEquals(Displacement.raw(5), abs(Displacement.raw(-5)))
+		assertEquals(Displacement.raw(5), abs(Displacement.raw(5)))
 		assertEquals(Displacement.raw(4), min(Displacement.raw(6), Displacement.raw(4)))
 		assertEquals(Displacement.raw(6), max(Displacement.raw(6), Displacement.raw(4)))
 	}

@@ -24,24 +24,52 @@ object Geometry {
             throw IllegalArgumentException("circle at ($cx, $cy) with radius $cr is already in line ($lsx, $lsy, $lslx, $lsly)")
         }
 
+        var useBinarySearch = false
+        var signumCounter = 0
         var largestSafeMovement = 0.m
+        var largestSafeDistance = distanceBetweenPointAndLineSegment(cx, cy, lsx, lsy, lslx, lsly, outPointOnLine)
         var smallestUnsafeMovement = totalMovement + (fullDistance - cr) * 0.99
+        var smallestUnsafeDistance = fullDistance
         var candidateMovement = smallestUnsafeMovement
-        while ((smallestUnsafeMovement - largestSafeMovement) > 0.1.mm) {
+        while ((smallestUnsafeMovement - largestSafeMovement) > 0.1.mm && largestSafeDistance - cr > 0.1.mm) {
             val movementFactor = candidateMovement / totalMovement
+            val newX = cx + movementFactor * cvx
+            val newY = cy + movementFactor * cvy
             val distance = distanceBetweenPointAndLineSegment(
-                cx + movementFactor * cvx, cy + movementFactor * cvy,
-                lsx, lsy, lslx, lsly, outPointOnLine
+                newX, newY, lsx, lsy, lslx, lsly, outPointOnLine
             )
 
             if (distance > cr) {
-                // TODO Update candidateMovement
-                if (largestSafeMovement < candidateMovement) largestSafeMovement = candidateMovement
+                if (signumCounter == -1) useBinarySearch = true
+                signumCounter -= 1
+                if (largestSafeMovement < candidateMovement) {
+                    largestSafeMovement = candidateMovement
+                    largestSafeDistance = distance
+                }
             } else {
-                // TODO Update candidateMovement
-                if (smallestUnsafeMovement > candidateMovement) smallestUnsafeMovement = candidateMovement
+                if (signumCounter == 1) useBinarySearch = true
+                signumCounter += 1
+                if (smallestUnsafeMovement > candidateMovement) {
+                    smallestUnsafeMovement = candidateMovement
+                    smallestUnsafeDistance = distance
+                }
             }
-            candidateMovement = (largestSafeMovement + smallestUnsafeMovement) / 2
+
+            if (useBinarySearch) candidateMovement = (largestSafeMovement + smallestUnsafeMovement) / 2
+            else {
+                // Example:
+                // - radius = 100mm
+                // - largestSafeDistance = 150mm
+                // - largestSafeMovement = 600mm
+                // - smallestUnsafeDistance = 40mm
+                // - smallestUnsafeMovement = 800mm
+                //
+                // - distanceFactor = (150 - 100) / (150 - 40) = 50 / 110 = 0.45
+                // - candidateMovement = 600 + 0.45 * (800 - 600) = 600 + 0.45 * 200 = 690
+                var distanceFactor = (largestSafeDistance - cr) / (largestSafeDistance - smallestUnsafeDistance)
+                distanceFactor *= if (largestSafeDistance - cr > cr - smallestUnsafeDistance) 1.05 else 0.95
+                candidateMovement = largestSafeMovement + distanceFactor * (smallestUnsafeMovement - largestSafeMovement)
+            }
         }
 
         val movementFactor = largestSafeMovement / totalMovement
@@ -181,6 +209,12 @@ object Geometry {
         px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
         ldx: Displacement, ldy: Displacement, outPointOnLine: Position
     ): Displacement {
+        if (ldx == 0.m && ldy == 0.m) {
+            outPointOnLine.x = lx
+            outPointOnLine.y = ly
+            return sqrt((px - lx) * (px - lx) + (py - ly) * (py - ly))
+        }
+
         // First, we need to find the intersection with the line through (px, py) perpendicular to l. Use:
         // - perp(endicular)X = ldy
         // - perp(endicular)Y = -ldx
@@ -211,27 +245,43 @@ object Geometry {
         // (11) b = ((lx - px) * ldx + (ly - py) * ldy) / (-ldx * ldx - ldy * ldy)
         // (12) b = ((px - lx) * ldx + (py - ly) * ldy) / (ldx * ldx + ldy * ldy)
 
-        // Unfortunately, we also need to handle potential overflow and division by 0, as well as loss of precision
-        val largestLength = max(abs(ldx / 1.m), abs(ldy / 1.m))
-        val threshold = 3
-        val factor = if (largestLength > threshold) threshold / largestLength else FixDisplacement.ONE
+        // Unfortunately, computing ldx * ldx + ldy * ldy often overflows, so we need to be smarter.
+        // To avoid this, we can divide both sides of the equation by ldx or ldy. We will pick
+        // the one with the largest absolute value.
+        val numerator: Displacement
+        val denominator: Displacement
+        if (abs(ldy) > abs(ldx)) {
+            numerator = (px - lx) * (ldx / ldy) + py - ly
+            denominator = ldx * (ldx / ldy) + ldy
+        } else {
+            numerator = px - lx + (py - ly) * (ldy / ldx)
+            denominator = ldx + ldy * (ldy / ldx)
+        }
 
-        val smallLdx = ldx * factor
-        val smallLdy = ldy * factor
+        // Mathematically, the point on the line is given by:
+        // (13) x = lx + ldx * b
+        // (14) y = ly + ldy * b
 
-        val numerator = ((px - lx) * smallLdx + (py - ly) * smallLdy)
-        val denominator = (smallLdx * smallLdx + smallLdy * smallLdy)
+        // Basically, there are 3 ways to compute x (and similarly y):
+        // (15) x = lx + ldx * (numerator / denominator)
+        // (16) x = lx + (ldx * numerator) / denominator
+        // (17) x = lx + numerator / (denominator / ldx)
 
-        val b = if (denominator.raw != 0.0) {
-            val rawB = numerator.raw / denominator.raw
-            // If b is not between 0 and 1, the closest point is not on the line segment
-            if (rawB < 0) FixDisplacement.ZERO
-            else if (rawB * factor.toDouble() > 1) FixDisplacement.ONE / factor
-            else FixDisplacement.from(rawB)
-        } else FixDisplacement.ZERO // When the denominator is 0, the length of the line is (nearly) 0, so b doesn't matter
+        // Equation (15) can lose significant precision due to the (numerator / denominator) rounding.
+        // Equations (16) and (17) are more precise, unless they overflow.
 
-        val x = lx + smallLdx * b
-        val y = ly + smallLdy * b
+        val plusX = if (abs(ldx) > 500.m) numerator / (denominator / ldx) else (ldx * numerator.value) / denominator.value
+        val plusY = if (abs(ldy) > 500.m) numerator / (denominator / ldy) else (ldy * numerator.value) / denominator.value
+
+        // The closest point on the LINE is:
+        // (18) x = lx + plusX and y = ly + plusY
+
+        // However, there is no guarantee that this point is also on the line SEGMENT,
+        // so we need to clamp x in the interval [min(lx, lx + ldx), max(lx, lx + ldx)]
+        val x = if (ldx < 0.m) { if (plusX > 0.m) lx else if (plusX < ldx) lx + ldx else lx + plusX }
+        else { if (plusX < 0.m) lx else if (plusX > ldx) lx + ldx else lx + plusX }
+        val y = if (ldy < 0.m) { if (plusY > 0.m) ly else if (plusY < ldy) ly + ldy else ly + plusY }
+        else { if (plusY < 0.m) ly else if (plusY > ldy) ly + ldy else ly + plusY }
 
         outPointOnLine.x = x
         outPointOnLine.y = y

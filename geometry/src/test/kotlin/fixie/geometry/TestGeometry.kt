@@ -20,7 +20,7 @@ class TestGeometry {
     @Test
     fun testDistanceBetweenPointAndLineSegment() {
         val rng = Random.Default
-        for (counter in 0 until 10) {
+        for (counter in 0 until 100_000) {
             val maxDisplacement = Int.MAX_VALUE / 3
             val offsetX = Displacement.raw(rng.nextInt(-maxDisplacement, maxDisplacement))
             val offsetY = Displacement.raw(rng.nextInt(-maxDisplacement, maxDisplacement))
@@ -37,33 +37,49 @@ class TestGeometry {
                 this.assertEquals(expectedPoint, Position(actualPoint.x - offsetX, actualPoint.y - offsetY))
             }
 
-            val horizontal = LineSegment(startX = 10.m + offsetX, startY = 3.m + offsetY, lengthX = 50.m, lengthY = 0.m)
+            for (horizontal in arrayOf(
+                LineSegment(startX = 10.m + offsetX, startY = 3.m + offsetY, lengthX = 50.m, lengthY = 0.m),
+                LineSegment(startX = 60.m + offsetX, startY = 3.m + offsetY, lengthX = -50.m, lengthY = 0.m)
+            )) {
+                testPointLine(5.m, 3.m, horizontal, 5.m, Position(10.m, 3.m))
+                testPointLine(10.m, 3.m, horizontal, 0.m, Position(10.m, 3.m))
+                testPointLine(50.m, 3.m, horizontal, 0.m, Position(50.m, 3.m))
+                testPointLine(60.m, 3.m, horizontal, 0.m, Position(60.m, 3.m))
+                testPointLine(65.m, 3.m, horizontal, 5.m, Position(60.m, 3.m))
 
-            testPointLine(5.m, 3.m, horizontal, 5.m, Position(10.m, 3.m))
-            testPointLine(10.m, 3.m, horizontal, 0.m, Position(10.m, 3.m))
-            testPointLine(50.m, 3.m, horizontal, 0.m, Position(50.m, 3.m))
-            testPointLine(60.m, 3.m, horizontal, 0.m, Position(60.m, 3.m))
-            testPointLine(65.m, 3.m, horizontal, 5.m, Position(60.m, 3.m))
+                testPointLine(7.m, 7.m, horizontal, 5.m, Position(10.m, 3.m))
+                testPointLine(7.m, -1.m, horizontal, 5.m, Position(10.m, 3.m))
+                testPointLine(10.m, 10.m, horizontal, 7.m, Position(10.m, 3.m))
+                testPointLine(20.m, -4.m, horizontal, 7.m, Position(20.m, 3.m))
+                testPointLine(60.m, -4.m, horizontal, 7.m, Position(60.m, 3.m))
+                testPointLine(63.m, 7.m, horizontal, 5.m, Position(60.m, 3.m))
+            }
 
-            testPointLine(7.m, 7.m, horizontal, 5.m, Position(10.m, 3.m))
-            testPointLine(7.m, -1.m, horizontal, 5.m, Position(10.m, 3.m))
-            testPointLine(10.m, 10.m, horizontal, 7.m, Position(10.m, 3.m))
-            testPointLine(20.m, -4.m, horizontal, 7.m, Position(20.m, 3.m))
-            testPointLine(60.m, -4.m, horizontal, 7.m, Position(60.m, 3.m))
-            testPointLine(63.m, 7.m, horizontal, 5.m, Position(60.m, 3.m))
-
-            val vertical = LineSegment(startX = 50.m + offsetX, startY = 10.m + offsetY, lengthX = 0.m, lengthY = 90.m)
-
-            testPointLine(50.m, 10.m, vertical, 0.m, Position(50.m, 10.m))
-            testPointLine(50.m, 80.m, vertical, 0.m, Position(50.m, 80.m))
-            testPointLine(40.m, 80.m, vertical, 10.m, Position(50.m, 80.m))
-            testPointLine(50.m, 100.m, vertical, 0.m, Position(50.m, 100.m))
-            testPointLine(40.m, 100.m, vertical, 10.m, Position(50.m, 100.m))
+            for (vertical in arrayOf(
+                LineSegment(startX = 50.m + offsetX, startY = 10.m + offsetY, lengthX = 0.m, lengthY = 90.m),
+                LineSegment(startX = 50.m + offsetX, startY = 100.m + offsetY, lengthX = 0.m, lengthY = -90.m)
+            )) {
+                testPointLine(50.m, 10.m, vertical, 0.m, Position(50.m, 10.m))
+                testPointLine(50.m, 80.m, vertical, 0.m, Position(50.m, 80.m))
+                testPointLine(40.m, 80.m, vertical, 10.m, Position(50.m, 80.m))
+                testPointLine(50.m, 100.m, vertical, 0.m, Position(50.m, 100.m))
+                testPointLine(40.m, 100.m, vertical, 10.m, Position(50.m, 100.m))
+            }
 
             // Edge case
             testPointLine(-300.m, 400.m, LineSegment(
                 startX = offsetX, startY = offsetY, lengthX = 0.01.mm, lengthY = 0.m
             ), 500.m, Position(0.m, 0.m))
+
+            val longLine = LineSegment(startX = offsetX, startY = offsetY, lengthX = 2.km, lengthY = 2.km)
+            testPointLine(-400.m, 300.m, longLine, 500.m, Position(0.m, 0.m))
+            testPointLine(2.km, 0.m, longLine, (1000.0 * kotlin.math.sqrt(2.0)).m, Position(1.km, 1.km))
+
+            val zeroLine = LineSegment(startX = offsetX, startY = offsetY, lengthX = 0.m, lengthY = 0.m)
+            testPointLine(3.m, 4.m, zeroLine, 5.m, Position(0.m, 0.m))
+
+            val miniLine = LineSegment(startX = offsetX, startY = offsetY, lengthX = Displacement.raw(1), lengthY = 0.m)
+            testPointLine(3.m, 4.m, miniLine, 5.m, Position(0.m, 0.m))
         }
     }
 
@@ -71,7 +87,7 @@ class TestGeometry {
     fun testDistanceBetweenLineSegments() {
 
         val rng = Random.Default
-        for (counter in 0 until 1000) {
+        for (counter in 0 until 10_000) {
             val maxDisplacement = Int.MAX_VALUE / 3
             val offsetX = Displacement.raw(rng.nextInt(-maxDisplacement, maxDisplacement))
             val offsetY = Displacement.raw(rng.nextInt(-maxDisplacement, maxDisplacement))

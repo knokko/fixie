@@ -34,7 +34,7 @@ class DisplacementClassGenerator(
         writer.println("import kotlin.math.sqrt")
         writer.println()
         writer.println("@JvmInline")
-        writer.println("value class ${displacement.className} internal constructor(internal val value: ${displacement.number.className}) " +
+        writer.println("value class ${displacement.className} internal constructor(val value: ${displacement.number.className}) " +
                 ": Comparable<${displacement.className}> {")
     }
 
@@ -157,6 +157,12 @@ class DisplacementClassGenerator(
     }
 
     private fun generateMathFunctions() {
+        if (displacement.number.internalType.signed) {
+            writer.println()
+            if (displacement.number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
+            writer.println("fun abs(x: ${displacement.className}) = ${displacement.className}(abs(x.value))")
+        }
+
         writer.println()
         if (displacement.number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
         writer.println("fun sqrt(area: ${displacement.className}.Area) = sqrt(area.raw) * ${displacement.className}.${displacement.oneUnit}")

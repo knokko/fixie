@@ -50,7 +50,7 @@ fun main() {
             lastX = position.x
             lastY = position.y
         }
-    ), 0.m, 2.m, 1200.mm, 0.m)
+    ), 0.m, 2.m, 0.m, 0.m)
 
     val simpleMaterial = TileProperties()
     scene.addTile(LineSegment(-20.m, 0.m, 100.m, 0.m), simpleMaterial)

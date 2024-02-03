@@ -68,6 +68,8 @@ class TestDisplacement {
 		assertEquals(one * one, (2 * one) * one - one * one)
 		assertEquals(5 * one, sqrt((3 * one) * (3 * one) + (4 * one) * (4 * one)))
 		assertEquals(FixDisplacement.from(2), (2 * one * one) / (one * one))
+		assertTrue(2 * one * one <= one * 3 * one)
+		assertTrue(4 * one * one >= one * 3 * one)
 	}
 
 	@Test

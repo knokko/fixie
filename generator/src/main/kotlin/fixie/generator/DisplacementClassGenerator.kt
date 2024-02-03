@@ -130,13 +130,15 @@ class DisplacementClassGenerator(
 
     private fun generateAreaClass() {
         writer.println("\t@JvmInline")
-        writer.println("\tvalue class Area(val raw: Double) {")
+        writer.println("\tvalue class Area(val raw: Double) : Comparable<Area> {")
         writer.println()
         writer.println("\t\toperator fun plus(right: Area) = Area(this.raw + right.raw)")
         writer.println()
         writer.println("\t\toperator fun minus(right: Area) = Area(this.raw - right.raw)")
         writer.println()
         writer.println("\t\toperator fun div(right: Area) = ${displacement.number.className}.from(this.raw / right.raw)")
+        writer.println()
+        writer.println("\t\toverride operator fun compareTo(other: Area) = this.raw.compareTo(other.raw)")
         writer.println("\t}")
     }
 

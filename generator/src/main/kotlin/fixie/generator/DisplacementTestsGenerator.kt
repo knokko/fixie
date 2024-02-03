@@ -115,6 +115,8 @@ class DisplacementTestsGenerator(
         writer.println("\t\tassertEquals(one * one, (2 * one) * one - one * one)")
         writer.println("\t\tassertEquals(5 * one, sqrt((3 * one) * (3 * one) + (4 * one) * (4 * one)))")
         writer.println("\t\tassertEquals(${displacement.number.className}.from(2), (2 * one * one) / (one * one))")
+        writer.println("\t\tassertTrue(2 * one * one <= one * 3 * one)")
+        writer.println("\t\tassertTrue(4 * one * one >= one * 3 * one)")
         writer.println("\t}")
     }
 

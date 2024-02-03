@@ -16,7 +16,7 @@ class Scene {
 
     private var updateThread: Thread? = null
 
-    private val tiles = mutableListOf<LineSegment>()
+    private val tiles = mutableListOf<Tile>()
     private val entities = mutableListOf<Entity>()
 
     private var entityPositions = Array(10) { Position.origin() }
@@ -68,30 +68,31 @@ class Scene {
         val originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         velocity.y -= (9.8 * stepDuration).mm
 
-        var didIntersect = false
+        var intersectedTile: Tile? = null
         for (tile in tiles) {
             if (Geometry.sweepCircleToLineSegment(
                 position.x, position.y, deltaX, deltaY, entity.properties.radius,
-                tile.startX, tile.startY, tile.lengthX, tile.lengthY,
+                tile.collider.startX, tile.collider.startY, tile.collider.lengthX, tile.collider.lengthY,
                 entityIntersection, tileIntersection
             )) {
                 deltaX = entityIntersection.x - position.x
                 deltaY = entityIntersection.y - position.y
                 lastTileIntersection.x = tileIntersection.x
                 lastTileIntersection.y = tileIntersection.y
-                didIntersect = true
+                intersectedTile = tile
             }
         }
 
         position.x += deltaX
         position.y += deltaY
 
-        if (didIntersect) {
+        if (intersectedTile != null) {
             val normalX = (position.x - lastTileIntersection.x) / entity.properties.radius
             val normalY = (position.y - lastTileIntersection.y) / entity.properties.radius
 
-            val bounceConstant = 1.01 * entity.properties.bounceConstant
-            val frictionConstant = 0.02 * entity.properties.frictionConstant
+            val bounceConstant = max(FixDisplacement.from(1.1),
+                entity.properties.bounceFactor + intersectedTile.properties.bounceFactor + 1)
+            val frictionConstant = 0.02 * entity.properties.frictionFactor * intersectedTile.properties.frictionFactor
 
             val opposingFactor = bounceConstant * (normalX * velocity.x + normalY * velocity.y)
             val frictionFactor = frictionConstant * (normalY * velocity.x - normalX * velocity.y)
@@ -107,7 +108,7 @@ class Scene {
             for (tile in tiles) {
                 if (Geometry.sweepCircleToLineSegment(
                         position.x, position.y, deltaX, deltaY, entity.properties.radius,
-                        tile.startX, tile.startY, tile.lengthX, tile.lengthY,
+                        tile.collider.startX, tile.collider.startY, tile.collider.lengthX, tile.collider.lengthY,
                         entityIntersection, tileIntersection
                     )) {
                     deltaX = entityIntersection.x - position.x
@@ -149,12 +150,12 @@ class Scene {
         return id
     }
 
-    fun addTile(tile: LineSegment) {
+    fun addTile(collider: LineSegment, properties: TileProperties) {
         if (updateThread != null && Thread.currentThread() != updateThread) throw ConcurrentModificationException()
 
         // TODO Forbid entity intersections?
 
-        tiles.add(tile)
+        tiles.add(Tile(UUID.randomUUID(), collider, properties))
     }
 
     fun read(query: SceneQuery) {

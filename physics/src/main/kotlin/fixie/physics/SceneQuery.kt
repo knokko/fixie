@@ -1,11 +1,10 @@
 package fixie.physics
 
-import fixie.geometry.LineSegment
 import kotlin.math.max
 
 class SceneQuery(initialTileCapacity: Int = 100, initialEntityCapacity: Int = 100) {
 
-    var tiles = Array<LineSegment?>(initialTileCapacity) { null }
+    var tiles = Array<Tile?>(initialTileCapacity) { null }
     var entities = Array(initialEntityCapacity) { EntityQuery() }
 
     var numTiles = 0

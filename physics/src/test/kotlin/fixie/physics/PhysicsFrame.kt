@@ -11,6 +11,7 @@ import java.awt.event.KeyListener
 import java.lang.Thread.sleep
 import javax.swing.JFrame
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
+import kotlin.math.roundToInt
 
 var lastX = 0.m
 var lastY = 0.m
@@ -39,8 +40,6 @@ fun main() {
     val scene = Scene()
     scene.spawnEntity(EntityProperties(
         radius = 0.1.m,
-        bounceConstant = FixDisplacement.Companion.from(1.0),
-        frictionConstant = FixDisplacement.Companion.from(1.0),
         updateFunction = { position, velocity ->
             if (moveLeft) velocity.x -= 100.mm
             if (moveRight) velocity.x += 100.mm
@@ -52,10 +51,12 @@ fun main() {
             lastY = position.y
         }
     ), 0.m, 2.m, 1200.mm, 0.m)
-    scene.addTile(LineSegment(-20.m, 0.m, 100.m, 0.m))
-    scene.addTile(LineSegment(2.m, 0.3.m, 3.m, 0.m))
-    scene.addTile(LineSegment(7.m, 0.m, 1.m, 4.m))
-    scene.addTile(LineSegment(-1.m, 0.m, 0.m, 2.m))
+
+    val simpleMaterial = TileProperties()
+    scene.addTile(LineSegment(-20.m, 0.m, 100.m, 0.m), simpleMaterial)
+    scene.addTile(LineSegment(2.m, 0.3.m, 3.m, 0.m), simpleMaterial)
+    scene.addTile(LineSegment(7.m, 0.m, 1.m, 4.m), simpleMaterial)
+    scene.addTile(LineSegment(-1.m, 0.m, 0.m, 2.m), simpleMaterial)
 
     val frame = PhysicsFrame(scene)
     frame.setSize(1200, 800)
@@ -84,16 +85,16 @@ class PhysicsFrame(private val scene: Scene) : JFrame() {
 
         scene.read(sceneQuery)
 
-        fun transformX(x: Displacement) = 300 + (200 * (x - lastX).toDouble(DistanceUnit.METER)).toInt()
+        fun transformX(x: Displacement) = 300 + (200 * (x - lastX).toDouble(DistanceUnit.METER)).roundToInt()
 
-        fun transformY(y: Displacement) = 400 - (200 * (y - lastY).toDouble(DistanceUnit.METER)).toInt()
+        fun transformY(y: Displacement) = 400 - (200 * (y - lastY).toDouble(DistanceUnit.METER)).roundToInt()
 
         g.color = Color.BLACK
         for (index in 0 until sceneQuery.numTiles) {
             val tile = sceneQuery.tiles[index]!!
             g.drawLine(
-                transformX(tile.startX), transformY(tile.startY),
-                transformX(tile.startX + tile.lengthX), transformY(tile.startY + tile.lengthY)
+                transformX(tile.collider.startX), transformY(tile.collider.startY),
+                transformX(tile.collider.startX + tile.collider.lengthX), transformY(tile.collider.startY + tile.collider.lengthY)
             )
         }
         for (index in 0 until sceneQuery.numEntities) {

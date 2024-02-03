@@ -6,7 +6,7 @@ import fixie.geometry.Position
 
 class EntityProperties(
     val radius: Displacement,
-    val bounceConstant: FixDisplacement,
-    val frictionConstant: FixDisplacement,
+    val bounceFactor: FixDisplacement = FixDisplacement.ZERO,
+    val frictionFactor: FixDisplacement = FixDisplacement.ONE,
     val updateFunction: ((Position, Velocity) -> Unit)? = null
 )

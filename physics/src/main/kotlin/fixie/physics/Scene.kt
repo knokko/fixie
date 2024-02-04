@@ -44,10 +44,12 @@ class Scene {
         }
     }
 
+    private val spawnIntersection = Position.origin()
+
     private fun canSpawn(x: Displacement, y: Displacement, properties: EntityProperties): Boolean {
         for (tile in tiles) {
             if (Geometry.distanceBetweenPointAndLineSegment(
-                    x, y, tile.collider, lastIntersection
+                    x, y, tile.collider, spawnIntersection
             ) <= properties.radius) return false
         }
 
@@ -156,18 +158,29 @@ class Scene {
 
     private val entityIntersection = Position.origin()
     private val tileIntersection = Position.origin()
-    private val lastIntersection = Position.origin()
+
+    private class Intersection {
+        var myX = 0.m
+        var myY = 0.m
+        var otherX = 0.m
+        var otherY = 0.m
+        var radius = 0.m
+        var delta = 0.m
+        var bounce = FixDisplacement.ZERO
+        var friction = FixDisplacement.ZERO
+    }
+
+    private val intersections = Array(5) { Intersection() }
 
     private fun updateEntity(entity: Entity, position: Position, velocity: Velocity) {
         entity.properties.updateFunction?.invoke(position, velocity)
-        // TODO Anti-stuck policy?
 
         var deltaX = velocity.x * stepDuration / 1000
         var deltaY = velocity.y * stepDuration / 1000
         val originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         velocity.y -= (9.8 * stepDuration).mm
 
-        var intersectedTile: Tile? = null
+        var numIntersections = 0
         for (tile in tiles) {
             if (Geometry.sweepCircleToLineSegment(
                 position.x, position.y, deltaX, deltaY, entity.properties.radius,
@@ -176,57 +189,76 @@ class Scene {
             )) {
                 deltaX = entityIntersection.x - position.x
                 deltaY = entityIntersection.y - position.y
-                lastIntersection.x = tileIntersection.x
-                lastIntersection.y = tileIntersection.y
-                intersectedTile = tile
+
+                val intersection = intersections[numIntersections % intersections.size]
+                intersection.myX = entityIntersection.x
+                intersection.myY = entityIntersection.y
+                intersection.otherX = tileIntersection.x
+                intersection.otherY = tileIntersection.y
+                intersection.radius = entity.properties.radius
+                intersection.delta = sqrt(deltaX * deltaX + deltaY * deltaY)
+                intersection.bounce = tile.properties.bounceFactor
+                intersection.friction = tile.properties.frictionFactor
+
+                numIntersections += 1
             }
         }
 
-        var intersectedEntity: Entity? = null
-        var index = 0
+        var otherEntityIndex = 0
         for (other in entities) {
+            val otherPosition = entityPositions[otherEntityIndex]
             if (other != entity && Geometry.sweepCircleToCircle(
                 position.x, position.y, entity.properties.radius, deltaX, deltaY,
-                entityPositions[index].x, entityPositions[index].y, other.properties.radius, entityIntersection
+                otherPosition.x, otherPosition.y, other.properties.radius, entityIntersection
             )) {
-                intersectedTile = null
                 deltaX = entityIntersection.x - position.x
                 deltaY = entityIntersection.y - position.y
-                lastIntersection.x = entityPositions[index].x
-                lastIntersection.y = entityPositions[index].y
-                intersectedEntity = other
+
+                val intersection = intersections[numIntersections % intersections.size]
+                intersection.myX = entityIntersection.x
+                intersection.myY = entityIntersection.y
+                intersection.otherX = otherPosition.x
+                intersection.otherY = otherPosition.y
+                intersection.radius = entity.properties.radius + other.properties.radius
+                intersection.delta = sqrt(deltaX * deltaX + deltaY * deltaY)
+                intersection.bounce = other.properties.bounceFactor
+                intersection.friction = other.properties.frictionFactor
+
+                numIntersections += 1
             }
-            index += 1
+            otherEntityIndex += 1
         }
 
         position.x += deltaX
         position.y += deltaY
 
-        if (intersectedTile != null || intersectedEntity != null) {
-            var effectiveRadius = entity.properties.radius
-            if (intersectedEntity != null) effectiveRadius += intersectedEntity.properties.radius
-            val normalX = (position.x - lastIntersection.x) / effectiveRadius
-            val normalY = (position.y - lastIntersection.y) / effectiveRadius
+        if (numIntersections > 5) numIntersections = 5
 
-            val otherBounce: FixDisplacement
-            val otherFriction: FixDisplacement
-            if (intersectedTile != null) {
-                otherBounce = intersectedTile.properties.bounceFactor
-                otherFriction = intersectedTile.properties.frictionFactor
-            } else {
-                otherBounce = intersectedEntity!!.properties.bounceFactor
-                otherFriction = intersectedEntity.properties.frictionFactor
-            }
+        var smallestIntersectionDelta = -1.m
+        for (index in 0 until numIntersections) {
+            val delta = intersections[index].delta
+            if (smallestIntersectionDelta == -1.m || delta < smallestIntersectionDelta) smallestIntersectionDelta = delta
+        }
+
+        for (index in 0 until numIntersections) {
+            val intersection = intersections[index]
+            if (intersection.delta < smallestIntersectionDelta - 1.mm) continue
+
+            val normalX = (intersection.myX - intersection.otherX) / intersection.radius
+            val normalY = (intersection.myY - intersection.otherY) / intersection.radius
+
             val bounceConstant = max(FixDisplacement.from(1.1),
-                entity.properties.bounceFactor + otherBounce + 1)
-            val frictionConstant = 0.02 * entity.properties.frictionFactor * otherFriction
+                entity.properties.bounceFactor + intersection.bounce + 1)
+            val frictionConstant = 0.02 * entity.properties.frictionFactor * intersection.friction
 
             val opposingFactor = bounceConstant * (normalX * velocity.x + normalY * velocity.y)
             val frictionFactor = frictionConstant * (normalY * velocity.x - normalX * velocity.y)
 
             velocity.x -= opposingFactor * normalX + frictionFactor * normalY
             velocity.y -= opposingFactor * normalY - frictionFactor * normalX
+        }
 
+        if (numIntersections > 0) {
             val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
             val remainingBudget = 1 - finalDelta / originalDelta
             deltaX = remainingBudget * velocity.x * stepDuration / 1000
@@ -243,16 +275,17 @@ class Scene {
                 }
             }
 
-            index = 0
+            otherEntityIndex = 0
             for (other in entities) {
                 if (other != entity && Geometry.sweepCircleToCircle(
                         position.x, position.y, entity.properties.radius, deltaX, deltaY,
-                        entityPositions[index].x, entityPositions[index].y, other.properties.radius, entityIntersection
+                        entityPositions[otherEntityIndex].x, entityPositions[otherEntityIndex].y,
+                        other.properties.radius, entityIntersection
                     )) {
                     deltaX = entityIntersection.x - position.x
                     deltaY = entityIntersection.y - position.y
                 }
-                index += 1
+                otherEntityIndex += 1
             }
 
             position.x += deltaX

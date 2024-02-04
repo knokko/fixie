@@ -168,6 +168,8 @@ class Scene {
         var delta = 0.m
         var bounce = FixDisplacement.ZERO
         var friction = FixDisplacement.ZERO
+        var otherVelocity: Velocity? = null
+        var otherRadius = 0.m
     }
 
     private val intersections = Array(5) { Intersection() }
@@ -199,6 +201,7 @@ class Scene {
                 intersection.delta = sqrt(deltaX * deltaX + deltaY * deltaY)
                 intersection.bounce = tile.properties.bounceFactor
                 intersection.friction = tile.properties.frictionFactor
+                intersection.otherVelocity = null
 
                 numIntersections += 1
             }
@@ -223,6 +226,8 @@ class Scene {
                 intersection.delta = sqrt(deltaX * deltaX + deltaY * deltaY)
                 intersection.bounce = other.properties.bounceFactor
                 intersection.friction = other.properties.frictionFactor
+                intersection.otherVelocity = entityVelocities[otherEntityIndex]
+                intersection.otherRadius = other.properties.radius
 
                 numIntersections += 1
             }
@@ -254,8 +259,18 @@ class Scene {
             val opposingFactor = bounceConstant * (normalX * velocity.x + normalY * velocity.y)
             val frictionFactor = frictionConstant * (normalY * velocity.x - normalX * velocity.y)
 
-            velocity.x -= opposingFactor * normalX + frictionFactor * normalY
-            velocity.y -= opposingFactor * normalY - frictionFactor * normalX
+            val impulseX = opposingFactor * normalX + frictionFactor * normalY
+            val impulseY = opposingFactor * normalY - frictionFactor * normalX
+
+            velocity.x -= impulseX
+            velocity.y -= impulseY
+
+            val otherVelocity = intersection.otherVelocity
+            if (otherVelocity != null) {
+                val massFactor = (entity.properties.radius / intersection.otherRadius) * (entity.properties.radius / intersection.otherRadius)
+                otherVelocity.x += massFactor * impulseX
+                otherVelocity.y += massFactor * impulseY
+            }
         }
 
         if (numIntersections > 0) {

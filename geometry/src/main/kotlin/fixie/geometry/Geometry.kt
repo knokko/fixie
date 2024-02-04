@@ -82,6 +82,54 @@ object Geometry {
         return true
     }
 
+    fun sweepCircleToCircle(
+        x1: Displacement, y1: Displacement, r1: Displacement, vx: Displacement, vy: Displacement,
+        x2: Displacement, y2: Displacement, r2: Displacement, outPosition: Position
+    ): Boolean {
+        val r = r1 + r2
+        val originalDistance = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
+        if (originalDistance <= r1 + r2) throw IllegalArgumentException("Circle at ($x1, $y1) is already inside ($x2, $y2)")
+
+        findClosestPointOnLineToPoint(x2, y2, x1, y1, vx, vy, outPosition)
+
+        val minDistance = sqrt((x2 - outPosition.x) * (x2 - outPosition.x) + (y2 - outPosition.y) * (y2 - outPosition.y))
+        if (minDistance > r + 1.mm) return false
+
+        val dx = outPosition.x - x1
+        val dy = outPosition.y - y1
+        val directionCheck = (dx * vx + dy * vy).raw
+        if (directionCheck < 0) return false
+
+        val idealX = x1 + vx
+        val idealY = y1 + vy
+        val idealDistance = sqrt(vx * vx + vy * vy)
+
+        val blockedDistance = sqrt(r * r - minDistance * minDistance)
+        val maxDistance = sqrt((x1 - outPosition.x) * (x1 - outPosition.x) + (y1 - outPosition.y) * (y1 - outPosition.y))
+        var maxMoveDistance = maxDistance - blockedDistance
+        if (maxMoveDistance <= 0.m) {
+            outPosition.x = x1
+            outPosition.y = y1
+            return true
+        }
+
+        if (idealDistance <= maxMoveDistance) {
+            if (sqrt((idealX - x2) * (idealX - x2) + (idealY - y2) * (idealY - y2)) > r) return false
+        }
+
+        do {
+            val movementFactor = maxMoveDistance / idealDistance
+            val testX = x1 + movementFactor * vx
+            val testY = y1 + movementFactor * vy
+            val testDistance = sqrt((testX - x2) * (testX - x2) + (testY - y2) * (testY - y2))
+            maxMoveDistance -= 0.03.mm
+            outPosition.x = testX
+            outPosition.y = testY
+        } while (testDistance <= r)
+
+        return true
+    }
+
     fun distanceBetweenLineSegments(
         x1: Displacement, y1: Displacement, lx1: Displacement, ly1: Displacement, outPoint1: Position,
         x2: Displacement, y2: Displacement, lx2: Displacement, ly2: Displacement, outPoint2: Position
@@ -205,15 +253,23 @@ object Geometry {
         px, py, line.startX, line.startY, line.lengthX, line.lengthY, outPointOnLine
     )
 
-    fun distanceBetweenPointAndLineSegment(
+    fun findClosestPointOnLineToPoint(
         px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
-        ldx: Displacement, ldy: Displacement, outPointOnLine: Position
-    ): Displacement {
-        if (ldx == 0.m && ldy == 0.m) {
+        ldx1: Displacement, ldy1: Displacement, outPointOnLine: Position
+    ) {
+        if (ldx1 == 0.m && ldy1 == 0.m) {
             outPointOnLine.x = lx
             outPointOnLine.y = ly
-            return sqrt((px - lx) * (px - lx) + (py - ly) * (py - ly))
+            return
         }
+
+        val aldx = abs(ldx1)
+        val aldy = abs(ldy1)
+
+        val factor = if (aldx < 10.mm && aldy < 10.mm) 10 else 1
+
+        val ldx = factor * ldx1
+        val ldy = factor * ldy1
 
         // First, we need to find the intersection with the line through (px, py) perpendicular to l. Use:
         // - perp(endicular)X = ldy
@@ -250,7 +306,7 @@ object Geometry {
         // the one with the largest absolute value.
         val numerator: Displacement
         val denominator: Displacement
-        if (abs(ldy) > abs(ldx)) {
+        if (aldy > aldx) {
             numerator = (px - lx) * (ldx / ldy) + py - ly
             denominator = ldx * (ldx / ldy) + ldy
         } else {
@@ -270,18 +326,28 @@ object Geometry {
         // Equation (15) can lose significant precision due to the (numerator / denominator) rounding.
         // Equations (16) and (17) are more precise, unless they overflow.
 
-        val plusX = if (abs(ldx) > 500.m) numerator / (denominator / ldx) else (ldx * numerator.value) / denominator.value
-        val plusY = if (abs(ldy) > 500.m) numerator / (denominator / ldy) else (ldy * numerator.value) / denominator.value
+        val absNumerator = abs(numerator)
+        val plusX = if (aldx > 100.m || (absNumerator > 100.m && aldx > 1.m)) numerator / (denominator / ldx) else (ldx * numerator.value) / denominator.value
+        val plusY = if (aldy > 100.m || (absNumerator > 100.m && aldy > 1.m)) numerator / (denominator / ldy) else (ldy * numerator.value) / denominator.value
 
-        // The closest point on the LINE is:
-        // (18) x = lx + plusX and y = ly + plusY
+        outPointOnLine.x = lx + plusX / factor
+        outPointOnLine.y = ly + plusY / factor
+    }
 
-        // However, there is no guarantee that this point is also on the line SEGMENT,
-        // so we need to clamp x in the interval [min(lx, lx + ldx), max(lx, lx + ldx)]
-        val x = if (ldx < 0.m) { if (plusX > 0.m) lx else if (plusX < ldx) lx + ldx else lx + plusX }
-        else { if (plusX < 0.m) lx else if (plusX > ldx) lx + ldx else lx + plusX }
-        val y = if (ldy < 0.m) { if (plusY > 0.m) ly else if (plusY < ldy) ly + ldy else ly + plusY }
-        else { if (plusY < 0.m) ly else if (plusY > ldy) ly + ldy else ly + plusY }
+    private fun distanceBetweenPointAndLineSegment(
+        px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
+        ldx: Displacement, ldy: Displacement, outPointOnLine: Position
+    ): Displacement {
+        findClosestPointOnLineToPoint(px, py, lx, ly, ldx, ldy, outPointOnLine)
+
+        // The closest point on the *line* may or may not lie on the line *segment*
+        val minX = min(lx, lx + ldx)
+        val maxX = max(lx, lx + ldx)
+        val x = min(max(outPointOnLine.x, minX), maxX)
+
+        val minY = min(ly, ly + ldy)
+        val maxY = max(ly, ly + ldy)
+        val y = min(max(outPointOnLine.y, minY), maxY)
 
         outPointOnLine.x = x
         outPointOnLine.y = y

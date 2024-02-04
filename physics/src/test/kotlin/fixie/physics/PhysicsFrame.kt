@@ -53,20 +53,24 @@ fun main() {
     val spawnPlayer = EntitySpawnRequest(x = 0.m, y = 2.m, properties = playerProperties)
     scene.spawnEntity(spawnPlayer)
 
+    val simpleMaterial = TileProperties()
+    scene.addTile(TilePlaceRequest(LineSegment(-20.m, 0.m, 100.m, 0.m), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(2.m, 0.3.m, 3.m, 0.m), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(7.m, 0.m, 1.m, 4.m), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(-1.m, 0.m, 0.m, 2.m), simpleMaterial))
+
+    scene.update(0)
+
+    scene.spawnEntity(EntitySpawnRequest(x = 1.m, y = 2.m, properties = EntityProperties(radius = 100.mm)))
+
     val rng = Random.Default
-    for (counter in 0 until 20) {
+    for (counter in 0 until 10) {
         scene.spawnEntity(EntitySpawnRequest(
             x = rng.nextInt(-10_000, 10_000).mm,
             y = rng.nextInt(-10_000, 10_000).mm,
             properties = EntityProperties(radius = rng.nextInt(20, 300).mm)
         ))
     }
-
-    val simpleMaterial = TileProperties()
-    scene.addTile(TilePlaceRequest(LineSegment(-20.m, 0.m, 100.m, 0.m), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(2.m, 0.3.m, 3.m, 0.m), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(7.m, 0.m, 1.m, 4.m), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(-1.m, 0.m, 0.m, 2.m), simpleMaterial))
 
     val frame = PhysicsFrame(scene, spawnPlayer)
     frame.setSize(1200, 800)

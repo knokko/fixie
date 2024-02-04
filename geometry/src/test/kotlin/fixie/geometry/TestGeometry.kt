@@ -2,19 +2,21 @@ package fixie.geometry
 
 import fixie.*
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 class TestGeometry {
 
-    private fun assertEquals(expected: Displacement, actual: Displacement) {
+    private fun assertEquals(expected: Displacement, actual: Displacement, threshold: Displacement = 0.02.mm) {
         val difference = expected - actual
-        if (difference < -0.02.mm || difference > 0.02.mm) Assertions.assertEquals(expected, actual)
+        if (difference < -threshold || difference > threshold) Assertions.assertEquals(expected, actual)
     }
 
-    private fun assertEquals(expectedPoint: Position, actual: Position) {
-        this.assertEquals(expectedPoint.x, actual.x)
-        this.assertEquals(expectedPoint.y, actual.y)
+    private fun assertEquals(expectedPoint: Position, actual: Position, threshold: Displacement = 0.02.mm) {
+        this.assertEquals(expectedPoint.x, actual.x, threshold)
+        this.assertEquals(expectedPoint.y, actual.y, threshold)
     }
 
     @Test
@@ -207,5 +209,29 @@ class TestGeometry {
         if (wasHit) {
             println("Hit line at $pointOnLine, with center at $circlePosition")
         } else println("miss")
+    }
+
+    @Test
+    fun testSweepCircleToCircleRegression() {
+        val point = Position.origin()
+        assertTrue(Geometry.sweepCircleToCircle(100.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
+        this.assertEquals(Position(105.m, 100.m), point, 0.2.mm)
+
+        assertTrue(Geometry.sweepCircleToCircle(96.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
+        this.assertEquals(Position(105.m, 100.m), point, 0.2.mm)
+
+        assertFalse(Geometry.sweepCircleToCircle(112.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
+        assertFalse(Geometry.sweepCircleToCircle(115.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
+
+        assertTrue(Geometry.sweepCircleToCircle(0.79.m, 101.1.mm, 100.mm, 30.mm, -1.mm, 1.m, 0.1.m, 100.mm, point))
+    }
+
+    @Test
+    fun testClosestPointOnLineToPointRegression() {
+        val point = Position.origin()
+        Geometry.findClosestPointOnLineToPoint(
+            1.m, 100.02.mm, 799.99.mm, 100.14.mm, 0.05.mm, -0.1.mm, point
+        )
+        assertTrue(sqrt((point.x - 1.m) * (point.x - 1.m) + (point.y - 100.mm) * (point.y - 100.mm)) < 199.mm)
     }
 }

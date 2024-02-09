@@ -1,5 +1,10 @@
 package fixie.physics
 
+import com.github.knokko.profiler.SampleProfiler
+import com.github.knokko.profiler.storage.FrequencyThreadStorage
+import com.github.knokko.profiler.storage.SampleStorage
+import com.github.knokko.update.UpdateCounter
+import com.github.knokko.update.UpdateLoop
 import fixie.*
 import fixie.geometry.LineSegment
 import fixie.geometry.Position
@@ -10,8 +15,8 @@ import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
 import java.awt.event.KeyListener
 import java.lang.RuntimeException
-import java.lang.Thread.sleep
 import javax.swing.JFrame
+import javax.swing.JPanel
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -72,26 +77,50 @@ fun main() {
         ))
     }
 
-    val frame = PhysicsFrame(scene, spawnPlayer)
+    val panel = PhysicsPanel(scene, spawnPlayer)
+    val frame = JFrame()
     frame.setSize(1200, 800)
     frame.isVisible = true
     frame.defaultCloseOperation = DISPOSE_ON_CLOSE
     frame.addKeyListener(PlayerControls())
+    frame.add(panel)
 
-    while (frame.isDisplayable) {
+    val updateCounter = UpdateCounter()
+    Thread(UpdateLoop({ updateLoop ->
+        updateCounter.increment()
         scene.update(20)
+        if (!frame.isDisplayable) updateLoop.stop()
+        if (Math.random() < 0.01) println("UPS is ${updateCounter.value}")
+    }, 20_000_000L)).start()
+
+    UpdateLoop({ renderLoop ->
         frame.repaint()
-        sleep(20)
-    }
+        if (!frame.isDisplayable) {
+            renderLoop.stop()
+            //panel.storage.getThreadStorage(panel.threadID).print(System.out, 60, 1.0)
+        }
+    }, 16_666_667L).start()
 }
 
-class PhysicsFrame(private val scene: Scene, private val player: EntitySpawnRequest) : JFrame() {
+class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequest) : JPanel() {
 
     private val sceneQuery = SceneQuery()
+    private val counter = UpdateCounter()
+
+    val storage: SampleStorage<FrequencyThreadStorage> = SampleStorage.frequency()
+    private val profiler = SampleProfiler(storage)
+    var threadID = 0L
+
+    init {
+        profiler.sleepTime = 0
+        profiler.start()
+    }
 
     override fun paint(g: Graphics?) {
-        super.paint(g)
-
+        profiler.isPaused = false
+        threadID = Thread.currentThread().id
+        val startTime = System.nanoTime()
+        counter.increment()
         val width = this.width
         val height = this.height
         g!!.color = Color.WHITE
@@ -133,6 +162,12 @@ class PhysicsFrame(private val scene: Scene, private val player: EntitySpawnRequ
             g.fillOval(minX, minY, maxX - minX, maxY - minY)
         }
 
+        if (Math.random() < 0.01) {
+            println("FPS is ${counter.value}")
+            println("Took ${(System.nanoTime() - startTime) / 1000}us")
+        }
+
+        profiler.isPaused = true
         Toolkit.getDefaultToolkit().sync()
     }
 }

@@ -212,6 +212,22 @@ class TestGeometry {
     }
 
     @Test
+    fun testSweepCircleToLineSegmentRegression() {
+        val circlePosition = Position.origin()
+        val pointOnLine = Position.origin()
+        assertTrue(Geometry.sweepCircleToLineSegment(
+            Displacement.raw(693953), Displacement.raw(11506),
+            Displacement.raw(23874), Displacement.raw(288),
+            Displacement.raw(4600),
+            Displacement.raw(700000), Displacement.raw(0),
+            Displacement.raw(100000), Displacement.raw(400000),
+            circlePosition, pointOnLine
+        ))
+
+        assertEquals(Position(6.98.m, 115.mm), circlePosition, 0.03.m)
+    }
+
+    @Test
     fun testSweepCircleToCircleRegression() {
         val point = Position.origin()
         assertTrue(Geometry.sweepCircleToCircle(100.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
@@ -224,6 +240,8 @@ class TestGeometry {
         assertFalse(Geometry.sweepCircleToCircle(115.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
 
         assertTrue(Geometry.sweepCircleToCircle(0.79.m, 101.1.mm, 100.mm, 30.mm, -1.mm, 1.m, 0.1.m, 100.mm, point))
+
+        assertFalse(Geometry.sweepCircleToCircle(5.92579.m, 0.10908.m, 0.109.m, -0.00191.m, 0.51.mm, 5.65642.m, 0.32833.m, 0.213.m, point))
     }
 
     @Test
@@ -233,5 +251,15 @@ class TestGeometry {
             1.m, 100.02.mm, 799.99.mm, 100.14.mm, 0.05.mm, -0.1.mm, point
         )
         assertTrue(sqrt((point.x - 1.m) * (point.x - 1.m) + (point.y - 100.mm) * (point.y - 100.mm)) < 199.mm)
+
+        // p is (5.65642m, 0.32833m) and l is (5.92579m, 0.10908m) and ld is (-0.00191m, 5.1E-4m)
+        Geometry.findClosestPointOnLineToPoint(
+            Displacement.raw(565642), Displacement.raw(32833),
+            Displacement.raw(592579), Displacement.raw(10908),
+            Displacement.raw(-191), Displacement.raw(51),
+            point
+        )
+
+        assertEquals(Position(5.62.m, 0.2.m), point, 10.mm)
     }
 }

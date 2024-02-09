@@ -6,6 +6,14 @@ object Geometry {
 
     fun sweepCircleToLineSegment(
         cx: Displacement, cy: Displacement, cvx: Displacement, cvy: Displacement, cr: Displacement,
+        line: LineSegment, outCirclePosition: Position, outPointOnLine: Position
+    ) = sweepCircleToLineSegment(
+        cx, cy, cvx, cvy, cr, line.startX, line.startY,
+        line.lengthX, line.lengthY, outCirclePosition, outPointOnLine
+    )
+
+    fun sweepCircleToLineSegment(
+        cx: Displacement, cy: Displacement, cvx: Displacement, cvy: Displacement, cr: Displacement,
         lsx: Displacement, lsy: Displacement, lslx: Displacement, lsly: Displacement,
         outCirclePosition: Position, outPointOnLine: Position
     ): Boolean {
@@ -28,7 +36,10 @@ object Geometry {
         var signumCounter = 0
         var largestSafeMovement = 0.m
         var largestSafeDistance = distanceBetweenPointAndLineSegment(cx, cy, lsx, lsy, lslx, lsly, outPointOnLine)
-        var smallestUnsafeMovement = totalMovement + (fullDistance - cr) * 0.99
+
+        val dix = outCirclePosition.x - cx
+        val diy = outCirclePosition.y - cy
+        var smallestUnsafeMovement = sqrt(dix * dix + diy * diy)
         var smallestUnsafeDistance = fullDistance
         var candidateMovement = smallestUnsafeMovement
         while ((smallestUnsafeMovement - largestSafeMovement) > 0.1.mm && largestSafeDistance - cr > 0.1.mm) {
@@ -88,7 +99,7 @@ object Geometry {
     ): Boolean {
         val r = r1 + r2
         val originalDistance = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
-        if (originalDistance <= r1 + r2) throw IllegalArgumentException("Circle at ($x1, $y1) is already inside ($x2, $y2)")
+        if (originalDistance <= r1 + r2) throw IllegalArgumentException("Circle at ($x1, $y1) with r=$r1 is already inside ($x2, $y2) with r=$r2")
 
         findClosestPointOnLineToPoint(x2, y2, x1, y1, vx, vy, outPosition)
 
@@ -97,15 +108,19 @@ object Geometry {
 
         val dx = outPosition.x - x1
         val dy = outPosition.y - y1
-        val directionCheck = (dx * vx + dy * vy).raw
-        if (directionCheck < 0) return false
+
+        if (abs(vx) >= abs(vy)) {
+            if ((vx >= 0.m) != (dx >= 0.m)) return false
+        } else {
+            if ((vy >= 0.m) != (dy >= 0.m)) return false
+        }
 
         val idealX = x1 + vx
         val idealY = y1 + vy
         val idealDistance = sqrt(vx * vx + vy * vy)
 
         val blockedDistance = sqrt(r * r - minDistance * minDistance)
-        val maxDistance = sqrt((x1 - outPosition.x) * (x1 - outPosition.x) + (y1 - outPosition.y) * (y1 - outPosition.y))
+        val maxDistance = sqrt(dx * dx + dy * dy)
         var maxMoveDistance = maxDistance - blockedDistance
         if (maxMoveDistance <= 0.m) {
             outPosition.x = x1
@@ -330,8 +345,8 @@ object Geometry {
         val plusX = if (aldx > 100.m || (absNumerator > 100.m && aldx > 1.m)) numerator / (denominator / ldx) else (ldx * numerator.value) / denominator.value
         val plusY = if (aldy > 100.m || (absNumerator > 100.m && aldy > 1.m)) numerator / (denominator / ldy) else (ldy * numerator.value) / denominator.value
 
-        outPointOnLine.x = lx + plusX / factor
-        outPointOnLine.y = ly + plusY / factor
+        outPointOnLine.x = lx + plusX
+        outPointOnLine.y = ly + plusY
     }
 
     private fun distanceBetweenPointAndLineSegment(

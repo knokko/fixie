@@ -151,6 +151,7 @@ class Scene {
                 request.id = id
                 request.processed = true
             }
+            confirmedTiles.clear()
 
             updateThread = null
         }
@@ -186,8 +187,7 @@ class Scene {
         for (tile in tiles) {
             if (Geometry.sweepCircleToLineSegment(
                 position.x, position.y, deltaX, deltaY, entity.properties.radius,
-                tile.collider.startX, tile.collider.startY, tile.collider.lengthX, tile.collider.lengthY,
-                entityIntersection, tileIntersection
+                tile.collider, entityIntersection, tileIntersection
             )) {
                 deltaX = entityIntersection.x - position.x
                 deltaY = entityIntersection.y - position.y
@@ -234,8 +234,7 @@ class Scene {
             otherEntityIndex += 1
         }
 
-        position.x += deltaX
-        position.y += deltaY
+        moveSafely(entity, position, deltaX, deltaY)
 
         if (numIntersections > 5) numIntersections = 5
 
@@ -282,8 +281,7 @@ class Scene {
             for (tile in tiles) {
                 if (Geometry.sweepCircleToLineSegment(
                         position.x, position.y, deltaX, deltaY, entity.properties.radius,
-                        tile.collider.startX, tile.collider.startY, tile.collider.lengthX, tile.collider.lengthY,
-                        entityIntersection, tileIntersection
+                        tile.collider, entityIntersection, tileIntersection
                     )) {
                     deltaX = entityIntersection.x - position.x
                     deltaY = entityIntersection.y - position.y
@@ -303,9 +301,35 @@ class Scene {
                 otherEntityIndex += 1
             }
 
-            position.x += deltaX
-            position.y += deltaY
+            moveSafely(entity, position, deltaX, deltaY)
         }
+    }
+
+    private fun moveSafely(entity: Entity, position: Position, deltaX: Displacement, deltaY: Displacement) {
+        var otherEntityIndex = 0
+        for (other in entities) {
+            if (other != entity) {
+                val dx = position.x + deltaX - entityPositions[otherEntityIndex].x
+                val dy = position.y + deltaY - entityPositions[otherEntityIndex].y
+                if (sqrt(dx * dx + dy * dy) <= entity.properties.radius + other.properties.radius) {
+                    println("intervene entity")
+                    return
+                }
+            }
+            otherEntityIndex += 1
+        }
+
+        for (tile in tiles) {
+            if (Geometry.distanceBetweenPointAndLineSegment(
+                position.x + deltaX, position.y + deltaY, tile.collider, tileIntersection
+            ) <= entity.properties.radius) {
+                println("intervene tile")
+                return
+            }
+        }
+
+        position.x += deltaX
+        position.y += deltaY
     }
 
     private fun updateEntities() {

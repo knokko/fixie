@@ -154,6 +154,10 @@ class Scene {
             }
             confirmedTiles.clear()
 
+            if (entities.removeIf { abs(it.position.x) > 10.km || abs(it.position.y) > 10.km }) {
+                println("destroyed an entity")
+            }
+
             updateThread = null
         }
     }
@@ -274,7 +278,7 @@ class Scene {
             }
         }
 
-        if (numIntersections > 0) {
+        if (numIntersections > 0 && originalDelta > 0.1.mm) {
             val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
             val remainingBudget = 1 - finalDelta / originalDelta
             deltaX = remainingBudget * velocity.x * stepDuration

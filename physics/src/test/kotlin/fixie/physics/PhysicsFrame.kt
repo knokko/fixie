@@ -20,6 +20,8 @@ import javax.swing.JPanel
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 fun main() {
     var moveLeft = false
@@ -46,10 +48,10 @@ fun main() {
     val playerProperties = EntityProperties(
         radius = 0.1.m,
         updateFunction = { _, velocity ->
-            if (moveLeft) velocity.x -= 100.mm
-            if (moveRight) velocity.x += 100.mm
+            if (moveLeft) velocity.x -= 0.02.mps
+            if (moveRight) velocity.x += 0.02.mps
             if (shouldJump) {
-                velocity.y += 4.m
+                velocity.y += 4.mps
                 shouldJump = false
             }
         }
@@ -64,7 +66,7 @@ fun main() {
     scene.addTile(TilePlaceRequest(LineSegment(7.m, 0.m, 1.m, 4.m), simpleMaterial))
     scene.addTile(TilePlaceRequest(LineSegment(-1.m, 0.m, 0.m, 2.m), simpleMaterial))
 
-    scene.update(0)
+    scene.update(Duration.ZERO)
 
     scene.spawnEntity(EntitySpawnRequest(x = 1.m, y = 2.m, properties = EntityProperties(radius = 100.mm)))
 
@@ -88,7 +90,7 @@ fun main() {
     val updateCounter = UpdateCounter()
     Thread(UpdateLoop({ updateLoop ->
         updateCounter.increment()
-        scene.update(20)
+        scene.update(20.milliseconds)
         if (!frame.isDisplayable) updateLoop.stop()
         if (Math.random() < 0.01) println("UPS is ${updateCounter.value}")
     }, 20_000_000L)).start()

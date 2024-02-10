@@ -1,6 +1,7 @@
 package fixie.generator
 
 import fixie.DistanceUnit
+import fixie.SpeedUnit
 import java.io.File
 import java.io.PrintWriter
 import java.math.BigInteger
@@ -141,6 +142,25 @@ fun main() {
         displayUnit = DistanceUnit.METER,
         createNumberExtensions = true
     ))
+    generate(SpeedClass(
+        className = "Speed",
+        number = fixDist,
+        oneUnit = SpeedUnit.METERS_PER_SECOND,
+        displayUnit = SpeedUnit.KILOMETERS_PER_HOUR,
+        createNumberExtensions = true
+    ))
+}
+
+private fun generate(speed: SpeedClass) {
+    val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${speed.className}.kt"))
+    SpeedClassGenerator(writer, speed).generate()
+    writer.flush()
+    writer.close()
+
+    val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${speed.className}.kt"))
+    SpeedTestsGenerator(testWriter, speed).generate()
+    testWriter.flush()
+    testWriter.close()
 }
 
 private fun generate(displacement: DisplacementClass) {

@@ -6,13 +6,14 @@ import fixie.geometry.LineSegment
 import fixie.geometry.Position
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 class Scene {
 
-    // Duration of 1 physics step/tick, in milliseconds
-    // TODO Maybe use fixed-point duration for this?
-    private val stepDuration = 10L
-    private var remainingTime = 0L
+    private val stepDuration = 10.milliseconds
+    private var remainingTime = 0.milliseconds
 
     private var updateThread: Thread? = null
 
@@ -178,10 +179,11 @@ class Scene {
     private fun updateEntity(entity: Entity, position: Position, velocity: Velocity) {
         entity.properties.updateFunction?.invoke(position, velocity)
 
-        var deltaX = velocity.x * stepDuration / 1000
-        var deltaY = velocity.y * stepDuration / 1000
+        var deltaX = velocity.x * stepDuration
+        var deltaY = velocity.y * stepDuration
         val originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
-        velocity.y -= (9.8 * stepDuration).mm
+        // TODO Acceleration?
+        velocity.y -= 9.8.mps * stepDuration.toDouble(DurationUnit.SECONDS)
 
         var numIntersections = 0
         for (tile in tiles) {
@@ -275,8 +277,8 @@ class Scene {
         if (numIntersections > 0) {
             val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
             val remainingBudget = 1 - finalDelta / originalDelta
-            deltaX = remainingBudget * velocity.x * stepDuration / 1000
-            deltaY = remainingBudget * velocity.y * stepDuration / 1000
+            deltaX = remainingBudget * velocity.x * stepDuration
+            deltaY = remainingBudget * velocity.y * stepDuration
 
             for (tile in tiles) {
                 if (Geometry.sweepCircleToLineSegment(
@@ -340,9 +342,9 @@ class Scene {
         }
     }
 
-    fun update(millis: Long) {
+    fun update(duration: Duration) {
         copyStateBeforeUpdate()
-        remainingTime += millis
+        remainingTime += duration
 
         while (remainingTime >= stepDuration) {
             updateEntities()

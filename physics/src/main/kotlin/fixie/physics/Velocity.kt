@@ -3,16 +3,14 @@ package fixie.physics
 import fixie.*
 
 class Velocity(
-    /** Velocity in the x-direction, per second */
-    var x: Displacement,
-    /** Velocity in the y-direction, per second */
-    var y: Displacement
+    var x: Speed,
+    var y: Speed
 ) {
 
-    override fun toString() = "V($x/s, $y/s)"
+    override fun toString() = "V($x, $y)"
 
     companion object {
 
-        fun zero() = Velocity(0.m, 0.m)
+        fun zero() = Velocity(0.mps, 0.mps)
     }
 }

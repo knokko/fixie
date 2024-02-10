@@ -2,6 +2,7 @@ package fixie
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import kotlin.time.Duration.Companion.seconds
 
 class TestDisplacement {
 
@@ -59,6 +60,7 @@ class TestDisplacement {
 		assertEquals(Displacement.raw(20), Displacement.raw(50) / 2.5f)
 		assertEquals(Displacement.raw(20), Displacement.raw(50) / 2.5)
 		assertEquals(Displacement.raw(-43), -Displacement.raw(43))
+		assertEquals(2.0, (10 * Displacement.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND))
 	}
 
 	@Test

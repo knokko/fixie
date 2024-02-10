@@ -26,6 +26,7 @@ class DisplacementTestsGenerator(
         writer.println()
         writer.println("import org.junit.jupiter.api.Test")
         writer.println("import org.junit.jupiter.api.Assertions.*")
+        writer.println("import kotlin.time.Duration.Companion.seconds")
         writer.println()
         writer.println("class Test${displacement.className} {")
     }
@@ -103,6 +104,7 @@ class DisplacementTestsGenerator(
         if (displacement.number.internalType.signed) {
             writer.println("\t\tassertEquals(${displacement.className}.raw(-43), -${displacement.className}.raw(43))")
         }
+        writer.println("\t\tassertEquals(2.0, (10 * ${displacement.className}.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND))")
         writer.println("\t}")
     }
 

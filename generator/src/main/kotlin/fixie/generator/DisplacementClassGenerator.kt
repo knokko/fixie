@@ -32,6 +32,8 @@ class DisplacementClassGenerator(
         writer.println("package fixie")
         writer.println()
         writer.println("import kotlin.math.sqrt")
+        writer.println("import kotlin.time.Duration")
+        writer.println("import kotlin.time.DurationUnit")
         writer.println()
         writer.println("@JvmInline")
         writer.println("value class ${displacement.className} internal constructor(val value: ${displacement.number.className}) " +
@@ -91,6 +93,8 @@ class DisplacementClassGenerator(
         writer.println("\toperator fun times(right: ${displacement.className}) = Area(this.value.toDouble() * right.value.toDouble())")
         next()
         writer.println("\toperator fun div(right: ${displacement.className}) = this.value / right.value")
+        next()
+        writer.println("\toperator fun div(right: Duration) = (this.toDouble(DistanceUnit.METER) / right.toDouble(DurationUnit.SECONDS)).mps")
     }
 
     private fun generateCompanionObject() {

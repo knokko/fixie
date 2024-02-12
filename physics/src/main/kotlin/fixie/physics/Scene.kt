@@ -176,9 +176,20 @@ class Scene {
         var friction = FixDisplacement.ZERO
         var otherVelocity: Velocity? = null
         var otherRadius = 0.m
+
+        fun validate() {
+            val dx = otherX - myX
+            val dy = otherY - myY
+            if (dx * dx + dy * dy > radius * (radius * 1.1)) {
+                println("invalid intersection at ($myX, $myY) and ($otherX, $otherY)")
+                throw RuntimeException("distance between points is ($dx, $dy): ${sqrt(dx * dx + dy * dy)} but radius is $radius")
+            }
+        }
     }
 
     private val intersections = Array(5) { Intersection() }
+    private val interestingTiles = mutableListOf<Tile>()
+    private val interestingEntities = mutableListOf<Int>()
 
     private fun updateEntity(entity: Entity, position: Position, velocity: Velocity) {
         entity.properties.updateFunction?.invoke(position, velocity)
@@ -189,8 +200,40 @@ class Scene {
         // TODO Acceleration?
         velocity.y -= 9.8.mps * stepDuration.toDouble(DurationUnit.SECONDS)
 
-        var numIntersections = 0
+        val safeRadius = 2 * entity.properties.radius + 2 * originalDelta
+        val safeMinX = position.x - safeRadius
+        val safeMinY = position.y - safeRadius
+        val safeMaxX = position.x + safeRadius
+        val safeMaxY = position.y + safeRadius
         for (tile in tiles) {
+            val endX = tile.collider.startX + tile.collider.lengthX
+            val endY = tile.collider.startY + tile.collider.lengthY
+            val minTileX = min(tile.collider.startX, endX)
+            val minTileY = min(tile.collider.startY, endY)
+            val maxTileX = max(tile.collider.startX, endX)
+            val maxTileY = max(tile.collider.startY, endY)
+            if (safeMinX <= maxTileX && safeMinY <= maxTileY && safeMaxX >= minTileX && safeMaxY >= minTileY) {
+                if (Geometry.distanceBetweenPointAndLineSegment(position.x, position.y, tile.collider, tileIntersection) < safeRadius) {
+                    interestingTiles.add(tile)
+                }
+            }
+        }
+
+        var candidateEntityIndex = 0
+        for (other in entities) {
+            if (other != entity) {
+                val otherPosition = entityPositions[candidateEntityIndex]
+                val dx = position.x - otherPosition.x
+                val dy = position.y - otherPosition.y
+                val squaredDistance = dx * dx + dy * dy
+                val safeSquaredRadius = (safeRadius + other.properties.radius) * (safeRadius + other.properties.radius)
+                if (squaredDistance < safeSquaredRadius) interestingEntities.add(candidateEntityIndex)
+            }
+            candidateEntityIndex += 1
+        }
+
+        var numIntersections = 0
+        for (tile in interestingTiles) {
             if (Geometry.sweepCircleToLineSegment(
                 position.x, position.y, deltaX, deltaY, entity.properties.radius,
                 tile.collider, entityIntersection, tileIntersection
@@ -209,14 +252,16 @@ class Scene {
                 intersection.friction = tile.properties.frictionFactor
                 intersection.otherVelocity = null
 
+                intersection.validate()
+
                 numIntersections += 1
             }
         }
 
-        var otherEntityIndex = 0
-        for (other in entities) {
+        for (otherEntityIndex in interestingEntities) {
+            val other = entities[otherEntityIndex]
             val otherPosition = entityPositions[otherEntityIndex]
-            if (other != entity && Geometry.sweepCircleToCircle(
+            if (Geometry.sweepCircleToCircle(
                 position.x, position.y, entity.properties.radius, deltaX, deltaY,
                 otherPosition.x, otherPosition.y, other.properties.radius, entityIntersection
             )) {
@@ -235,9 +280,10 @@ class Scene {
                 intersection.otherVelocity = entityVelocities[otherEntityIndex]
                 intersection.otherRadius = other.properties.radius
 
+                intersection.validate()
+
                 numIntersections += 1
             }
-            otherEntityIndex += 1
         }
 
         moveSafely(entity, position, deltaX, deltaY)
@@ -257,6 +303,10 @@ class Scene {
             val normalX = (intersection.myX - intersection.otherX) / intersection.radius
             val normalY = (intersection.myY - intersection.otherY) / intersection.radius
 
+            if (normalX * normalX + normalY * normalY > 1.1) {
+                throw RuntimeException("No no")
+            }
+
             val bounceConstant = max(FixDisplacement.from(1.1),
                 entity.properties.bounceFactor + intersection.bounce + 1)
             val frictionConstant = 0.02 * entity.properties.frictionFactor * intersection.friction
@@ -265,6 +315,9 @@ class Scene {
             val frictionFactor = frictionConstant * (normalY * velocity.x - normalX * velocity.y)
 
             val impulseX = opposingFactor * normalX + frictionFactor * normalY
+            if (opposingFactor > 1.kmps) {
+                println("uh ooh: ${normalX * normalX + normalY * normalY}")
+            }
             val impulseY = opposingFactor * normalY - frictionFactor * normalX
 
             velocity.x -= impulseX
@@ -284,7 +337,7 @@ class Scene {
             deltaX = remainingBudget * velocity.x * stepDuration
             deltaY = remainingBudget * velocity.y * stepDuration
 
-            for (tile in tiles) {
+            for (tile in interestingTiles) {
                 if (Geometry.sweepCircleToLineSegment(
                         position.x, position.y, deltaX, deltaY, entity.properties.radius,
                         tile.collider, entityIntersection, tileIntersection
@@ -294,9 +347,9 @@ class Scene {
                 }
             }
 
-            otherEntityIndex = 0
-            for (other in entities) {
-                if (other != entity && Geometry.sweepCircleToCircle(
+            for (otherEntityIndex in interestingEntities) {
+                val other = entities[otherEntityIndex]
+                if (Geometry.sweepCircleToCircle(
                         position.x, position.y, entity.properties.radius, deltaX, deltaY,
                         entityPositions[otherEntityIndex].x, entityPositions[otherEntityIndex].y,
                         other.properties.radius, entityIntersection
@@ -304,28 +357,27 @@ class Scene {
                     deltaX = entityIntersection.x - position.x
                     deltaY = entityIntersection.y - position.y
                 }
-                otherEntityIndex += 1
             }
 
             moveSafely(entity, position, deltaX, deltaY)
         }
+
+        interestingTiles.clear()
+        interestingEntities.clear()
     }
 
     private fun moveSafely(entity: Entity, position: Position, deltaX: Displacement, deltaY: Displacement) {
-        var otherEntityIndex = 0
-        for (other in entities) {
-            if (other != entity) {
-                val dx = position.x + deltaX - entityPositions[otherEntityIndex].x
-                val dy = position.y + deltaY - entityPositions[otherEntityIndex].y
-                if (sqrt(dx * dx + dy * dy) <= entity.properties.radius + other.properties.radius) {
-                    println("intervene entity")
-                    return
-                }
+        for (otherEntityIndex in interestingEntities) {
+            val other = entities[otherEntityIndex]
+            val dx = position.x + deltaX - entityPositions[otherEntityIndex].x
+            val dy = position.y + deltaY - entityPositions[otherEntityIndex].y
+            if (sqrt(dx * dx + dy * dy) <= entity.properties.radius + other.properties.radius) {
+                println("intervene entity")
+                return
             }
-            otherEntityIndex += 1
         }
 
-        for (tile in tiles) {
+        for (tile in interestingTiles) {
             if (Geometry.distanceBetweenPointAndLineSegment(
                 position.x + deltaX, position.y + deltaY, tile.collider, tileIntersection
             ) <= entity.properties.radius) {

@@ -48,8 +48,8 @@ fun main() {
     val playerProperties = EntityProperties(
         radius = 0.1.m,
         updateFunction = { _, velocity ->
-            if (moveLeft) velocity.x -= 0.02.mps
-            if (moveRight) velocity.x += 0.02.mps
+            if (moveLeft) velocity.x -= 0.05.mps
+            if (moveRight) velocity.x += 0.05.mps
             if (shouldJump) {
                 velocity.y += 4.mps
                 shouldJump = false
@@ -59,19 +59,38 @@ fun main() {
 
     val spawnPlayer = EntitySpawnRequest(x = 0.m, y = 2.m, properties = playerProperties)
     scene.spawnEntity(spawnPlayer)
-
-    val simpleMaterial = TileProperties()
-    scene.addTile(TilePlaceRequest(LineSegment(-20.m, 0.m, 100.m, 0.m), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(2.m, 0.3.m, 3.m, 0.m), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(7.m, 0.m, 1.m, 4.m), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(-1.m, 0.m, 0.m, 2.m), simpleMaterial))
-
     scene.update(Duration.ZERO)
 
-    scene.spawnEntity(EntitySpawnRequest(x = 1.m, y = 2.m, properties = EntityProperties(radius = 100.mm)))
+    val rng = Random(1234)
+    val simpleMaterial = TileProperties()
 
-    val rng = Random.Default
-    for (counter in 0 until 10) {
+    for (counter in 0 until 10000) {
+        scene.addTile(TilePlaceRequest(LineSegment(
+            startX = rng.nextInt(-100_000, 100_000).mm,
+            startY = rng.nextInt(-100_000, 100_000).mm,
+            lengthX = rng.nextInt(100, 1_000).mm,
+            lengthY = rng.nextInt(100, 1_000).mm,
+        ), simpleMaterial))
+    }
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = -100.m, startY = -100.m,
+        lengthX = 200.m, lengthY = 0.m
+    ), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = -100.m, startY = -100.m,
+        lengthX = 0.m, lengthY = 2000.m
+    ), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = -100.m, startY = 100.m,
+        lengthX = 200.m, lengthY = 0.m
+    ), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = 100.m, startY = -100.m,
+        lengthX = 0.m, lengthY = 2000.m
+    ), simpleMaterial))
+    scene.update(Duration.ZERO)
+
+    for (counter in 0 until 100) {
         scene.spawnEntity(EntitySpawnRequest(
             x = rng.nextInt(-10_000, 10_000).mm,
             y = rng.nextInt(-10_000, 10_000).mm,
@@ -115,7 +134,7 @@ class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequ
 
     init {
         profiler.sleepTime = 0
-        profiler.start()
+        //profiler.start()
     }
 
     override fun paint(g: Graphics?) {
@@ -169,7 +188,7 @@ class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequ
             println("Took ${(System.nanoTime() - startTime) / 1000}us")
         }
 
-        profiler.isPaused = true
+        //profiler.isPaused = true
         Toolkit.getDefaultToolkit().sync()
     }
 }

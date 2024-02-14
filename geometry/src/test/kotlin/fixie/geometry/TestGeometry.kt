@@ -198,17 +198,25 @@ class TestGeometry {
     }
 
     @Test
-    fun testSweepCircleToLineSegment() {
-        // TODO This needs some actual testing
-        val circlePosition = Position.origin()
+    fun testDistanceBetweenPointAndLineSegmentRegression() {
         val pointOnLine = Position.origin()
-        val wasHit = Geometry.sweepCircleToLineSegment(
-            2.m, 10.m, 3.m, -10.m, 500.mm, 5.m, 0.m, 200.m, 0.m, circlePosition, pointOnLine
-        )
+        assertEquals(18.06.mm, Geometry.distanceBetweenPointAndLineSegment(
+            -7.83224.m, 3.45939.m, -65.174.m, -25.146.m, 78.468.m, 39.172.m, pointOnLine
+        ))
+        assertEquals(Position(-7.84057.m, 3.47541.m), pointOnLine, 0.3.mm)
+    }
 
-        if (wasHit) {
-            println("Hit line at $pointOnLine, with center at $circlePosition")
-        } else println("miss")
+    @Test
+    fun testDistanceBetweenLineSegmentsRegression() {
+        val point1 = Position.origin()
+        val point2 = Position.origin()
+
+        assertEquals(18.05.mm, Geometry.distanceBetweenLineSegments(
+            -6.397.m, 1.27852.m, -1.43524.m, 2.18087.m, point1,
+            -65.174.m, -25.146.m, 78.468.m, 39.172.m, point2
+        ))
+        assertEquals(Position(-7.83224.m, 3.45939.m), point1)
+        assertEquals(Position(-7.84031.m, 3.47554.m), point2)
     }
 
     @Test
@@ -225,6 +233,17 @@ class TestGeometry {
         ))
 
         assertEquals(Position(6.98.m, 115.mm), circlePosition, 0.03.m)
+
+        val pointX = -6.397.m
+        val pointY = 1.27852.m
+        val deltaX = -1.43524.m
+        val deltaY = 2.18087.m
+        assertTrue(Geometry.sweepCircleToLineSegment(
+            pointX, pointY, deltaX, deltaY, 0.02.m,
+            -65.174.m, -25.146.m, 78.468.m, 39.172.m,
+            circlePosition, pointOnLine
+        ))
+        assertEquals(Position(pointX + deltaX * 0.99925, pointY + deltaY * 0.99925), circlePosition)
     }
 
     @Test

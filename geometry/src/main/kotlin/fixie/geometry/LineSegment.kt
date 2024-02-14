@@ -11,4 +11,5 @@ class LineSegment(
     val lengthX: Displacement,
     val lengthY: Displacement
 ) {
+    override fun toString() = "LineSegment($startX, $startY, $lengthX, $lengthY)"
 }

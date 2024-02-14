@@ -43,9 +43,9 @@ object Geometry {
         var smallestUnsafeDistance = fullDistance
         var candidateMovement = smallestUnsafeMovement
         while ((smallestUnsafeMovement - largestSafeMovement) > 0.1.mm && largestSafeDistance - cr > 0.1.mm) {
-            val movementFactor = candidateMovement / totalMovement
-            val newX = cx + movementFactor * cvx
-            val newY = cy + movementFactor * cvy
+            val movementFactor = candidateMovement.toDouble(DistanceUnit.METER) / totalMovement.toDouble(DistanceUnit.METER)
+            val newX = cx + (movementFactor * cvx.toDouble(DistanceUnit.METER)).m
+            val newY = cy + (movementFactor * cvy.toDouble(DistanceUnit.METER)).m
             val distance = distanceBetweenPointAndLineSegment(
                 newX, newY, lsx, lsy, lslx, lsly, outPointOnLine
             )
@@ -83,10 +83,10 @@ object Geometry {
             }
         }
 
-        val movementFactor = largestSafeMovement / totalMovement
+        val movementFactor = largestSafeMovement.toDouble(DistanceUnit.METER) / totalMovement.toDouble(DistanceUnit.METER)
 
-        val newX = cx + movementFactor * cvx
-        val newY = cy + movementFactor * cvy
+        val newX = cx + (movementFactor * cvx.toDouble(DistanceUnit.METER)).m
+        val newY = cy + (movementFactor * cvy.toDouble(DistanceUnit.METER)).m
         outCirclePosition.x = newX
         outCirclePosition.y = newY
         distanceBetweenPointAndLineSegment(newX, newY, lsx, lsy, lslx, lsly, outPointOnLine)
@@ -133,9 +133,9 @@ object Geometry {
         }
 
         do {
-            val movementFactor = maxMoveDistance / idealDistance
-            val testX = x1 + movementFactor * vx
-            val testY = y1 + movementFactor * vy
+            val movementFactor = maxMoveDistance.toDouble(DistanceUnit.METER) / idealDistance.toDouble(DistanceUnit.METER)
+            val testX = x1 + (movementFactor * vx.toDouble(DistanceUnit.METER)).m
+            val testY = y1 + (movementFactor * vy.toDouble(DistanceUnit.METER)).m
             val testDistance = sqrt((testX - x2) * (testX - x2) + (testY - y2) * (testY - y2))
             maxMoveDistance -= 0.03.mm
             outPosition.x = testX
@@ -270,21 +270,13 @@ object Geometry {
 
     fun findClosestPointOnLineToPoint(
         px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
-        ldx1: Displacement, ldy1: Displacement, outPointOnLine: Position
+        ldx: Displacement, ldy: Displacement, outPointOnLine: Position
     ) {
-        if (ldx1 == 0.m && ldy1 == 0.m) {
-            outPointOnLine.x = lx
-            outPointOnLine.y = ly
-            return
-        }
-
-        val aldx = abs(ldx1)
-        val aldy = abs(ldy1)
-
-        val factor = if (aldx < 10.mm && aldy < 10.mm) 10 else 1
-
-        val ldx = factor * ldx1
-        val ldy = factor * ldy1
+        // Place the point position in the origin and convert the rest to double to obtain maximum precision
+        val offsetX = (lx - px).toDouble(DistanceUnit.METER)
+        val offsetY = (ly - py).toDouble(DistanceUnit.METER)
+        val lengthX = ldx.toDouble(DistanceUnit.METER)
+        val lengthY = ldy.toDouble(DistanceUnit.METER)
 
         // First, we need to find the intersection with the line through (px, py) perpendicular to l. Use:
         // - perp(endicular)X = ldy
@@ -295,61 +287,36 @@ object Geometry {
         // (2) py + a * perpY = ly + b * ldy
 
         // Isolating a gives:
-        // (3) a = (lx + b * ldx - px) / perpX
-        // (4) a = (ly + b * ldy - py) / perpY
+        // (3) a = (lx + b * ldx - px) / perpX = (offsetX + b * lengthX) / perpX
+        // (4) a = (ly + b * ldy - py) / perpY = (offsetY + b * lengthY) / perpY
 
         // Combining (3) and (4) gives:
-        // (5) (lx + b * ldx - px) / perpX = (ly + b * ldy - py) / perpY
+        // (5) (offsetX + b * lengthX) / perpX = (offsetY + b * lengthY) / perpY
 
         // Multiplying both sides by perpX * perpY gives:
-        // (6) perpY * (lx + b * ldx - px) = perpX * (ly + b * ldy - py)
+        // (6) perpY * (offsetX + b * lengthX) = perpX * (offsetY + b * lengthY)
 
         // Isolate b...
-        // (7) -b * ldy * perpX + b * ldx * perpY = -lx * perpY + px * perpY + ly * perpX - py * perpX
-        // (8) b * (ldx * perpY - ldy * perpX) = ...
-        // (9) b = ... / (ldx * perpY - ldy * perpX)
+        // (7) b * lengthX * perpY - b * lengthY * perpX = perpX * offsetY - perpY * offsetX
+        // (8) b * (lengthX * perpY - lengthY * perpX) = perpX * offsetY - perpY * offsetX
+        // (9) b = (perpX * offsetY - perpY * offsetX) / (lengthX * perpY - lengthY * perpX)
 
-        // Replace perpX with ldy and perpY with -ldx:
-        // (10) b = (lx * ldx - px * ldx + ly * ldy - py * ldy) / (-ldx * ldx - ldy * ldy)
+        // Replace perpX with lengthY and perpY with -lengthX:
+        // (10) b = (lengthY * offsetY + lengthX * offsetX) / (-lengthX * lengthX - lengthY * lengthY)
 
         // Simplify...
-        // (11) b = ((lx - px) * ldx + (ly - py) * ldy) / (-ldx * ldx - ldy * ldy)
-        // (12) b = ((px - lx) * ldx + (py - ly) * ldy) / (ldx * ldx + ldy * ldy)
+        // (11) b = -(lengthX * offsetX + lengthY * offsetY) / (lengthX * lengthX + lengthY * lengthY)
+        val b = -(lengthX * offsetX + lengthY * offsetY) / (lengthX * lengthX + lengthY * lengthY)
 
-        // Unfortunately, computing ldx * ldx + ldy * ldy often overflows, so we need to be smarter.
-        // To avoid this, we can divide both sides of the equation by ldx or ldy. We will pick
-        // the one with the largest absolute value.
-        val numerator: Displacement
-        val denominator: Displacement
-        if (aldy > aldx) {
-            numerator = (px - lx) * (ldx / ldy) + py - ly
-            denominator = ldx * (ldx / ldy) + ldy
-        } else {
-            numerator = px - lx + (py - ly) * (ldy / ldx)
-            denominator = ldx + ldy * (ldy / ldx)
-        }
+        // The point on the line is given by:
+        // (12) x = lx + ldx * b
+        // (13) y = ly + ldy * b
 
-        // Mathematically, the point on the line is given by:
-        // (13) x = lx + ldx * b
-        // (14) y = ly + ldy * b
-
-        // Basically, there are 3 ways to compute x (and similarly y):
-        // (15) x = lx + ldx * (numerator / denominator)
-        // (16) x = lx + (ldx * numerator) / denominator
-        // (17) x = lx + numerator / (denominator / ldx)
-
-        // Equation (15) can lose significant precision due to the (numerator / denominator) rounding.
-        // Equations (16) and (17) are more precise, unless they overflow.
-
-        val absNumerator = abs(numerator)
-        val plusX = if (aldx > 100.m || (absNumerator > 100.m && aldx > 1.m)) numerator / (denominator / ldx) else (ldx * numerator.value) / denominator.value
-        val plusY = if (aldy > 100.m || (absNumerator > 100.m && aldy > 1.m)) numerator / (denominator / ldy) else (ldy * numerator.value) / denominator.value
-
-        outPointOnLine.x = lx + plusX
-        outPointOnLine.y = ly + plusY
+        outPointOnLine.x = lx + (b * lengthX).m
+        outPointOnLine.y = ly + (b * lengthY).m
     }
 
-    private fun distanceBetweenPointAndLineSegment(
+    internal fun distanceBetweenPointAndLineSegment(
         px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
         ldx: Displacement, ldy: Displacement, outPointOnLine: Position
     ): Displacement {

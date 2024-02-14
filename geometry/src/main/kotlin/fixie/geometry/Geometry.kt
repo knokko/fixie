@@ -78,7 +78,10 @@ object Geometry {
                 // - distanceFactor = (150 - 100) / (150 - 40) = 50 / 110 = 0.45
                 // - candidateMovement = 600 + 0.45 * (800 - 600) = 600 + 0.45 * 200 = 690
                 var distanceFactor = (largestSafeDistance - cr) / (largestSafeDistance - smallestUnsafeDistance)
+
                 distanceFactor *= if (largestSafeDistance - cr > cr - smallestUnsafeDistance) 1.05 else 0.95
+                if (distanceFactor < 0) distanceFactor = FixDisplacement.ZERO
+                if (distanceFactor > 1) distanceFactor = FixDisplacement.ONE
                 candidateMovement = largestSafeMovement + distanceFactor * (smallestUnsafeMovement - largestSafeMovement)
             }
         }

@@ -68,6 +68,6 @@ project(':physics') {
         implementation project(':')
         implementation project(':generated')
         implementation project(':geometry')
-        implementation 'com.github.knokko.update-loop:implementation:v1.0.0'
+        implementation 'com.github.knokko.update-loop:implementation:v2.0.0'
     }
 }

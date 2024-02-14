@@ -372,7 +372,6 @@ class Scene {
             val dx = position.x + deltaX - entityPositions[otherEntityIndex].x
             val dy = position.y + deltaY - entityPositions[otherEntityIndex].y
             if (sqrt(dx * dx + dy * dy) <= entity.properties.radius + other.properties.radius) {
-                println("intervene entity")
                 return
             }
         }
@@ -381,7 +380,6 @@ class Scene {
             if (Geometry.distanceBetweenPointAndLineSegment(
                 position.x + deltaX, position.y + deltaY, tile.collider, tileIntersection
             ) <= entity.properties.radius) {
-                println("intervene tile")
                 return
             }
         }

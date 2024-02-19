@@ -18,6 +18,8 @@ import java.lang.RuntimeException
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -64,7 +66,7 @@ fun main() {
     val rng = Random(1234)
     val simpleMaterial = TileProperties()
 
-    for (counter in 0 until 10000) {
+    for (counter in 0 until 100_000) {
         scene.addTile(TilePlaceRequest(LineSegment(
             startX = rng.nextInt(-100_000, 100_000).mm,
             startY = rng.nextInt(-100_000, 100_000).mm,
@@ -90,7 +92,7 @@ fun main() {
     ), simpleMaterial))
     scene.update(Duration.ZERO)
 
-    for (counter in 0 until 100) {
+    for (counter in 0 until 1000) {
         scene.spawnEntity(EntitySpawnRequest(
             x = rng.nextInt(-10_000, 10_000).mm,
             y = rng.nextInt(-10_000, 10_000).mm,
@@ -110,7 +112,10 @@ fun main() {
     Thread(UpdateLoop({ updateLoop ->
         updateCounter.increment()
         scene.update(20.milliseconds)
-        if (!frame.isDisplayable) updateLoop.stop()
+        if (!frame.isDisplayable) {
+            updateLoop.stop()
+            panel.storage.getThreadStorage(Thread.currentThread().id).print(System.out, 60, 1.0)
+        }
         if (Math.random() < 0.01) println("UPS is ${updateCounter.value}")
     }, 20_000_000L)).start()
 
@@ -118,6 +123,7 @@ fun main() {
         frame.repaint()
         if (!frame.isDisplayable) {
             renderLoop.stop()
+            panel.profiler.stop()
             //panel.storage.getThreadStorage(panel.threadID).print(System.out, 60, 1.0)
         }
     }, 16_666_667L).start()
@@ -129,12 +135,12 @@ class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequ
     private val counter = UpdateCounter()
 
     val storage: SampleStorage<FrequencyThreadStorage> = SampleStorage.frequency()
-    private val profiler = SampleProfiler(storage)
+    val profiler = SampleProfiler(storage)
     var threadID = 0L
 
     init {
-        profiler.sleepTime = 0
-        //profiler.start()
+        profiler.sleepTime = 1
+        profiler.start()
     }
 
     override fun paint(g: Graphics?) {
@@ -166,10 +172,17 @@ class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequ
         g.color = Color.BLACK
         for (index in 0 until sceneQuery.numTiles) {
             val tile = sceneQuery.tiles[index]!!
-            g.drawLine(
-                transformX(tile.collider.startX), transformY(tile.collider.startY),
-                transformX(tile.collider.startX + tile.collider.lengthX), transformY(tile.collider.startY + tile.collider.lengthY)
-            )
+            val startX = transformX(tile.collider.startX)
+            val startY = transformY(tile.collider.startY)
+            val endX = transformX(tile.collider.startX + tile.collider.lengthX)
+            val endY = transformY(tile.collider.startY + tile.collider.lengthY)
+            val minX = min(startX, endX)
+            val minY = min(startY, endY)
+            val maxX = max(startX, endX)
+            val maxY = max(startY, endY)
+            if (maxX >= 0 && maxY >= 0 && minX <= width && minY <= height) {
+                g.drawLine(startX, startY, endX, endY)
+            }
         }
         for (index in 0 until sceneQuery.numEntities) {
             val entity = sceneQuery.entities[index]

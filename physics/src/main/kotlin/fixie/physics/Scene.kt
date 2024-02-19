@@ -10,6 +10,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
+private val LIMIT = 10.km
+
 class Scene {
 
     private val stepDuration = 10.milliseconds
@@ -18,6 +20,12 @@ class Scene {
     private var updateThread: Thread? = null
 
     private val tiles = mutableListOf<Tile>()
+    private val tileTree = TileTree(
+            minX = -LIMIT,
+            minY = -LIMIT,
+            maxX = LIMIT,
+            maxY = LIMIT
+    )
     private val entities = mutableListOf<Entity>()
 
     private val entitiesToSpawn = ConcurrentLinkedQueue<EntitySpawnRequest>()
@@ -48,11 +56,15 @@ class Scene {
     private val spawnIntersection = Position.origin()
 
     private fun canSpawn(x: Displacement, y: Displacement, properties: EntityProperties): Boolean {
-        for (tile in tiles) {
+        val safeRadius = 2 * properties.radius
+        queryTiles.clear()
+        tileTree.query(x - safeRadius, y - safeRadius, x + safeRadius, y + safeRadius, queryTiles)
+        for (tile in queryTiles) {
             if (Geometry.distanceBetweenPointAndLineSegment(
                     x, y, tile.collider, spawnIntersection
             ) <= properties.radius) return false
         }
+        queryTiles.clear()
 
         var index = 0
         for (entity in entities) {
@@ -143,18 +155,18 @@ class Scene {
             confirmedEntities.clear()
 
             for (request in confirmedTiles) {
-                val id = UUID.randomUUID()
-                tiles.add(Tile(
-                    id = id,
+                val tile = Tile(
                     collider = request.collider,
                     properties = request.properties
-                ))
-                request.id = id
+                )
+                tileTree.insert(tile)
+                tiles.add(tile)
+                request.id = tile.id
                 request.processed = true
             }
             confirmedTiles.clear()
 
-            if (entities.removeIf { abs(it.position.x) > 10.km || abs(it.position.y) > 10.km }) {
+            if (entities.removeIf { abs(it.position.x) > LIMIT || abs(it.position.y) > LIMIT }) {
                 println("destroyed an entity")
             }
 
@@ -189,6 +201,7 @@ class Scene {
 
     private val intersections = Array(5) { Intersection() }
     private val interestingTiles = mutableListOf<Tile>()
+    private val queryTiles = mutableListOf<Tile>()
     private val interestingEntities = mutableListOf<Int>()
 
     private fun updateEntity(entity: Entity, position: Position, velocity: Velocity) {
@@ -205,7 +218,10 @@ class Scene {
         val safeMinY = position.y - safeRadius
         val safeMaxX = position.x + safeRadius
         val safeMaxY = position.y + safeRadius
-        for (tile in tiles) {
+        queryTiles.clear()
+        interestingTiles.clear()
+        tileTree.query(safeMinX, safeMinY, safeMaxX, safeMaxY, queryTiles)
+        for (tile in queryTiles) {
             val endX = tile.collider.startX + tile.collider.lengthX
             val endY = tile.collider.startY + tile.collider.lengthY
             val minTileX = min(tile.collider.startX, endX)
@@ -218,10 +234,12 @@ class Scene {
                 }
             }
         }
+        queryTiles.clear()
 
         var candidateEntityIndex = 0
         for (other in entities) {
             if (other != entity) {
+                // TODO Optimize next
                 val otherPosition = entityPositions[candidateEntityIndex]
                 val dx = position.x - otherPosition.x
                 val dy = position.y - otherPosition.y

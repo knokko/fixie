@@ -402,28 +402,35 @@ class Scene {
         tilesToPlace.add(request)
     }
 
-    fun read(query: SceneQuery) {
+    fun read(query: SceneQuery, minX: Displacement, minY: Displacement, maxX: Displacement, maxY: Displacement) {
         synchronized(this) {
-            query.ensureCapacity(tiles.size, entities.size)
-            query.numTiles = tiles.size
-            query.numEntities = entities.size
+            query.tiles.clear()
+            tileTree.query(minX, minY, maxX, maxY, query.tiles)
 
-            var index = 0
-            for (tile in tiles) {
-                query.tiles[index] = tile
-                index += 1
-            }
-
-            index = 0
+            query.entities.clear()
+            var poolIndex = 0
             for (entity in entities) {
-                val qe = query.entities[index]
-                qe.id = entity.id
-                qe.properties = entity.properties
-                qe.position.x = entity.position.x
-                qe.position.y = entity.position.y
-                qe.velocity.x = entity.velocity.x
-                qe.velocity.y = entity.velocity.y
-                index += 1
+                val p = entity.position
+                val r = entity.properties.radius
+                if (p.x + r >= minX && p.y + r >= minY && p.x - r <= maxX && p.y - r <= maxY) {
+                    val qe: EntityQuery
+                    if (poolIndex < query.objectPool.size) {
+                        qe = query.objectPool[poolIndex]
+                    } else {
+                        qe = EntityQuery()
+                        query.objectPool.add(qe)
+                    }
+                    query.entities.add(qe)
+
+                    qe.id = entity.id
+                    qe.properties = entity.properties
+                    qe.position.x = p.x
+                    qe.position.y = p.y
+                    qe.velocity.x = entity.velocity.x
+                    qe.velocity.y = entity.velocity.y
+
+                    poolIndex += 1
+                }
             }
         }
     }

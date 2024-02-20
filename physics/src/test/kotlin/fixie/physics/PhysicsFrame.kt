@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
 import java.awt.event.KeyListener
 import java.lang.RuntimeException
+import java.util.*
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
@@ -47,15 +48,18 @@ fun main() {
     }
 
     val scene = Scene()
+    val lastPlayerPosition = Position.origin()
     val playerProperties = EntityProperties(
         radius = 0.1.m,
-        updateFunction = { _, velocity ->
+        updateFunction = { position, velocity ->
             if (moveLeft) velocity.x -= 0.05.mps
             if (moveRight) velocity.x += 0.05.mps
             if (shouldJump) {
                 velocity.y += 4.mps
                 shouldJump = false
             }
+            lastPlayerPosition.x = position.x
+            lastPlayerPosition.y = position.y
         }
     )
 
@@ -100,7 +104,7 @@ fun main() {
         ))
     }
 
-    val panel = PhysicsPanel(scene, spawnPlayer)
+    val panel = PhysicsPanel(scene, lastPlayerPosition, spawnPlayer.id!!)
     val frame = JFrame()
     frame.setSize(1200, 800)
     frame.isVisible = true
@@ -129,7 +133,7 @@ fun main() {
     }, 16_666_667L).start()
 }
 
-class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequest) : JPanel() {
+class PhysicsPanel(private val scene: Scene, private val playerPosition: Position, private val playerID: UUID) : JPanel() {
 
     private val sceneQuery = SceneQuery()
     private val counter = UpdateCounter()
@@ -153,39 +157,25 @@ class PhysicsPanel(private val scene: Scene, private val player: EntitySpawnRequ
         g!!.color = Color.WHITE
         g.fillRect(0, 0, width, height)
 
-        if (!player.processed) return
-        val playerID = player.id!!
+        val viewDistance = 5.m
+        scene.read(
+                sceneQuery, playerPosition.x - viewDistance, playerPosition.y - viewDistance,
+                playerPosition.x + viewDistance, playerPosition.y + viewDistance
+        )
 
-        scene.read(sceneQuery)
+        fun transformX(x: Displacement) = width / 2 + (200 * (x - playerPosition.x).toDouble(DistanceUnit.METER)).roundToInt()
 
-        var playerPosition: Position? = null
-        for (index in 0 until sceneQuery.numEntities) {
-            if (sceneQuery.entities[index].id == playerID) playerPosition = sceneQuery.entities[index].position
-        }
-
-        if (playerPosition == null) throw RuntimeException("Can't find player position")
-
-        fun transformX(x: Displacement) = 300 + (200 * (x - playerPosition.x).toDouble(DistanceUnit.METER)).roundToInt()
-
-        fun transformY(y: Displacement) = 400 - (200 * (y - playerPosition.y).toDouble(DistanceUnit.METER)).roundToInt()
+        fun transformY(y: Displacement) = height / 2 - (200 * (y - playerPosition.y).toDouble(DistanceUnit.METER)).roundToInt()
 
         g.color = Color.BLACK
-        for (index in 0 until sceneQuery.numTiles) {
-            val tile = sceneQuery.tiles[index]!!
+        for (tile in sceneQuery.tiles) {
             val startX = transformX(tile.collider.startX)
             val startY = transformY(tile.collider.startY)
             val endX = transformX(tile.collider.startX + tile.collider.lengthX)
             val endY = transformY(tile.collider.startY + tile.collider.lengthY)
-            val minX = min(startX, endX)
-            val minY = min(startY, endY)
-            val maxX = max(startX, endX)
-            val maxY = max(startY, endY)
-            if (maxX >= 0 && maxY >= 0 && minX <= width && minY <= height) {
-                g.drawLine(startX, startY, endX, endY)
-            }
+            g.drawLine(startX, startY, endX, endY)
         }
-        for (index in 0 until sceneQuery.numEntities) {
-            val entity = sceneQuery.entities[index]
+        for (entity in sceneQuery.entities) {
             val minX = transformX(entity.position.x - entity.properties.radius)
             val minY = transformY(entity.position.y + entity.properties.radius)
             val maxX = transformX(entity.position.x + entity.properties.radius)

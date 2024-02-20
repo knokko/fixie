@@ -92,7 +92,7 @@ fun main() {
     ), simpleMaterial))
     scene.update(Duration.ZERO)
 
-    for (counter in 0 until 1000) {
+    for (counter in 0 until 3000) {
         scene.spawnEntity(EntitySpawnRequest(
             x = rng.nextInt(-10_000, 10_000).mm,
             y = rng.nextInt(-10_000, 10_000).mm,

@@ -102,7 +102,9 @@ object Geometry {
     ): Boolean {
         val r = r1 + r2
         val originalDistance = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
-        if (originalDistance <= r1 + r2) throw IllegalArgumentException("Circle at ($x1, $y1) with r=$r1 is already inside ($x2, $y2) with r=$r2")
+        if (originalDistance <= r1 + r2) {
+            throw IllegalArgumentException("Circle at ($x1, $y1) with r=$r1 is already inside ($x2, $y2) with r=$r2 since d=$originalDistance")
+        }
 
         findClosestPointOnLineToPoint(x2, y2, x1, y1, vx, vy, outPosition)
 

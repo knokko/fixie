@@ -4,7 +4,6 @@ import fixie.*
 import fixie.geometry.Geometry
 import fixie.geometry.LineSegment
 import fixie.geometry.Position
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -27,6 +26,7 @@ class Scene {
             maxY = LIMIT
     )
     private val entities = mutableListOf<Entity>()
+    private val entityClustering = EntityClustering()
 
     private val entitiesToSpawn = ConcurrentLinkedQueue<EntitySpawnRequest>()
     private val tilesToPlace = ConcurrentLinkedQueue<TilePlaceRequest>()
@@ -59,18 +59,9 @@ class Scene {
         }
         queryTiles.clear()
 
-        var index = 0
         for (entity in entities) {
-            val dx = x - entity.wipPosition.x
-            val dy = y - entity.wipPosition.y
-            val combinedRadius = properties.radius + entity.properties.radius
-            if (dx * dx + dy * dy <= combinedRadius * combinedRadius) return false
-            index += 1
-        }
-
-        for (entity in confirmedEntities) {
-            val dx = x - entity.x
-            val dy = y - entity.y
+            val dx = x - entity.position.x
+            val dy = y - entity.position.y
             val combinedRadius = properties.radius + entity.properties.radius
             if (dx * dx + dy * dy <= combinedRadius * combinedRadius) return false
         }
@@ -78,14 +69,20 @@ class Scene {
         return true
     }
 
-    private val confirmedEntities = mutableListOf<EntitySpawnRequest>()
-
     private fun processEntitySpawnRequests() {
         do {
             val request = entitiesToSpawn.poll()
             if (request != null) {
-                if (canSpawn(request.x, request.y, request.properties)) confirmedEntities.add(request)
-                else request.processed = true
+                if (canSpawn(request.x, request.y, request.properties)) {
+                    val entity = Entity(
+                            properties = request.properties,
+                            position = Position(request.x, request.y),
+                            velocity = Velocity(request.velocityX, request.velocityY)
+                    )
+                    entities.add(entity)
+                    request.id = entity.id
+                }
+                request.processed = true
             }
         } while (request != null)
     }
@@ -99,31 +96,35 @@ class Scene {
             index += 1
         }
 
-        for (entity in confirmedEntities) {
-            if (Geometry.distanceBetweenPointAndLineSegment(
-                entity.x, entity.y, collider, tileIntersection
-            ) <= entity.properties.radius) return false
-        }
-
         return true
     }
-
-    private val confirmedTiles = mutableListOf<TilePlaceRequest>()
 
     private fun processTilePlaceRequests() {
         do {
             val request = tilesToPlace.poll()
             if (request != null) {
-                if (canPlace(request.collider)) confirmedTiles.add(request)
-                else request.processed = true
+                if (canPlace(request.collider)) {
+                    val tile = Tile(
+                            collider = request.collider,
+                            properties = request.properties
+                    )
+                    tileTree.insert(tile)
+                    tiles.add(tile)
+                    request.id = tile.id
+                }
+                request.processed = true
             }
         } while (request != null)
     }
 
-    private fun copyStateAfterUpdate() {
-        processEntitySpawnRequests()
-        processTilePlaceRequests()
+    private fun processRequests() {
+        synchronized(this) {
+            processEntitySpawnRequests()
+            processTilePlaceRequests()
+        }
+    }
 
+    private fun copyStateAfterUpdate() {
         synchronized(this) {
             var index = 0
             for (entity in entities) {
@@ -133,31 +134,6 @@ class Scene {
                 entity.velocity.y = entity.wipVelocity.y
                 index += 1
             }
-
-            for (request in confirmedEntities) {
-                val id = UUID.randomUUID()
-                entities.add(Entity(
-                    id = id,
-                    properties = request.properties,
-                    position = Position(request.x, request.y),
-                    velocity = Velocity(request.velocityX, request.velocityY)
-                ))
-                request.id = id
-                request.processed = true
-            }
-            confirmedEntities.clear()
-
-            for (request in confirmedTiles) {
-                val tile = Tile(
-                    collider = request.collider,
-                    properties = request.properties
-                )
-                tileTree.insert(tile)
-                tiles.add(tile)
-                request.id = tile.id
-                request.processed = true
-            }
-            confirmedTiles.clear()
 
             if (entities.removeIf { abs(it.position.x) > LIMIT || abs(it.position.y) > LIMIT }) {
                 println("destroyed an entity")
@@ -198,13 +174,9 @@ class Scene {
     private val interestingEntities = mutableListOf<Entity>()
 
     private fun updateEntity(entity: Entity) {
-        entity.properties.updateFunction?.invoke(entity.wipPosition, entity.wipVelocity)
-
         var deltaX = entity.wipVelocity.x * stepDuration
         var deltaY = entity.wipVelocity.y * stepDuration
         val originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
-        // TODO Acceleration?
-        entity.wipVelocity.y -= 9.8.mps * stepDuration.toDouble(DurationUnit.SECONDS)
 
         val safeRadius = 2 * entity.properties.radius + 2 * originalDelta
         val safeMinX = entity.wipPosition.x - safeRadius
@@ -231,16 +203,7 @@ class Scene {
         }
         queryTiles.clear()
 
-        for (other in entities) {
-            if (other != entity) {
-                // TODO Optimize next
-                val dx = entity.wipPosition.x - other.wipPosition.x
-                val dy = entity.wipPosition.y - other.wipPosition.y
-                val squaredDistance = dx * dx + dy * dy
-                val safeSquaredRadius = (safeRadius + other.properties.radius) * (safeRadius + other.properties.radius)
-                if (squaredDistance < safeSquaredRadius) interestingEntities.add(other)
-            }
-        }
+        entityClustering.query(entity, interestingEntities)
 
         var numIntersections = 0
         for (tile in interestingTiles) {
@@ -371,9 +334,21 @@ class Scene {
 
         interestingTiles.clear()
         interestingEntities.clear()
+
+        entity.wipVelocity.y -= 9.8.mps * stepDuration.toDouble(DurationUnit.SECONDS)
     }
 
     private fun moveSafely(entity: Entity, deltaX: Displacement, deltaY: Displacement) {
+        run {
+            val vx = entity.velocity.x * stepDuration
+            val vy = entity.velocity.y * stepDuration
+            val dx = entity.wipPosition.x + deltaX - entity.position.x
+            val dy = entity.wipPosition.y + deltaY - entity.position.y
+            if (sqrt(dx * dx + dy * dy) > sqrt(vx * vx + vy * vy) + 0.1 * entity.properties.radius) {
+                return
+            }
+        }
+
         for (other in interestingEntities) {
             val dx = entity.wipPosition.x + deltaX - other.wipPosition.x
             val dy = entity.wipPosition.y + deltaY - other.wipPosition.y
@@ -395,23 +370,30 @@ class Scene {
     }
 
     private fun updateEntities() {
-        var index = 0
+        for (entity in entities) {
+            val vx = entity.wipVelocity.x * stepDuration
+            val vy = entity.wipVelocity.y * stepDuration
+            entityClustering.insert(entity, 1.1 * (entity.properties.radius + abs(vx) + abs(vy)))
+        }
+
         for (entity in entities) {
             updateEntity(entity)
-            index += 1
+            entity.properties.updateFunction?.invoke(entity.wipPosition, entity.wipVelocity)
         }
+
+        entityClustering.reset()
     }
 
     fun update(duration: Duration) {
-        copyStateBeforeUpdate()
+        processRequests()
         remainingTime += duration
 
         while (remainingTime >= stepDuration) {
+            copyStateBeforeUpdate()
             updateEntities()
+            copyStateAfterUpdate()
             remainingTime -= stepDuration
         }
-
-        copyStateAfterUpdate()
     }
 
     fun spawnEntity(request: EntitySpawnRequest) {

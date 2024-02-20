@@ -88,12 +88,10 @@ class Scene {
     }
 
     private fun canPlace(collider: LineSegment): Boolean {
-        var index = 0
         for (entity in entities) {
             if (Geometry.distanceBetweenPointAndLineSegment(
-                entity.wipPosition.x, entity.wipPosition.y, collider, tileIntersection
+                entity.position.x, entity.position.y, collider, tileIntersection
             ) <= entity.properties.radius) return false
-            index += 1
         }
 
         return true

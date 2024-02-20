@@ -85,7 +85,8 @@ class TileTree(
                 val maxIndexY = node.determineIndexY(maxY + MARGIN)
                 for (indexY in minIndexY..maxIndexY) {
                     for (indexX in minIndexX..maxIndexX) {
-                        node.children!![indexX + SPLIT_FACTOR * indexY]?.query(minX, minY, maxX, maxY, outTiles)
+                        val child = node.children!![indexX + SPLIT_FACTOR * indexY]
+                        if (child != null) nodes.add(child)
                     }
                 }
             }

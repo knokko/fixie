@@ -14,17 +14,85 @@ import java.awt.Toolkit
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
 import java.awt.event.KeyListener
-import java.lang.RuntimeException
 import java.util.*
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
+    val scene = Scene()
+
+    val spawnPlayer = EntitySpawnRequest(x = 0.m, y = 1.5.m, properties = playerProperties)
+    scene.spawnEntity(spawnPlayer)
+    scene.update(Duration.ZERO)
+
+    val length = 10.m
+
+    scene.addTile(TilePlaceRequest(LineSegment(
+            startX = -length, startY = 0.m, lengthX = length, lengthY = -length
+    ), TileProperties()))
+    scene.addTile(TilePlaceRequest(LineSegment(
+            startX = length, startY = 0.m, lengthX = -length, lengthY = -length
+    ), TileProperties()))
+
+    for (counter in -5 .. 5) {
+        scene.spawnEntity(EntitySpawnRequest(
+                x = counter.m, y = 0.m, properties = EntityProperties(radius = 0.2.m)
+        ))
+    }
+
+    return Pair(scene, spawnPlayer.id!!)
+}
+private fun randomBusyScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
+    val scene = Scene()
+
+    val spawnPlayer = EntitySpawnRequest(x = 0.m, y = 2.m, properties = playerProperties)
+    scene.spawnEntity(spawnPlayer)
+    scene.update(Duration.ZERO)
+
+    val rng = Random(1234)
+    val simpleMaterial = TileProperties()
+
+    for (counter in 0 until 10_000) {
+        scene.addTile(TilePlaceRequest(LineSegment(
+                startX = rng.nextInt(-100_000, 100_000).mm,
+                startY = rng.nextInt(-100_000, 100_000).mm,
+                lengthX = rng.nextInt(100, 1_000).mm,
+                lengthY = rng.nextInt(100, 1_000).mm,
+        ), simpleMaterial))
+    }
+    scene.addTile(TilePlaceRequest(LineSegment(
+            startX = -100.m, startY = -100.m,
+            lengthX = 200.m, lengthY = 0.m
+    ), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(
+            startX = -100.m, startY = -100.m,
+            lengthX = 0.m, lengthY = 2000.m
+    ), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(
+            startX = -100.m, startY = 100.m,
+            lengthX = 200.m, lengthY = 0.m
+    ), simpleMaterial))
+    scene.addTile(TilePlaceRequest(LineSegment(
+            startX = 100.m, startY = -100.m,
+            lengthX = 0.m, lengthY = 2000.m
+    ), simpleMaterial))
+    scene.update(Duration.ZERO)
+
+    for (counter in 0 until 3000) {
+        scene.spawnEntity(EntitySpawnRequest(
+                x = rng.nextInt(-10_000, 10_000).mm,
+                y = rng.nextInt(-10_000, 10_000).mm,
+                properties = EntityProperties(radius = rng.nextInt(20, 300).mm)
+        ))
+    }
+
+    return Pair(scene, spawnPlayer.id!!)
+}
 
 fun main() {
     var moveLeft = false
@@ -47,64 +115,24 @@ fun main() {
         }
     }
 
-    val scene = Scene()
     val lastPlayerPosition = Position.origin()
     val playerProperties = EntityProperties(
-        radius = 0.1.m,
-        updateFunction = { position, velocity ->
-            if (moveLeft) velocity.x -= 0.05.mps
-            if (moveRight) velocity.x += 0.05.mps
-            if (shouldJump) {
-                velocity.y += 4.mps
-                shouldJump = false
+            radius = 0.1.m,
+            updateFunction = { position, velocity ->
+                if (moveLeft) velocity.x -= 0.05.mps
+                if (moveRight) velocity.x += 0.05.mps
+                if (shouldJump) {
+                    velocity.y += 4.mps
+                    shouldJump = false
+                }
+                lastPlayerPosition.x = position.x
+                lastPlayerPosition.y = position.y
             }
-            lastPlayerPosition.x = position.x
-            lastPlayerPosition.y = position.y
-        }
     )
 
-    val spawnPlayer = EntitySpawnRequest(x = 0.m, y = 2.m, properties = playerProperties)
-    scene.spawnEntity(spawnPlayer)
-    scene.update(Duration.ZERO)
+    val (scene, playerID) = randomBusyScene(playerProperties)
 
-    val rng = Random(1234)
-    val simpleMaterial = TileProperties()
-
-    for (counter in 0 until 100_000) {
-        scene.addTile(TilePlaceRequest(LineSegment(
-            startX = rng.nextInt(-100_000, 100_000).mm,
-            startY = rng.nextInt(-100_000, 100_000).mm,
-            lengthX = rng.nextInt(100, 1_000).mm,
-            lengthY = rng.nextInt(100, 1_000).mm,
-        ), simpleMaterial))
-    }
-    scene.addTile(TilePlaceRequest(LineSegment(
-        startX = -100.m, startY = -100.m,
-        lengthX = 200.m, lengthY = 0.m
-    ), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(
-        startX = -100.m, startY = -100.m,
-        lengthX = 0.m, lengthY = 2000.m
-    ), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(
-        startX = -100.m, startY = 100.m,
-        lengthX = 200.m, lengthY = 0.m
-    ), simpleMaterial))
-    scene.addTile(TilePlaceRequest(LineSegment(
-        startX = 100.m, startY = -100.m,
-        lengthX = 0.m, lengthY = 2000.m
-    ), simpleMaterial))
-    scene.update(Duration.ZERO)
-
-    for (counter in 0 until 3000) {
-        scene.spawnEntity(EntitySpawnRequest(
-            x = rng.nextInt(-10_000, 10_000).mm,
-            y = rng.nextInt(-10_000, 10_000).mm,
-            properties = EntityProperties(radius = rng.nextInt(20, 300).mm)
-        ))
-    }
-
-    val panel = PhysicsPanel(scene, lastPlayerPosition, spawnPlayer.id!!)
+    val panel = PhysicsPanel(scene, lastPlayerPosition, playerID)
     val frame = JFrame()
     frame.setSize(1200, 800)
     frame.isVisible = true
@@ -168,14 +196,16 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
         fun transformY(y: Displacement) = height / 2 - (200 * (y - playerPosition.y).toDouble(DistanceUnit.METER)).roundToInt()
 
         g.color = Color.BLACK
-        for (tile in sceneQuery.tiles) {
+        for (index in 0 until sceneQuery.tiles.size) {
+            val tile = sceneQuery.tiles[index]
             val startX = transformX(tile.collider.startX)
             val startY = transformY(tile.collider.startY)
             val endX = transformX(tile.collider.startX + tile.collider.lengthX)
             val endY = transformY(tile.collider.startY + tile.collider.lengthY)
             g.drawLine(startX, startY, endX, endY)
         }
-        for (entity in sceneQuery.entities) {
+        for (index in 0 until sceneQuery.entities.size) {
+            val entity = sceneQuery.entities[index]
             val minX = transformX(entity.position.x - entity.properties.radius)
             val minY = transformY(entity.position.y + entity.properties.radius)
             val maxX = transformX(entity.position.x + entity.properties.radius)

@@ -34,7 +34,7 @@ class TestTileTree {
                     lengthY = next()
             ), material))
         }
-        val took = System.nanoTime() - startTime;
+        val took = System.nanoTime() - startTime
         if (took > 5_000_000_000) {
             throw AssertionError("Expected to finish within 5 seconds, but took ${took / 1_000_000_000L} seconds")
         }
@@ -67,7 +67,7 @@ class TestTileTree {
         fun check(tile: Tile) {
 
             fun check(minX: Displacement, minY: Displacement, maxX: Displacement, maxY: Displacement) {
-                val testList = mutableListOf<Tile>()
+                val testList = GrowingBuffer.withImmutableElements(100, DUMMY_TILE)
                 tree.query(minX, minY, maxX, maxY, testList)
                 assertTrue(testList.contains(tile))
             }

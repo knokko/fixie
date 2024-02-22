@@ -69,7 +69,7 @@ class TileTree(
         else insertChild(tile)
     }
 
-    fun query(minX: Displacement, minY: Displacement, maxX: Displacement, maxY: Displacement, outTiles: MutableList<Tile>) {
+    fun query(minX: Displacement, minY: Displacement, maxX: Displacement, maxY: Displacement, outTiles: GrowingBuffer<Tile>) {
         val nodes = mutableListOf(this)
 
         while (nodes.isNotEmpty()) {

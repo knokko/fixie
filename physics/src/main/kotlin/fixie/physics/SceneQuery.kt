@@ -1,8 +1,14 @@
 package fixie.physics
 
-class SceneQuery {
-    val tiles = mutableListOf<Tile>()
-    val entities = mutableListOf<EntityQuery>()
+import fixie.geometry.LineSegment
+import fixie.*
 
-    internal val objectPool = mutableListOf<EntityQuery>()
+internal val DUMMY_TILE = Tile(
+        collider = LineSegment(0.m, 0.m, 0.m, 0.m),
+        properties = TileProperties()
+)
+
+class SceneQuery {
+    val tiles = GrowingBuffer.withImmutableElements(20, DUMMY_TILE)
+    val entities = GrowingBuffer.withMutableElements(10) { EntityQuery() }
 }

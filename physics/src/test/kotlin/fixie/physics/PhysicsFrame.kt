@@ -47,6 +47,33 @@ private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UU
 
     return Pair(scene, spawnPlayer.id!!)
 }
+
+private fun impulseTestScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
+    val scene = Scene()
+
+    val spawnPlayer = EntitySpawnRequest(x = 0.m, y = 1.5.m, properties = playerProperties)
+    scene.spawnEntity(spawnPlayer)
+    scene.update(Duration.ZERO)
+
+    val length = 3.m
+
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = -length, startY = 0.m, lengthX = 2 * length, lengthY = 0.m
+    ), TileProperties()))
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = -length, startY = 0.m, lengthX = -length / 2, lengthY = length
+    ), TileProperties()))
+    scene.addTile(TilePlaceRequest(LineSegment(
+        startX = length, startY = 0.m, lengthX = length / 2, lengthY = length
+    ), TileProperties()))
+
+    scene.spawnEntity(EntitySpawnRequest(
+        x = length / 2, y = 2.m, properties = EntityProperties(radius = 1.m)
+    ))
+
+    return Pair(scene, spawnPlayer.id!!)
+}
+
 private fun randomBusyScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
     val scene = Scene()
 
@@ -190,6 +217,12 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
                 sceneQuery, playerPosition.x - viewDistance, playerPosition.y - viewDistance,
                 playerPosition.x + viewDistance, playerPosition.y + viewDistance
         )
+
+        var playerPosition = playerPosition
+        for (index in 0 until sceneQuery.entities.size) {
+            val entity = sceneQuery.entities[index]
+            if (entity.id == playerID) playerPosition = entity.position
+        }
 
         fun transformX(x: Displacement) = width / 2 + (200 * (x - playerPosition.x).toDouble(DistanceUnit.METER)).roundToInt()
 

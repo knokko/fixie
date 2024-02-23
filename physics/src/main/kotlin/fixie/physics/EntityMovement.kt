@@ -159,14 +159,15 @@ internal class EntityMovement(
             deltaY = firstIntersection.myY - entity.wipPosition.y
         }
 
-        run {
+        while (true) {
             val vx = entity.velocity.x * stepDuration
             val vy = entity.velocity.y * stepDuration
             val dx = entity.wipPosition.x + deltaX - entity.position.x
             val dy = entity.wipPosition.y + deltaY - entity.position.y
             if (sqrt(dx * dx + dy * dy) > sqrt(vx * vx + vy * vy) + 0.1 * entity.properties.radius) {
-                return
-            }
+                deltaX /= 2
+                deltaY /= 2
+            } else break
         }
 
         for (other in interestingEntities) {

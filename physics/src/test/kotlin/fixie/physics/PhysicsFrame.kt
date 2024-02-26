@@ -18,6 +18,8 @@ import java.util.*
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants.DISPOSE_ON_CLOSE
+import kotlin.math.abs
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
@@ -42,6 +44,12 @@ private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UU
     for (counter in -5 .. 5) {
         scene.spawnEntity(EntitySpawnRequest(
                 x = counter.m, y = 0.m, properties = EntityProperties(radius = 0.2.m)
+        ))
+        scene.spawnEntity(EntitySpawnRequest(
+                x = counter.m, y = 0.4.m, properties = EntityProperties(radius = 0.1.m)
+        ))
+        scene.spawnEntity(EntitySpawnRequest(
+                x = counter.m, y = 0.9.m, properties = EntityProperties(radius = 0.3.m)
         ))
     }
 
@@ -157,7 +165,7 @@ fun main() {
             }
     )
 
-    val (scene, playerID) = randomBusyScene(playerProperties)
+    val (scene, playerID) = simpleSplitScene(playerProperties)
 
     val panel = PhysicsPanel(scene, lastPlayerPosition, playerID)
     val frame = JFrame()
@@ -244,8 +252,11 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
             val maxX = transformX(entity.position.x + entity.properties.radius)
             val maxY = transformY(entity.position.y - entity.properties.radius)
 
-            if (entity.id == playerID) g.color = Color.BLUE
-            else g.color = Color.BLACK
+            fun toColorValue(x: Speed) = min(255, abs(30 * x.toDouble(SpeedUnit.METERS_PER_SECOND)).roundToInt())
+            var blue = 0;
+            if (entity.id == playerID) blue = 255;
+
+            g.color = Color(toColorValue(entity.velocity.x), toColorValue(entity.velocity.y), blue)
             g.fillOval(minX, minY, maxX - minX, maxY - minY)
         }
 

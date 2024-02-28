@@ -4,6 +4,8 @@ import fixie.*
 import fixie.geometry.Geometry
 import fixie.geometry.LineSegment
 import fixie.geometry.Position
+import fixie.physics.constraint.MaxAccelerationConstraint
+import fixie.physics.constraint.NotMovingConstraint
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -78,6 +80,8 @@ class Scene {
                             position = Position(request.x, request.y),
                             velocity = Velocity(request.velocityX, request.velocityY)
                     )
+                    entity.constraints.add(MaxAccelerationConstraint(400.milliseconds, stepDuration, 5.mps))
+                    entity.constraints.add(NotMovingConstraint(200.milliseconds, stepDuration))
                     entities.add(entity)
                     request.id = entity.id
                 }
@@ -168,6 +172,10 @@ class Scene {
             val vx = entity.wipVelocity.x * stepDuration
             val vy = entity.wipVelocity.y * stepDuration
             entityClustering.insert(entity, 1.1 * (entity.properties.radius + abs(vx) + abs(vy)))
+
+            for (constraint in entity.constraints) {
+                constraint.check(entity.wipPosition, entity.wipVelocity)
+            }
         }
 
         for (entity in entities) {

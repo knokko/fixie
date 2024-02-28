@@ -1,7 +1,10 @@
 package fixie.physics
 
 import fixie.geometry.Position
+import fixie.physics.constraint.MaxAccelerationConstraint
+import fixie.physics.constraint.VelocityConstraint
 import java.util.*
+import kotlin.time.Duration.Companion.milliseconds
 
 class Entity(
     val properties: EntityProperties,
@@ -9,6 +12,8 @@ class Entity(
     val velocity: Velocity
 ) {
     val id: UUID = UUID.randomUUID()
+
+    internal val constraints = mutableListOf<VelocityConstraint>()
     
     internal val wipPosition = Position.origin()
     internal val wipVelocity = Velocity.zero()

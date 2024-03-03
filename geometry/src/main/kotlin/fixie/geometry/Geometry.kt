@@ -102,7 +102,7 @@ object Geometry {
     ): Boolean {
         val r = r1 + r2
         val originalDistance = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
-        if (originalDistance <= r1 + r2) {
+        if (originalDistance <= r) {
             throw IllegalArgumentException("Circle at ($x1, $y1) with r=$r1 is already inside ($x2, $y2) with r=$r2 since d=$originalDistance")
         }
 
@@ -110,6 +110,19 @@ object Geometry {
 
         val minDistance = sqrt((x2 - outPosition.x) * (x2 - outPosition.x) + (y2 - outPosition.y) * (y2 - outPosition.y))
         if (minDistance > r + 1.mm) return false
+
+        if (minDistance > r * 0.99) {
+            val dx = x1 + vx - x2
+            val dy = y1 + vy - y2
+
+            // Dirty trick: allow the moving circle to move 1% 'through' the other circle,
+            // provided that it doesn't intersect with the other circle if it were moved to the final position.
+
+            // This weird rule smoothens some disturbances that are caused by rounding errors when one ball is rolling
+            // over another ball. It also improves performance in other cases because the rest of this method can
+            // be skipped.
+            if (sqrt(dx * dx + dy * dy) > r) return false
+        }
 
         val dx = outPosition.x - x1
         val dy = outPosition.y - y1

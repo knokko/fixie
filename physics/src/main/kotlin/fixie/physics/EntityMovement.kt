@@ -4,7 +4,9 @@ import fixie.*
 import fixie.geometry.Geometry
 import fixie.geometry.Position
 import java.util.*
+import kotlin.math.*
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 internal class EntityMovement(
@@ -13,7 +15,7 @@ internal class EntityMovement(
         private val entityClustering: EntityClustering
 ) {
     val intersections = GrowingBuffer.withMutableElements(5) { Intersection() }
-    private val processedIntersections = GrowingBuffer.withImmutableElements(5, UUID.randomUUID())
+    private val properIntersections = mutableListOf<Intersection>()
 
     private val interestingTiles = mutableListOf<Tile>()
     private val queryTiles = GrowingBuffer.withImmutableElements(10, DUMMY_TILE)
@@ -22,6 +24,7 @@ internal class EntityMovement(
 
     private val entityIntersection = Position.origin()
     private val tileIntersection = Position.origin()
+    private val retryDestination = Position.origin()
 
     private lateinit var entity: Entity
 
@@ -60,7 +63,7 @@ internal class EntityMovement(
         originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
 
         intersections.clear()
-        processedIntersections.clear()
+        properIntersections.clear()
         remainingBudget = FixDisplacement.ONE
     }
 
@@ -190,6 +193,31 @@ internal class EntityMovement(
         entity.wipPosition.y += deltaY
     }
 
+    private fun processTileOrEntityIntersections(processTiles: Boolean) {
+        val vx = entity.wipVelocity.x.toDouble(SpeedUnit.METERS_PER_SECOND)
+        val vy = entity.wipVelocity.y.toDouble(SpeedUnit.METERS_PER_SECOND)
+        val speed = sqrt(vx * vx + vy * vy)
+        val directionX = vx / speed
+        val directionY = vy / speed
+
+        var totalIntersectionFactor = FixDisplacement.ZERO
+        for (intersection in properIntersections) {
+            if (intersection.otherVelocity == null == processTiles) {
+                totalIntersectionFactor += determineIntersectionFactor(intersection, directionX, directionY)
+            }
+        }
+
+        if (totalIntersectionFactor > FixDisplacement.ZERO) {
+            val oldVelocityX = entity.wipVelocity.x
+            val oldVelocityY = entity.wipVelocity.y
+            for (intersection in properIntersections) {
+                if (intersection.otherVelocity == null == processTiles) {
+                    processIntersection(intersection, oldVelocityX, oldVelocityY, directionX, directionY, totalIntersectionFactor)
+                }
+            }
+        }
+    }
+
     fun processIntersections() {
         if (intersections.size == 0) return
 
@@ -201,13 +229,30 @@ internal class EntityMovement(
 
         for (index in 0 until intersections.size) {
             val intersection = intersections[index]
-            if (intersection.delta > firstIntersection.delta + 1.mm) continue
-            if (processedIntersections.contains(intersection.otherID)) continue
-            processIntersection(intersection)
+            if (intersection.delta <= firstIntersection.delta + 1.mm) properIntersections.add(intersection)
         }
+
+        processTileOrEntityIntersections(true)
+        processTileOrEntityIntersections(false)
     }
 
-    private fun processIntersection(intersection: Intersection) {
+    private fun determineIntersectionFactor(intersection: Intersection, directionX: Double, directionY: Double): FixDisplacement {
+        val normalX = (intersection.myX - intersection.otherX) / intersection.radius
+        val normalY = (intersection.myY - intersection.otherY) / intersection.radius
+
+        return determineIntersectionFactor(normalX, normalY, directionX, directionY)
+    }
+
+    private fun determineIntersectionFactor(
+            normalX: FixDisplacement, normalY: FixDisplacement, directionX: Double, directionY: Double
+    ): FixDisplacement {
+        return max(FixDisplacement.ZERO, -directionX * normalX - directionY * normalY)
+    }
+
+    private fun processIntersection(
+            intersection: Intersection, oldVelocityX: Speed, oldVelocityY: Speed,
+            directionX: Double, directionY: Double, totalIntersectionFactor: FixDisplacement
+    ) {
         val normalX = (intersection.myX - intersection.otherX) / intersection.radius
         val normalY = (intersection.myY - intersection.otherY) / intersection.radius
 
@@ -215,18 +260,21 @@ internal class EntityMovement(
             throw RuntimeException("No no")
         }
 
-        val bounceConstant = max(FixDisplacement.from(1.01),
-                entity.properties.bounceFactor + intersection.bounce + 1)
-        val frictionConstant = 0.02 * entity.properties.frictionFactor * intersection.friction
+        val intersectionFactor = determineIntersectionFactor(
+                normalX, normalY, directionX, directionY
+        ) / totalIntersectionFactor
 
-        val opposingFactor = bounceConstant * (normalX * entity.wipVelocity.x + normalY * entity.wipVelocity.y)
-        val frictionFactor = frictionConstant * (normalY * entity.wipVelocity.x - normalX * entity.wipVelocity.y)
+        val bounceConstant = entity.properties.bounceFactor + intersection.bounce + 1
+        val frictionConstant = 0.01 * entity.properties.frictionFactor * intersection.friction
 
-        val impulseX = opposingFactor * normalX + frictionFactor * normalY
+        val opposingFactor = bounceConstant * (normalX * oldVelocityX + normalY * oldVelocityY)
+        val frictionFactor = frictionConstant * (normalY * oldVelocityX - normalX * oldVelocityY)
+
+        val impulseX = intersectionFactor * (opposingFactor * normalX + frictionFactor * normalY)
         if (opposingFactor > 1.kmps) {
             println("uh ooh: ${normalX * normalX + normalY * normalY}")
         }
-        val impulseY = opposingFactor * normalY - frictionFactor * normalX
+        val impulseY = intersectionFactor * (opposingFactor * normalY - frictionFactor * normalX)
 
         entity.wipVelocity.x -= impulseX
         entity.wipVelocity.y -= impulseY
@@ -237,21 +285,82 @@ internal class EntityMovement(
             otherVelocity.x += massFactor * impulseX
             otherVelocity.y += massFactor * impulseY
         }
+    }
 
-        processedIntersections.add(intersection.otherID)
+    private fun retryTiles() {
+        for (tile in interestingTiles) {
+            if (Geometry.sweepCircleToLineSegment(
+                            entity.wipPosition.x, entity.wipPosition.y,
+                            retryDestination.x - entity.wipPosition.x,
+                            retryDestination.y - entity.wipPosition.y, entity.properties.radius,
+                            tile.collider, entityIntersection, tileIntersection
+                    )) {
+                retryDestination.x = entityIntersection.x
+                retryDestination.y = entityIntersection.y
+            }
+        }
+    }
+
+    private fun retryEntities() {
+        for (other in interestingEntities) {
+            if (Geometry.sweepCircleToCircle(
+                            entity.wipPosition.x, entity.wipPosition.y, entity.properties.radius,
+                            retryDestination.x - entity.wipPosition.x, retryDestination.y - entity.wipPosition.y,
+                            other.wipPosition.x, other.wipPosition.y, other.properties.radius, entityIntersection
+                    )) {
+                retryDestination.x = entityIntersection.x
+                retryDestination.y = entityIntersection.y
+            }
+        }
+    }
+
+    private fun retryAngle(angle: Double, totalDelta: Displacement): Displacement {
+        return retryDelta(cos(angle) * totalDelta, sin(angle) * totalDelta)
+    }
+
+    private fun retryDelta(dx: Displacement, dy: Displacement): Displacement {
+        retryDestination.x = entity.wipPosition.x + dx
+        retryDestination.y = entity.wipPosition.y + dy
+        retryTiles()
+        retryEntities()
+
+        val distanceX = retryDestination.x - entity.wipPosition.x
+        val distanceY = retryDestination.y - entity.wipPosition.y
+        return sqrt(distanceX * distanceX + distanceY * distanceY)
+    }
+
+    private fun retryAngles(originalAngle: Double, totalDelta: Displacement) {
+        if (retryDelta(deltaX, deltaY) > 0.m) return
+
+        if (entity.stuckCounter > 0) return
+
+        val angleIncrement = 0.01
+        for (counter in 1 until 6) {
+            if (retryAngle(originalAngle + angleIncrement * counter * counter, totalDelta) > 0.m) return
+            if (retryAngle(originalAngle - angleIncrement * counter * counter, totalDelta) > 0.m) return
+        }
+
+        entity.stuckCounter = (5.seconds / stepDuration).roundToLong()
     }
 
     fun retry() {
-        intersections.clear()
-
         val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         remainingBudget -= finalDelta / originalDelta
 
         deltaX = remainingBudget * entity.wipVelocity.x * stepDuration
         deltaY = remainingBudget * entity.wipVelocity.y * stepDuration
+        val totalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
+        if (totalDelta < 0.1.mm) return
 
-        determineTileIntersections()
-        determineEntityIntersections()
+        val oldAngle = atan2(deltaY.value.toDouble(), deltaX.value.toDouble())
+
+        retryAngles(oldAngle, totalDelta)
+
+        deltaX = retryDestination.x - entity.wipPosition.x
+        deltaY = retryDestination.y - entity.wipPosition.y
+
+        intersections.clear()
+        properIntersections.clear()
 
         moveSafely()
     }

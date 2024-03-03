@@ -78,6 +78,9 @@ private fun impulseTestScene(playerProperties: EntityProperties): Pair<Scene, UU
     scene.spawnEntity(EntitySpawnRequest(
         x = length / 2, y = 2.m, properties = EntityProperties(radius = 1.m)
     ))
+    scene.spawnEntity(EntitySpawnRequest(
+            x = -length / 2, y = 2.m, properties = EntityProperties(radius = 20.mm)
+    ))
 
     return Pair(scene, spawnPlayer.id!!)
 }
@@ -253,8 +256,8 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
             val maxY = transformY(entity.position.y - entity.properties.radius)
 
             fun toColorValue(x: Speed) = min(255, abs(30 * x.toDouble(SpeedUnit.METERS_PER_SECOND)).roundToInt())
-            var blue = 0;
-            if (entity.id == playerID) blue = 255;
+            var blue = 0
+            if (entity.id == playerID) blue = 100
 
             g.color = Color(toColorValue(entity.velocity.x), toColorValue(entity.velocity.y), blue)
             g.fillOval(minX, minY, maxX - minX, maxY - minY)

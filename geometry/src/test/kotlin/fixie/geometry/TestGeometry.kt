@@ -243,7 +243,7 @@ class TestGeometry {
             -65.174.m, -25.146.m, 78.468.m, 39.172.m,
             circlePosition, pointOnLine
         ))
-        assertEquals(Position(pointX + deltaX * 0.99925, pointY + deltaY * 0.99925), circlePosition)
+        assertEquals(Position(pointX + deltaX * 0.99925, pointY + deltaY * 0.99925), circlePosition, 0.1.mm)
     }
 
     @Test

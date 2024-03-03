@@ -18,8 +18,11 @@ internal class EntityClustering {
     private fun determineKey(indexX: Int, indexY: Int) = indexX.toLong() + 1_000_000L * indexY.toLong()
 
     fun reset() {
-        // TODO Maybe free their memory
-        for (value in entityMap.values) value.clear()
+        entityMap.values.removeIf {
+            val shouldRemove = it.isEmpty()
+            it.clear()
+            shouldRemove
+        }
     }
 
     fun insert(entity: Entity, safeRadius: Displacement) {

@@ -77,7 +77,7 @@ class TestEntityClustering {
 
         val rng = Random(123)
         val entities = Array(2000) {
-            entity(props, rng.nextInt(-20_000, 20_000).mm, rng.nextInt(-20_000, 20_000).mm)
+            entity(props, (-20_000 + rng.nextInt(40_000)).mm, (-20_000 + rng.nextInt(40_000)).mm)
         }
 
         fun check(entity: Entity) {

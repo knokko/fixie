@@ -10,7 +10,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 internal class EntityMovement(
-        private val stepDuration: Duration,
         private val tileTree: TileTree,
         private val entityClustering: EntityClustering
 ) {
@@ -56,10 +55,14 @@ internal class EntityMovement(
         }
     }
 
+    private fun computeCurrentVelocityX() = entity.wipVelocity.x
+
+    private fun computeCurrentVelocityY() = entity.wipVelocity.y - 4.9.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
+
     fun start(entity: Entity) {
         this.entity = entity
-        deltaX = entity.wipVelocity.x * stepDuration
-        deltaY = entity.wipVelocity.y * stepDuration
+        deltaX = computeCurrentVelocityX() * Scene.STEP_DURATION
+        deltaY = computeCurrentVelocityY() * Scene.STEP_DURATION
         originalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
 
         intersections.clear()
@@ -163,8 +166,8 @@ internal class EntityMovement(
         }
 
         while (true) {
-            val vx = entity.velocity.x * stepDuration
-            val vy = entity.velocity.y * stepDuration
+            val vx = entity.velocity.x * Scene.STEP_DURATION
+            val vy = entity.velocity.y * Scene.STEP_DURATION
             val dx = entity.wipPosition.x + deltaX - entity.position.x
             val dy = entity.wipPosition.y + deltaY - entity.position.y
             if (sqrt(dx * dx + dy * dy) > sqrt(vx * vx + vy * vy) + 0.1 * entity.properties.radius) {
@@ -194,8 +197,8 @@ internal class EntityMovement(
     }
 
     private fun processTileOrEntityIntersections(processTiles: Boolean) {
-        val vx = entity.wipVelocity.x.toDouble(SpeedUnit.METERS_PER_SECOND)
-        val vy = entity.wipVelocity.y.toDouble(SpeedUnit.METERS_PER_SECOND)
+        val vx = computeCurrentVelocityX().toDouble(SpeedUnit.METERS_PER_SECOND)
+        val vy = computeCurrentVelocityY().toDouble(SpeedUnit.METERS_PER_SECOND)
         val speed = sqrt(vx * vx + vy * vy)
         val directionX = vx / speed
         val directionY = vy / speed
@@ -208,8 +211,8 @@ internal class EntityMovement(
         }
 
         if (totalIntersectionFactor > FixDisplacement.ZERO) {
-            val oldVelocityX = entity.wipVelocity.x
-            val oldVelocityY = entity.wipVelocity.y
+            val oldVelocityX = computeCurrentVelocityX()
+            val oldVelocityY = computeCurrentVelocityY()
             for (intersection in properIntersections) {
                 if (intersection.otherVelocity == null == processTiles) {
                     processIntersection(intersection, oldVelocityX, oldVelocityY, directionX, directionY, totalIntersectionFactor)
@@ -340,15 +343,15 @@ internal class EntityMovement(
             if (retryAngle(originalAngle - angleIncrement * counter * counter, totalDelta) > 0.m) return
         }
 
-        entity.stuckCounter = (5.seconds / stepDuration).roundToLong()
+        entity.stuckCounter = (5.seconds / Scene.STEP_DURATION).roundToLong()
     }
 
     fun retry() {
         val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         remainingBudget -= finalDelta / originalDelta
 
-        deltaX = remainingBudget * entity.wipVelocity.x * stepDuration
-        deltaY = remainingBudget * entity.wipVelocity.y * stepDuration
+        deltaX = remainingBudget * computeCurrentVelocityX() * Scene.STEP_DURATION
+        deltaY = remainingBudget * computeCurrentVelocityY() * Scene.STEP_DURATION
         val totalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         if (totalDelta < 0.1.mm) return
 
@@ -369,6 +372,6 @@ internal class EntityMovement(
         interestingTiles.clear()
         interestingEntities.clear()
 
-        entity.wipVelocity.y -= 9.8.mps * stepDuration.toDouble(DurationUnit.SECONDS)
+        entity.wipVelocity.y -= 9.8.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
     }
 }

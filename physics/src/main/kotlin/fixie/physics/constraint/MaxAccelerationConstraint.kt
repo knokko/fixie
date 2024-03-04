@@ -2,6 +2,7 @@ package fixie.physics.constraint
 
 import fixie.*
 import fixie.geometry.Position
+import fixie.physics.Scene
 import fixie.physics.SlidingWindow
 import fixie.physics.Velocity
 import kotlin.math.roundToInt
@@ -9,11 +10,10 @@ import kotlin.time.Duration
 
 internal class MaxAccelerationConstraint(
         windowSize: Duration,
-        stepDuration: Duration,
         private val threshold: Speed
 ) : VelocityConstraint() {
 
-    private val age = (windowSize / stepDuration).roundToInt()
+    private val age = (windowSize / Scene.STEP_DURATION).roundToInt()
     private val velocityHistory = SlidingWindow(Array(age + 1) { Velocity.zero() })
 
     override fun check(position: Position, velocity: Velocity) {

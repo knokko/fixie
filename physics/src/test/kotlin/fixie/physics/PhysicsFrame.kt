@@ -23,7 +23,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 
 private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
     val scene = Scene()
@@ -181,13 +180,13 @@ fun main() {
     val updateCounter = UpdateCounter()
     Thread(UpdateLoop({ updateLoop ->
         updateCounter.increment()
-        scene.update(20.milliseconds)
+        scene.update(Scene.STEP_DURATION)
         if (!frame.isDisplayable) {
             updateLoop.stop()
             panel.storage.getThreadStorage(Thread.currentThread().id).print(System.out, 60, 1.0)
         }
         if (Math.random() < 0.01) println("UPS is ${updateCounter.value}")
-    }, 20_000_000L)).start()
+    }, Scene.STEP_DURATION.inWholeNanoseconds)).start()
 
     UpdateLoop({ renderLoop ->
         frame.repaint()

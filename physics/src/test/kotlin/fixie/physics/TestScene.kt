@@ -33,4 +33,33 @@ class TestScene {
 
         assertEquals(0, query.entities.size)
     }
+
+    @Test
+    fun testGravityAcceleration() {
+        val scene = Scene()
+
+        scene.spawnEntity(EntitySpawnRequest(
+                10.m, 0.m, EntityProperties(radius = 1.m)
+        ))
+
+        scene.update(1.seconds)
+
+        val query = SceneQuery()
+        scene.read(query, 9.m, -10.m, 11.m, 0.m)
+
+        assertEquals(1, query.entities.size)
+        val subject = query.entities[0]
+        assertEquals(10.m, subject.position.x)
+        assertEquals(-4.9.m, subject.position.y, 100.mm)
+        assertEquals(0.mps, subject.velocity.x)
+        assertEquals(-9.8.mps, subject.velocity.y, 0.1.mps)
+    }
+
+    private fun assertEquals(expected: Displacement, actual: Displacement, maxError: Displacement) {
+        if (abs(expected - actual) > maxError) assertEquals(expected, actual)
+    }
+
+    private fun assertEquals(expected: Speed, actual: Speed, maxError: Speed) {
+        if (abs(expected - actual) > maxError) assertEquals(expected, actual)
+    }
 }

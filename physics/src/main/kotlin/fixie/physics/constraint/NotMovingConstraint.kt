@@ -2,17 +2,17 @@ package fixie.physics.constraint
 
 import fixie.geometry.Position
 import fixie.*
+import fixie.physics.Scene
 import fixie.physics.SlidingWindow
 import fixie.physics.Velocity
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 internal class NotMovingConstraint(
-        windowDuration: Duration,
-        private val stepDuration: Duration
+        windowDuration: Duration
 ) : VelocityConstraint() {
 
-    private val age = (windowDuration / stepDuration).roundToInt()
+    private val age = (windowDuration / Scene.STEP_DURATION).roundToInt()
     private val velocityHistory = SlidingWindow(Array(age + 1) { Velocity.zero() })
     private val positionHistory = SlidingWindow(Array(age + 1) { Position.origin() })
 

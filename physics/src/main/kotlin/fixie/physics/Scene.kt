@@ -16,7 +16,6 @@ private val LIMIT = 10.km
 
 class Scene {
 
-    private val stepDuration = 10.milliseconds
     private var remainingTime = 0.milliseconds
 
     private var updateThread: Thread? = null
@@ -82,9 +81,9 @@ class Scene {
                             position = Position(request.x, request.y),
                             velocity = Velocity(request.velocityX, request.velocityY)
                     )
-                    entity.constraints.add(MaxAccelerationConstraint(400.milliseconds, stepDuration, 5.mps))
-                    entity.constraints.add(NotMovingConstraint(200.milliseconds, stepDuration))
-                    entity.constraints.add(NotStuckConstraint(0.2.mps, 1.seconds, stepDuration) { entity.stuckCounter = 0 })
+                    entity.constraints.add(MaxAccelerationConstraint(400.milliseconds, 5.mps))
+                    entity.constraints.add(NotMovingConstraint(200.milliseconds))
+                    entity.constraints.add(NotStuckConstraint(0.2.mps, 1.seconds) { entity.stuckCounter = 0 })
                     entities.add(entity)
                     request.id = entity.id
                 }
@@ -150,7 +149,7 @@ class Scene {
         }
     }
 
-    private val movement = EntityMovement(stepDuration, tileTree, entityClustering)
+    private val movement = EntityMovement(tileTree, entityClustering)
 
     private fun updateEntity(entity: Entity) {
         movement.start(entity)
@@ -169,8 +168,8 @@ class Scene {
 
     private fun updateEntities() {
         for (entity in entities) {
-            val vx = entity.wipVelocity.x * stepDuration
-            val vy = entity.wipVelocity.y * stepDuration
+            val vx = entity.wipVelocity.x * STEP_DURATION
+            val vy = entity.wipVelocity.y * STEP_DURATION
             entityClustering.insert(entity, 1.1 * (entity.properties.radius + abs(vx) + abs(vy)))
 
             for (constraint in entity.constraints) {
@@ -190,11 +189,11 @@ class Scene {
         processRequests()
         remainingTime += duration
 
-        while (remainingTime >= stepDuration) {
+        while (remainingTime >= STEP_DURATION) {
             copyStateBeforeUpdate()
             updateEntities()
             copyStateAfterUpdate()
-            remainingTime -= stepDuration
+            remainingTime -= STEP_DURATION
         }
     }
 
@@ -227,5 +226,9 @@ class Scene {
                 }
             }
         }
+    }
+
+    companion object {
+        val STEP_DURATION = 10.milliseconds
     }
 }

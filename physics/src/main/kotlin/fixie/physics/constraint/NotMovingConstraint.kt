@@ -21,13 +21,6 @@ internal class NotMovingConstraint(
     override fun check(position: Position, velocity: Velocity) {
        if (velocityHistory.getMaximumAge() >= age)  {
            val oldPosition = positionHistory.get(age)
-           val actualDistance = abs(position.x - oldPosition.x) + abs(position.y - oldPosition.y)
-           val expectedDistance = lowestSpeed * stepDuration * age
-
-           if (expectedDistance > 2 * actualDistance) {
-               velocity.x /= 2
-               velocity.y /= 2
-           }
 
            val currentSpeed = abs(velocity.x) + abs(velocity.y)
            val leavingSpeed = velocityHistory.get(velocityHistory.getMaximumAge()).x
@@ -40,6 +33,14 @@ internal class NotMovingConstraint(
                     val candidateSpeed = velocityHistory.get(candidateAge).x
                     if (candidateSpeed < lowestSpeed) lowestSpeed = candidateSpeed
                 }
+           }
+
+           val actualDistance = abs(position.x - oldPosition.x) + abs(position.y - oldPosition.y)
+           val expectedDistance = lowestSpeed * Scene.STEP_DURATION * age
+
+           if (expectedDistance > 2 * actualDistance) {
+               velocity.x /= 2
+               velocity.y /= 2
            }
        }
 

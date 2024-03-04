@@ -23,6 +23,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
     val scene = Scene()
@@ -156,8 +157,8 @@ fun main() {
     val playerProperties = EntityProperties(
             radius = 0.1.m,
             updateFunction = { position, velocity ->
-                if (moveLeft) velocity.x -= 0.05.mps
-                if (moveRight) velocity.x += 0.05.mps
+                if (moveLeft) velocity.x -= 5.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
+                if (moveRight) velocity.x += 5.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
                 if (shouldJump) {
                     velocity.y += 4.mps
                     shouldJump = false

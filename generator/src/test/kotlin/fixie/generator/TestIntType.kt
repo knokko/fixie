@@ -1,5 +1,6 @@
 package fixie.generator
 
+import fixie.generator.number.IntType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.math.BigInteger

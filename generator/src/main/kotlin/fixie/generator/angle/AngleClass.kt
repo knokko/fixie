@@ -1,6 +1,7 @@
-package fixie.generator
+package fixie.generator.angle
 
 import fixie.AngleUnit
+import fixie.generator.number.NumberClass
 
 class AngleClass(
         val className: String,

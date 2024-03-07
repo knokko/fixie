@@ -1,4 +1,4 @@
-package fixie.generator
+package fixie.generator.number
 
 import java.math.BigInteger
 

@@ -1,4 +1,4 @@
-package fixie.generator
+package fixie.generator.angle
 
 import java.io.PrintWriter
 

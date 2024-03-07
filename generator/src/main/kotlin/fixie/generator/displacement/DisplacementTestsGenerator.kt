@@ -1,4 +1,4 @@
-package fixie.generator
+package fixie.generator.displacement
 
 import java.io.PrintWriter
 

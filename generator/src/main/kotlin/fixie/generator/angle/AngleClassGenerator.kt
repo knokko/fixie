@@ -1,10 +1,7 @@
-package fixie.generator
+package fixie.generator.angle
 
 import fixie.AngleUnit
-import fixie.SpeedUnit
 import java.io.PrintWriter
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*

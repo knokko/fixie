@@ -1,4 +1,4 @@
-package fixie.generator
+package fixie.generator.speed
 
 import fixie.SpeedUnit
 import java.io.PrintWriter

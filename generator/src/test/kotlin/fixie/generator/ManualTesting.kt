@@ -1,5 +1,6 @@
 package fixie.generator
 
+import fixie.AngleUnit
 import fixie.DistanceUnit
 import fixie.SpeedUnit
 import java.io.File
@@ -149,6 +150,34 @@ fun main() {
         displayUnit = SpeedUnit.KILOMETERS_PER_HOUR,
         createNumberExtensions = true
     ))
+
+    val fixAngle = NumberClass(
+            className = "FixAngle",
+            internalType = IntType(false, 4),
+            oneValue = BigInteger.TWO.pow(24),
+            checkOverflow = false
+    )
+    generate(fixAngle)
+    generate(AngleClass(
+            className = "Angle",
+            number = fixAngle,
+            displayUnit = AngleUnit.DEGREES,
+            createNumberExtensions = true,
+            allowComparisons = false,
+            allowDivisionAndMultiplication = false
+    ))
+}
+
+private fun generate(angle: AngleClass) {
+    val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${angle.className}.kt"))
+    AngleClassGenerator(writer, angle).generate()
+    writer.flush()
+    writer.close()
+
+    val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${angle.className}.kt"))
+    AngleTestsGenerator(testWriter, angle).generate()
+    testWriter.flush()
+    testWriter.close()
 }
 
 private fun generate(speed: SpeedClass) {

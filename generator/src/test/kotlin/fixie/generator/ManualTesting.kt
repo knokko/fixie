@@ -1,14 +1,13 @@
 package fixie.generator
 
-import fixie.AngleUnit
-import fixie.DistanceUnit
-import fixie.SpeedUnit
 import fixie.generator.angle.AngleClass
 import fixie.generator.angle.AngleClassGenerator
 import fixie.generator.angle.AngleTestsGenerator
+import fixie.generator.angle.AngleUnit
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.displacement.DisplacementClassGenerator
 import fixie.generator.displacement.DisplacementTestsGenerator
+import fixie.generator.displacement.DistanceUnit
 import fixie.generator.number.IntType
 import fixie.generator.number.NumberClass
 import fixie.generator.number.NumberClassGenerator
@@ -16,6 +15,7 @@ import fixie.generator.number.NumberTestsGenerator
 import fixie.generator.speed.SpeedClass
 import fixie.generator.speed.SpeedClassGenerator
 import fixie.generator.speed.SpeedTestsGenerator
+import fixie.generator.speed.SpeedUnit
 import java.io.File
 import java.io.PrintWriter
 import java.math.BigInteger
@@ -154,6 +154,7 @@ fun main() {
         number = fixDist,
         oneUnit = DistanceUnit.METER,
         displayUnit = DistanceUnit.METER,
+            speed = null,
         createNumberExtensions = true
     ))
     generate(SpeedClass(
@@ -161,19 +162,13 @@ fun main() {
         number = fixDist,
         oneUnit = SpeedUnit.METERS_PER_SECOND,
         displayUnit = SpeedUnit.KILOMETERS_PER_HOUR,
+            displacementClassName = null,
         createNumberExtensions = true
     ))
 
-    val fixAngle = NumberClass(
-            className = "FixAngle",
-            internalType = IntType(false, 4),
-            oneValue = BigInteger.TWO.pow(24),
-            checkOverflow = false
-    )
-    generate(fixAngle)
     generate(AngleClass(
             className = "Angle",
-            number = fixAngle,
+            internalType = IntType(false, 4),
             displayUnit = AngleUnit.DEGREES,
             createNumberExtensions = true,
             allowComparisons = false,
@@ -183,48 +178,48 @@ fun main() {
 
 private fun generate(angle: AngleClass) {
     val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${angle.className}.kt"))
-    AngleClassGenerator(writer, angle).generate()
+    AngleClassGenerator(writer, angle, "fixie").generate()
     writer.flush()
     writer.close()
 
     val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${angle.className}.kt"))
-    AngleTestsGenerator(testWriter, angle).generate()
+    AngleTestsGenerator(testWriter, angle, "fixie").generate()
     testWriter.flush()
     testWriter.close()
 }
 
 private fun generate(speed: SpeedClass) {
     val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${speed.className}.kt"))
-    SpeedClassGenerator(writer, speed).generate()
+    SpeedClassGenerator(writer, speed, "fixie").generate()
     writer.flush()
     writer.close()
 
     val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${speed.className}.kt"))
-    SpeedTestsGenerator(testWriter, speed).generate()
+    SpeedTestsGenerator(testWriter, speed, "fixie").generate()
     testWriter.flush()
     testWriter.close()
 }
 
 private fun generate(displacement: DisplacementClass) {
     val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${displacement.className}.kt"))
-    DisplacementClassGenerator(writer, displacement).generate()
+    DisplacementClassGenerator(writer, displacement, "fixie").generate()
     writer.flush()
     writer.close()
 
     val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${displacement.className}.kt"))
-    DisplacementTestsGenerator(testWriter, displacement).generate()
+    DisplacementTestsGenerator(testWriter, displacement, "fixie").generate()
     testWriter.flush()
     testWriter.close()
 }
 
 private fun generate(number: NumberClass) {
     val writer = PrintWriter(File("generated/src/main/kotlin/fixie/${number.className}.kt"))
-    NumberClassGenerator(writer, number).generate()
+    NumberClassGenerator(writer, number, "fixie").generate()
     writer.flush()
     writer.close()
 
     val testWriter = PrintWriter(File("generated/src/test/kotlin/fixie/Test${number.className}.kt"))
-    NumberTestsGenerator(testWriter, number).generate()
+    NumberTestsGenerator(testWriter, number, "fixie").generate()
     testWriter.flush()
     testWriter.close()
 }

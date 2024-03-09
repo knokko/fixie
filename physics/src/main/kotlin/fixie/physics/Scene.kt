@@ -229,6 +229,6 @@ class Scene {
     }
 
     companion object {
-        val STEP_DURATION = 20.milliseconds
+        val STEP_DURATION = 10.milliseconds
     }
 }

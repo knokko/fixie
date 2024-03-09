@@ -1,3 +1,7 @@
 rootProject.name = 'fixie'
 
-include 'generator', 'generated', 'benchmarks', 'geometry', 'physics'
+include 'generator', 'geometry', 'physics', 'generator-tester', 'physics-kit',
+        'test-kit-fixie8', 'test-kit-fixie16', 'test-kit-fixie32', 'test-kit-fixie64',
+        'test-kit-fixie8u', 'test-kit-fixie16u', 'test-kit-fixie32u', 'test-kit-fixie64u',
+        'test-kit-fixie8-unchecked', 'test-kit-fixie16-unchecked', 'test-kit-fixie32-unchecked', 'test-kit-fixie64-unchecked',
+        'test-kit-fixie8u-unchecked', 'test-kit-fixie16u-unchecked', 'test-kit-fixie32u-unchecked', 'test-kit-fixie64u-unchecked'

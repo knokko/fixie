@@ -1,6 +1,5 @@
 package fixie.generator.speed
 
-import fixie.SpeedUnit
 import fixie.generator.number.NumberClass
 
 class SpeedClass(
@@ -8,5 +7,6 @@ class SpeedClass(
         val number: NumberClass,
         val oneUnit: SpeedUnit,
         val displayUnit: SpeedUnit,
+        val displacementClassName: String?,
         val createNumberExtensions: Boolean
 )

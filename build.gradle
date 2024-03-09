@@ -37,36 +37,21 @@ allprojects {
     }
 }
 
-project(':generated') {
+project(':generator-tester') {
     dependencies {
-        implementation project(':')
-    }
-}
-
-project(':generator') {
-    dependencies {
-        implementation project(':')
-    }
-}
-
-project(':benchmarks') {
-    dependencies {
-        implementation project(':')
-        implementation project(':generated')
+        implementation project(':generator')
     }
 }
 
 project(':geometry') {
     dependencies {
-        implementation project(':')
-        implementation project(':generated')
+        implementation project(':physics-kit')
     }
 }
 
 project(':physics') {
     dependencies {
-        implementation project(':')
-        implementation project(':generated')
+        implementation project(':physics-kit')
         implementation project(':geometry')
         implementation 'com.github.knokko.update-loop:implementation:v2.0.0'
     }

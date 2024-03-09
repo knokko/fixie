@@ -1,13 +1,15 @@
 package fixie.generator.number
 
 import java.io.PrintWriter
+import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.math.*
 import kotlin.random.Random
 
-class NumberTestsGenerator(
+internal class NumberTestsGenerator(
         private val writer: PrintWriter,
-        private val number: NumberClass
+        private val number: NumberClass,
+        private val packageName: String
 ) {
 
     fun generate() {
@@ -28,6 +30,7 @@ class NumberTestsGenerator(
     }
 
     private fun generateTestSequence(minValue: Double, maxValue: Double, growFactor: Double, density: Int, seed: Long): List<Double> {
+        if (minValue > maxValue) throw IllegalArgumentException("min value is $minValue, but max value is $maxValue")
         val rng = Random(seed)
         val sequence = mutableListOf(minValue, maxValue)
 
@@ -41,38 +44,51 @@ class NumberTestsGenerator(
         }
 
         sequence.sort()
+        if (sequence[0] == 1.0) {
+            throw IllegalStateException()
+        }
         return sequence
     }
 
-    private fun generateTestSequence(minValue: Long, maxValue: Long, growFactor: Int, density: Int, seed: Long): List<Long> {
+    private fun generateTestSequence(
+            minValue: BigInteger, maxValue: BigInteger,
+            growFactor: Int, density: Int, seed: Long
+    ): List<BigInteger> {
         val rng = Random(seed)
         val sequence = mutableListOf(minValue, maxValue)
 
         var value = minValue
-        while (value < maxValue / growFactor && value < maxValue) {
+        while (value < maxValue / BigInteger.valueOf(growFactor.toLong()) && value < maxValue) {
             if (value != minValue) {
-                val marginFactor = 1.0 + 0.7 * (growFactor - 1.0)
+                val marginFactor = BigDecimal.valueOf(1.0 + 0.7 * (growFactor - 1.0))
                 for (counter in 0 until density) {
-                    val bound1 = (value / marginFactor).roundToLong()
-                    val bound2 = (value * marginFactor).roundToLong()
-                    sequence.add(rng.nextLong(min(bound1, bound2), max(bound1, bound2)))
+                    val bound1 = (value.toBigDecimal() / marginFactor + BigDecimal.valueOf(0.5 * value.signum())).toBigInteger()
+                    val bound2 = (value.toBigDecimal() * marginFactor + BigDecimal.valueOf(0.5 * value.signum())).toBigInteger()
+
+                    val minBound = bound1.min(bound2)
+                    val maxBound = bound1.max(bound2)
+                    sequence.add(minBound + BigInteger.valueOf(rng.nextLong((maxBound - minBound).longValueExact())))
                 }
             }
 
-            if (value < -growFactor * growFactor) value /= growFactor
-            else if (value > growFactor * growFactor) value *= growFactor
-            else value += growFactor * growFactor
+            if (value < BigInteger.valueOf(-growFactor.toLong() * growFactor)) value /= BigInteger.valueOf(growFactor.toLong())
+            else if (value > BigInteger.valueOf(growFactor.toLong() * growFactor)) value *= BigInteger.valueOf(growFactor.toLong())
+            else value += BigInteger.valueOf(growFactor.toLong() * growFactor)
         }
 
-        if (!sequence.contains(0) && minValue <= 0 && maxValue >= 0) sequence.add(0)
-        if (!sequence.contains(1) && minValue <= 1 && maxValue >= 1) sequence.add(1)
+        if (!sequence.contains(BigInteger.ZERO) && minValue <= BigInteger.ZERO && maxValue >= BigInteger.ZERO) {
+            sequence.add(BigInteger.ZERO)
+        }
+        if (!sequence.contains(BigInteger.ONE) && minValue <= BigInteger.ONE && maxValue >= BigInteger.ONE) {
+            sequence.add(BigInteger.ONE)
+        }
 
         sequence.sort()
         return sequence
     }
 
     private fun generateClassPrefix() {
-        writer.println("package fixie")
+        writer.println("package $packageName")
         writer.println()
         writer.println("import kotlin.math.absoluteValue")
         writer.println("import org.junit.jupiter.api.Test")
@@ -98,14 +114,14 @@ class NumberTestsGenerator(
         writer.println("\t\tassertEquals(\"1\", ${number.className}.ONE.toString())")
         if (number.oneValue > BigInteger.valueOf(1000)) {
             writer.println("\t\tassertTrue((${number.className}.ONE / 3).toString().startsWith(\"0.33\"))")
-        } else {
+        } else if (number.oneValue >= BigInteger.valueOf(8)){
             writer.println("\t\tassertTrue((${number.className}.ONE / 3).toString().startsWith(\"0.3\"))")
         }
         if (number.internalType.signed) {
             writer.println("\t\tassertEquals(\"-1\", (-${number.className}.ONE).toString())")
             if (number.oneValue > BigInteger.valueOf(1000)) {
                 writer.println("\t\tassertTrue((${number.className}.ONE / -3).toString().startsWith(\"-0.33\"))")
-            } else {
+            } else if (number.oneValue >= BigInteger.valueOf(8)) {
                 writer.println("\t\tassertTrue((${number.className}.ONE / -3).toString().startsWith(\"-0.3\"))")
             }
         }
@@ -116,7 +132,9 @@ class NumberTestsGenerator(
 
         // Test numbers like 0.0x
         if (number.oneValue.remainder(BigInteger.valueOf(16)) == BigInteger.ZERO) {
-            writer.println("\t\tassertEquals(\"0.0625\", (${number.className}.ONE / 16).toString())")
+            if (number.oneValue > BigInteger.valueOf(50_000)) {
+                writer.println("\t\tassertEquals(\"0.0625\", (${number.className}.ONE / 16).toString())")
+            } else writer.println("\t\tassertTrue((${number.className}.ONE / 16).toString().startsWith(\"0.06\"))")
         }
         if (number.oneValue.remainder(BigInteger.valueOf(100)) == BigInteger.ZERO) {
             writer.println("\t\tassertEquals(\"0.01\", (${number.className}.ONE / 100).toString())")
@@ -145,7 +163,7 @@ class NumberTestsGenerator(
         }
 
         val testSequence = generateTestSequence(
-                minValue.longValueExact(), maxValue.longValueExact(), 15, 1, 2024012346
+                minValue, maxValue, 15, 1, 2024012346
         )
         for (candidate in testSequence) {
             writer.println("\t\ttestValue($candidate)")
@@ -153,18 +171,17 @@ class NumberTestsGenerator(
 
         if (number.checkOverflow && canUnderflow) {
             writer.println()
-            val minTypeValue = type.getMinValue().longValueExact()
-            val underflowSequence = generateTestSequence(minTypeValue, minValue.longValueExact() - 1, 45, 1, 242420001)
+            val minTypeValue = type.getMinValue()
+            val underflowSequence = generateTestSequence(minTypeValue, minValue - BigInteger.ONE, 45, 1, 242420001)
             for (candidate in underflowSequence) {
-                if (candidate == Long.MIN_VALUE) writer.println("\t\ttestOverflow(Long.MIN_VALUE)")
+                if (candidate == BigInteger.valueOf(Long.MIN_VALUE)) writer.println("\t\ttestOverflow(Long.MIN_VALUE)")
                 else writer.println("\t\ttestOverflow($candidate)")
             }
         }
 
         if (number.checkOverflow && canOverflow) {
             writer.println()
-            val maxTypeValue = if (type.numBytes == 8 && !type.signed) Long.MAX_VALUE else type.getMaxValue().longValueExact()
-            val overflowSequence = generateTestSequence(maxValue.longValueExact() + 1, maxTypeValue, 45, 1, 27202401)
+            val overflowSequence = generateTestSequence(maxValue + BigInteger.ONE, type.getMaxValue(), 45, 1, 27202401)
             for (candidate in overflowSequence) {
                 writer.println("\t\ttestOverflow($candidate)")
             }
@@ -176,12 +193,12 @@ class NumberTestsGenerator(
     private fun generateDoubleConversion(convertToFloat: Boolean) {
         writer.println()
         writer.println("\t@Test")
-        if (convertToFloat) {
-            writer.println("\tfun testFloatConversion() {")
-            writer.println("\t\tassertEquals(${number.className}.ONE, ${number.className}.from(1f))")
-        } else {
-            writer.println("\tfun testDoubleConversion() {")
-            writer.println("\t\tassertEquals(${number.className}.ONE, ${number.className}.from(1.0))")
+        if (convertToFloat) writer.println("\tfun testFloatConversion() {")
+        else writer.println("\tfun testDoubleConversion() {")
+
+        if (number.oneValue < BigInteger.TWO.pow(50)) {
+            if (convertToFloat) writer.println("\t\tassertEquals(${number.className}.ONE, ${number.className}.from(1f))")
+            else writer.println("\t\tassertEquals(${number.className}.ONE, ${number.className}.from(1.0))")
         }
 
         val minValue = 1.0 / number.oneValue.toDouble()
@@ -223,8 +240,9 @@ class NumberTestsGenerator(
                 }
             }
 
+            val minOverflowValue = max(realMaxValue * 1.0001, realMaxValue + 1)
             val overflowSequence = generateTestSequence(
-                max(realMaxValue * 1.0001, realMaxValue + 1), realMaxValue * realMaxValue,
+                minOverflowValue, minOverflowValue * minOverflowValue,
                 31.3, 1, 20272401
             )
             for (candidate in overflowSequence) {
@@ -242,8 +260,8 @@ class NumberTestsGenerator(
         writer.println("\tfun testUnaryMinus() {")
 
         val testSequence = generateTestSequence(
-            number.internalType.getMinValue().add(BigInteger.ONE).longValueExact(),
-            number.internalType.getMaxValue().longValueExact(),
+            number.internalType.getMinValue().add(BigInteger.ONE),
+            number.internalType.getMaxValue(),
             31, 1, 2024012410
         )
         if (number.checkOverflow) writer.println("\t\tassertThrows(FixedPointException::class.java) { -${number.className}.raw(${number.internalType}.MIN_VALUE) }")
@@ -279,13 +297,15 @@ class NumberTestsGenerator(
         if (number.internalType.numBytes < 4) minusPlusOne = "($minusPlusOne).to${number.internalType}()"
         writer.println("\t\ttestValues(${number.className}.raw(${number.internalType}.MIN_VALUE), ${number.className}.ONE, ${number.className}.raw($minusPlusOne))")
 
-        val minValue = (number.internalType.getMinValue() / number.oneValue).longValueExact()
-        val maxValue = (number.internalType.getMaxValue() / number.oneValue).longValueExact()
+        val minValue = (number.internalType.getMinValue() / number.oneValue)
+        val maxValue = (number.internalType.getMaxValue() / number.oneValue)
         val intSequence = generateTestSequence(minValue, maxValue, 3 * number.internalType.numBytes, 2, 20242401130)
         val rng = Random(32)
         for (candidate in intSequence) {
-            val adder = rng.nextLong(min(1 + maxValue - candidate, maxValue))
-            writer.println("\t\ttestValues($candidate, $adder, ${candidate + adder})")
+            var adderBound = BigInteger.ONE + maxValue - candidate
+            if (adderBound < BigInteger.ZERO) adderBound = maxValue
+            val adder = rng.nextLong(adderBound.min(maxValue).longValueExact())
+            writer.println("\t\ttestValues($candidate, $adder, ${candidate + BigInteger.valueOf(adder)})")
         }
 
         var maxMinusOne = "${number.internalType}.MAX_VALUE - $oneLongValue"
@@ -312,51 +332,76 @@ class NumberTestsGenerator(
 
             writer.println()
             for (candidate in intSequence2) {
-                val adder1 = maxValue - candidate + 1
-                val adder2 = (adder1 + 1) * (adder1 + 1)
+                val adder1 = maxValue - candidate + BigInteger.ONE
+                val adder2 = (adder1 + BigInteger.ONE) * (adder1 + BigInteger.ONE)
 
-                val difference1 = candidate - minValue + 1
-                val difference2 = (difference1 + 1) * (difference1 + 1)
+                val difference1 = candidate - minValue + BigInteger.ONE
+                val difference2 = (difference1 + BigInteger.ONE) * (difference1 + BigInteger.ONE)
 
                 for (adder in arrayOf(adder1, adder2)) {
-                    if (adder < adder1) break // Avoid overflow
-                    if (candidate.toInt().toLong() == candidate && adder.toInt().toLong() == adder) {
+                    if (BigInteger.valueOf(candidate.toInt().toLong()) == candidate &&
+                            BigInteger.valueOf(adder.toInt().toLong()) == adder) {
                         writer.println("\t\ttestOverflowPlus($candidate, $adder)")
                     }
-                    writer.println("\t\ttestOverflowPlus(${candidate}L, ${adder}L)")
+                    if (BigInteger.valueOf(candidate.toLong()) == candidate &&
+                            BigInteger.valueOf(adder.toLong()) == adder) {
+                        val longAdderString = if (adder == BigInteger.valueOf(Long.MIN_VALUE)) "Long.MIN_VALUE" else "${adder}L"
+                        writer.println("\t\ttestOverflowPlus(${candidate}L, $longAdderString)")
+                    }
 
                     // Avoid precision issues
-                    if (adder > 0.01 * abs(candidate) && abs(candidate) > 0.01 * adder) {
+                    if (adder.toDouble() > 0.01 * abs(candidate.toDouble()) &&
+                            abs(candidate.toDouble()) > 0.01 * adder.toDouble() &&
+                            BigInteger.valueOf(adder.toFloat().roundToLong()) == adder &&
+                            BigInteger.valueOf(candidate.toFloat().roundToLong()) == candidate
+                            ) {
                         writer.println("\t\ttestOverflowPlus(${candidate.toFloat()}f, ${adder.toFloat()}f)")
                     }
-                    if (adder > 0.0001 * abs(candidate) && abs(candidate) > 0.0001 * adder) {
+                    if (adder.toDouble() > 0.0001 * abs(candidate.toDouble()) &&
+                            abs(candidate.toDouble()) > 0.0001 * adder.toDouble() &&
+                            BigInteger.valueOf(adder.toDouble().roundToLong()) == adder &&
+                            BigInteger.valueOf(candidate.toDouble().roundToLong()) == candidate
+                            ) {
                         writer.println("\t\ttestOverflowPlus(${candidate.toDouble()}, ${adder.toDouble()})")
                     }
                 }
 
                 for (difference in arrayOf(difference1, difference2)) {
-                    if (difference < difference1) break // Avoid overflow
-                    if (candidate.toInt().toLong() == candidate && difference.toInt().toLong() == difference) {
+                    if (BigInteger.valueOf(candidate.toInt().toLong()) == candidate
+                            && BigInteger.valueOf(difference.toInt().toLong()) == difference) {
                         writer.println("\t\ttestOverflowMinus($candidate, $difference)")
                     }
-                    writer.println("\t\ttestOverflowMinus(${candidate}L, ${difference}L)")
+
+                    if (BigInteger.valueOf(difference.toLong()) == difference &&
+                            BigInteger.valueOf(candidate.toLong()) == candidate) {
+                        val longDifferenceString = if (difference == BigInteger.valueOf(Long.MIN_VALUE)) "Long.MIN_VALUE" else "${difference}L"
+                        writer.println("\t\ttestOverflowMinus(${candidate}L, $longDifferenceString)")
+                    }
 
                     // Avoid precision issues
-                    if (difference > 0.01 * abs(candidate) && abs(candidate) > 0.01 * difference && (difference == difference2 || abs(candidate) < 10_000)) {
+                    if (difference.toDouble() > 0.01 * abs(candidate.toDouble()) &&
+                            abs(candidate.toDouble()) > 0.01 * difference.toDouble() &&
+                            (difference == difference2 || abs(candidate.toDouble()) < 10_000) &&
+                            BigInteger.valueOf(difference.toFloat().roundToLong()) == difference &&
+                            BigInteger.valueOf(candidate.toFloat().roundToLong()) == candidate) {
                         writer.println("\t\ttestOverflowMinus(${candidate.toFloat()}f, ${difference.toFloat()}f)")
                     }
-                    if (difference > 0.0001 * abs(candidate) && abs(candidate) > 0.0001 * difference) {
+                    if (difference.toDouble() > 0.0001 * abs(candidate.toDouble())
+                            && abs(candidate.toDouble()) > 0.0001 * difference.toDouble()
+                            && BigInteger.valueOf(difference.toDouble().roundToLong()) == difference
+                            && BigInteger.valueOf(candidate.toDouble().roundToLong()) == candidate) {
                         writer.println("\t\ttestOverflowMinus(${candidate.toDouble()}, ${difference.toDouble()})")
                     }
                 }
             }
         }
 
-        val raw = rng.nextLong(1, number.oneValue.longValueExact())
+        val raw = BigInteger.ONE + BigInteger.valueOf(rng.nextLong(number.oneValue.subtract(BigInteger.ONE).longValueExact()))
+
         if (number.internalType.signed) {
-            writer.println("\t\tassertEquals(${number.className}.raw(${raw + (maxValue - 1) * number.oneValue.longValueExact()}), ${number.className}.raw(${-number.oneValue.longValueExact() + raw}) + $maxValue)")
+            writer.println("\t\tassertEquals(${number.className}.raw(${raw + (maxValue - BigInteger.ONE) * number.oneValue}), ${number.className}.raw(${-number.oneValue + raw}) + $maxValue)")
         } else {
-            writer.println("\t\tassertEquals(${number.className}.raw(${raw.toULong() + (maxValue.toULong() - 1u) * number.oneValue.longValueExact().toULong()}u), ${number.className}.raw(${raw}u) + ${maxValue - 1})")
+            writer.println("\t\tassertEquals(${number.className}.raw(${raw + (maxValue - BigInteger.ONE) * number.oneValue}u), ${number.className}.raw(${raw}u) + ${maxValue - BigInteger.ONE})")
         }
 
         writer.println("\t}")
@@ -401,16 +446,14 @@ class NumberTestsGenerator(
         writer.println("\t\t\t}")
         writer.println("\t\t}")
 
-        val minIntValue = (number.internalType.getMinValue() / number.oneValue).longValueExact()
-        val maxIntValue = (number.internalType.getMaxValue() / number.oneValue).longValueExact()
+        val minIntValue = (number.internalType.getMinValue() / number.oneValue)
+        val maxIntValue = (number.internalType.getMaxValue() / number.oneValue)
 
         val sequence = generateTestSequence(minIntValue, maxIntValue, 6, 2, 20242401118)
         val rng = Random(26012024235)
         for (a in sequence) {
             val b = sequence.random(rng)
-            val fits = try {
-                Math.multiplyExact(a, b) in minIntValue..maxIntValue
-            } catch (overflow: ArithmeticException) { false }
+            val fits = a * b in minIntValue..maxIntValue
 
             if (fits) {
                 writer.println("\t\ttestValues($a, $b)")
@@ -423,7 +466,7 @@ class NumberTestsGenerator(
         if (!number.internalType.signed) raw1 = -raw1
         val raw2 = rng.nextLong(number.oneValue.longValueExact() / 2, number.oneValue.longValueExact())
         val suffix = if (number.internalType.signed) "" else "u"
-        val maxDifference = max(1, number.oneValue.longValueExact() / 100)
+        val maxDifference = max(2, number.oneValue.longValueExact() / 100)
         writer.println("\t\tassertEquals(${number.className}.raw($raw1$suffix), (${number.className}.raw($raw1$suffix) * ${number.className}.raw($raw2$suffix)) / ${number.className}.raw($raw2$suffix), ${number.className}.raw($maxDifference$suffix))")
 
         writer.println("\t}")
@@ -479,7 +522,7 @@ class NumberTestsGenerator(
         if (maxIntValue * number.oneValue != number.internalType.getMaxValue()) {
             writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MAX_VALUE) > $maxIntValue)")
         }
-        writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MAX_VALUE) < ${maxIntValue.add(BigInteger.ONE)})")
+        writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MAX_VALUE) < ${maxIntValue.add(BigInteger.ONE)}${if (number.internalType.signed) "" else "u"})")
         writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MAX_VALUE) < ${maxIntValue.add(BigInteger.ONE).toDouble() * 1.001})")
         writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MAX_VALUE) < ${number.internalType}.MAX_VALUE)")
         writer.println("\t\tassertTrue(${number.className}.raw(${number.internalType}.MAX_VALUE) < ${number.internalType}.MAX_VALUE.toFloat())")

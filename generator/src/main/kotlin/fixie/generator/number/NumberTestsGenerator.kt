@@ -207,9 +207,9 @@ internal class NumberTestsGenerator(
         // Avoid nasty rounding errors
         var maxValue = realMaxValue
         if (convertToFloat) {
-            while (maxValue.toFloat().toDouble() > realMaxValue) maxValue = maxValue.nextDown()
+            while (maxValue.toFloat().toDouble() > realMaxValue) maxValue = maxValue.nextDown() * 0.999
         } else {
-            while (maxValue * number.oneValue.toDouble() > number.internalType.getMaxValue().toDouble()) maxValue = maxValue.nextDown()
+            while (maxValue * number.oneValue.toDouble() > number.internalType.getMaxValue().toDouble()) maxValue = maxValue.nextDown() * 0.999
         }
 
         fun generateTestCase(value: Double) {

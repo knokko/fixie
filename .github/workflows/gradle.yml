@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ windows-latest, macos-latest, ubuntu-latest ]
-        jdk: [ 11, 17, 20 ]
+        jdk: [ 11, 21 ]
     steps:
     - uses: actions/checkout@v3
     - name: Set up JDK ${{ matrix.jdk }}
@@ -23,13 +23,7 @@ jobs:
       with:
         java-version: ${{ matrix.jdk }}
         distribution: 'temurin'
-    - name: Build with Gradle
-      uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
-      with:
-        arguments: build
-    - name: Store test results
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: build/reports
+    - run: './gradlew shadowJar'
+    - run: 'java -jar generator-tester/build/libs/generator-tester-all.jar'
+    - run: './gradlew test'
+    - run: 'java -jar generator-tester/build/libs/generator-tester-all.jar check'

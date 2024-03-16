@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 allprojects {
@@ -38,8 +39,14 @@ allprojects {
 }
 
 project(':generator-tester') {
+    apply plugin: 'com.github.johnrengelman.shadow'
     dependencies {
         implementation project(':generator')
+    }
+    shadowJar {
+        manifest {
+            attributes ('Main-Class': 'fixie.generator.tester.GeneratorTesterKt')
+        }
     }
 }
 

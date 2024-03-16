@@ -14,25 +14,29 @@ import java.io.File
 import java.math.BigInteger
 import kotlin.math.min
 
-fun main() {
-    for (checkOverflow in arrayOf(false, true)) {
-        for (signed in arrayOf(false, true)) {
-            fun moduleName(numBits: Int) = "test-kit-fixie$numBits${if (signed) "" else "u"}${if (checkOverflow) "" else "-unchecked"}"
-            generateModule(createModule(8, signed, checkOverflow, longArrayOf(
-                    2, 10, 64, 100, Byte.MAX_VALUE.toLong()
-            )), File(moduleName(8)), true)
-            generateModule(createModule(16, signed, checkOverflow, longArrayOf(
-                    2, 10, 300, 2048, 10_000, Short.MAX_VALUE.toLong()
-            )), File(moduleName(16)), true)
-            generateModule(createModule(32, signed, checkOverflow, longArrayOf(
-                    2, 10, 5000, 1048576, 10_000_000, 123456789, 1_000_000_000, Int.MAX_VALUE.toLong()
-            )), File(moduleName(32)), true)
-            generateModule(createModule(64, signed, checkOverflow, longArrayOf(
-                    2, 10, 80_000_000, 1 shl 40, Long.MAX_VALUE / 1234567, Long.MAX_VALUE
-            )), File(moduleName(64)), true)
+fun main(args: Array<String>) {
+    if (args.isEmpty()) {
+        for (checkOverflow in arrayOf(false, true)) {
+            for (signed in arrayOf(false, true)) {
+                fun moduleName(numBits: Int) = "test-kit-fixie$numBits${if (signed) "" else "u"}${if (checkOverflow) "" else "-unchecked"}"
+                generateModule(createModule(8, signed, checkOverflow, longArrayOf(
+                        2, 10, 64, 100, Byte.MAX_VALUE.toLong()
+                )), File(moduleName(8)), true)
+                generateModule(createModule(16, signed, checkOverflow, longArrayOf(
+                        2, 10, 300, 2048, 10_000, Short.MAX_VALUE.toLong()
+                )), File(moduleName(16)), true)
+                generateModule(createModule(32, signed, checkOverflow, longArrayOf(
+                        2, 10, 5000, 1048576, 10_000_000, 123456789, 1_000_000_000, Int.MAX_VALUE.toLong()
+                )), File(moduleName(32)), true)
+                generateModule(createModule(64, signed, checkOverflow, longArrayOf(
+                        2, 10, 80_000_000, 1 shl 40, Long.MAX_VALUE / 1234567, Long.MAX_VALUE
+                )), File(moduleName(64)), true)
+            }
         }
+        generateModule(createPhysicsModule(), File("physics-kit"), true)
+    } else if (!File("test-kit-fixie32u/build/test-results/test/TEST-fixie32.TestFix2.xml").exists()) {
+        throw AssertionError("It looks like the test wasn't executed")
     }
-    generateModule(createPhysicsModule(), File("physics-kit"), true)
 }
 
 private fun createPhysicsModule(): FixieModule {

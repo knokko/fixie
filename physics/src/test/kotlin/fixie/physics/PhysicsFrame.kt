@@ -168,7 +168,7 @@ fun main() {
             }
     )
 
-    val (scene, playerID) = randomBusyScene(playerProperties)
+    val (scene, playerID) = simpleSplitScene(playerProperties)
 
     val panel = PhysicsPanel(scene, lastPlayerPosition, playerID)
     val frame = JFrame()

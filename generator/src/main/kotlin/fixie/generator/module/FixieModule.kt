@@ -30,6 +30,6 @@ class FixieModule(
         }
 
         checkPresent("displacement", displacements, { it.className }) { it.number }
-        checkPresent("speed", speed, { it.className }) { it.number }
+        checkPresent("speed", speed.filter { it.number != null }, { it.className }) { it.number!! }
     }
 }

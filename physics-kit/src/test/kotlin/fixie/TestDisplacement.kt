@@ -55,7 +55,7 @@ class TestDisplacement {
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * FixDisplacement.from(21))
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21f)
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21.0)
-		assertEquals(FixDisplacement.from(20), Displacement.raw(40) / Displacement.raw(2))
+		assertEquals(20.0, Displacement.raw(40) / Displacement.raw(2), 0.001)
 		assertEquals(Displacement.raw(63), Displacement.raw(3) * 21L)
 		assertEquals(Displacement.raw(20), Displacement.raw(40) / 2)
 		assertEquals(Displacement.raw(20), Displacement.raw(40) / 2L)

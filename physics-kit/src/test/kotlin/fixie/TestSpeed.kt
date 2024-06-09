@@ -2,14 +2,15 @@ package fixie
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 class TestSpeed {
 
 	@Test
 	fun testEquals() {
-		assertEquals(Speed.raw(10), Speed.raw(10))
-		assertNotEquals(Speed.raw(10), Speed.raw(11))
+		assertEquals(Speed.raw(10f), Speed.raw(10f))
+		assertNotEquals(Speed.raw(10f), Speed.raw(11f))
 		assertNotEquals(Speed.METERS_PER_SECOND, Speed.MILES_PER_HOUR)
 		assertNotEquals(Speed.METERS_PER_SECOND, Speed.KILOMETERS_PER_SECOND)
 	}
@@ -41,44 +42,42 @@ class TestSpeed {
 
 	@Test
 	fun testCompareTo() {
-		assertTrue(Speed.raw(40) < Speed.raw(41))
-		assertTrue(Speed.raw(40) <= Speed.raw(41))
-		assertTrue(Speed.raw(40) <= Speed.raw(40))
-		assertTrue(Speed.raw(40) >= Speed.raw(40))
-		assertFalse(Speed.raw(40) >= Speed.raw(41))
-		assertFalse(Speed.raw(40) > Speed.raw(41))
+		assertTrue(Speed.raw(40f) < Speed.raw(41f))
+		assertTrue(Speed.raw(40f) <= Speed.raw(41f))
+		assertTrue(Speed.raw(40f) <= Speed.raw(40f))
+		assertTrue(Speed.raw(40f) >= Speed.raw(40f))
+		assertFalse(Speed.raw(40f) >= Speed.raw(41f))
+		assertFalse(Speed.raw(40f) > Speed.raw(41f))
 
-		assertFalse(Speed.raw(40) < Speed.raw(39))
-		assertFalse(Speed.raw(40) <= Speed.raw(39))
-		assertTrue(Speed.raw(40) >= Speed.raw(39))
-		assertTrue(Speed.raw(40) > Speed.raw(39))
+		assertFalse(Speed.raw(40f) < Speed.raw(39f))
+		assertFalse(Speed.raw(40f) <= Speed.raw(39f))
+		assertTrue(Speed.raw(40f) >= Speed.raw(39f))
+		assertTrue(Speed.raw(40f) > Speed.raw(39f))
 	}
 
 	@Test
 	fun testArithmetic() {
-		assertEquals(Speed.raw(73), Speed.raw(70) + Speed.raw(3))
-		assertEquals(Speed.raw(20), Speed.raw(61) - Speed.raw(41))
-		assertEquals(Speed.raw(63), Speed.raw(3) * 21)
-		assertEquals(Speed.raw(63), Speed.raw(3) * FixDisplacement.from(21))
-		assertEquals(Speed.raw(63), Speed.raw(3) * 21f)
-		assertEquals(Speed.raw(63), Speed.raw(3) * 21.0)
-		assertEquals(FixDisplacement.from(20), Speed.raw(40) / Speed.raw(2))
-		assertEquals(Speed.raw(63), Speed.raw(3) * 21L)
-		assertEquals(Speed.raw(20), Speed.raw(40) / 2)
-		assertEquals(Speed.raw(20), Speed.raw(40) / 2L)
-		assertEquals(Speed.raw(20), Speed.raw(40) / FixDisplacement.from(2))
-		assertEquals(Speed.raw(20), Speed.raw(50) / 2.5f)
-		assertEquals(Speed.raw(20), Speed.raw(50) / 2.5)
-		assertEquals(Speed.raw(-43), -Speed.raw(43))
+		assertEquals(Speed.raw(73f), Speed.raw(70f) + Speed.raw(3f))
+		assertEquals(Speed.raw(20f), Speed.raw(61f) - Speed.raw(41f))
+		assertEquals(Speed.raw(63f), Speed.raw(3f) * 21)
+		assertEquals(Speed.raw(63f), Speed.raw(3f) * 21f)
+		assertEquals(Speed.raw(63f), Speed.raw(3f) * 21.0)
+		assertEquals(Speed.raw(63f), Speed.raw(3f) * 21L)
+		assertEquals(Speed.raw(20f), Speed.raw(40f) / 2)
+		assertEquals(Speed.raw(20f), Speed.raw(40f) / 2L)
+		assertEquals(Speed.raw(20f), Speed.raw(50f) / 2.5f)
+		assertEquals(Speed.raw(20f), Speed.raw(50f) / 2.5)
+		assertEquals(Speed.raw(-43f), -Speed.raw(43f))
 		assertEquals(20.0, (10 * Speed.METERS_PER_SECOND * 2.seconds).toDouble(DistanceUnit.METER), 0.01)
+		assertEquals(20.0, (10 * Speed.KILOMETERS_PER_HOUR * 2.hours).toDouble(DistanceUnit.KILOMETER), 0.01)
 	}
 
 	@Test
 	fun testExtensionFunctions() {
-		assertEquals(Speed.raw(63), 21 * Speed.raw(3))
-		assertEquals(Speed.raw(63), 21L * Speed.raw(3))
-		assertEquals(Speed.raw(63), 21f * Speed.raw(3))
-		assertEquals(Speed.raw(63), 21.0 * Speed.raw(3))
+		assertEquals(Speed.raw(63f), 21 * Speed.raw(3f))
+		assertEquals(Speed.raw(63f), 21L * Speed.raw(3f))
+		assertEquals(Speed.raw(63f), 21f * Speed.raw(3f))
+		assertEquals(Speed.raw(63f), 21.0 * Speed.raw(3f))
 		assertEquals(Speed.METERS_PER_SECOND, 1.mps)
 		assertEquals(Speed.METERS_PER_SECOND, 1L.mps)
 		assertEquals(0.5 * Speed.METERS_PER_SECOND, 0.5f.mps)
@@ -89,10 +88,10 @@ class TestSpeed {
 
 	@Test
 	fun testMathFunctions() {
-		assertEquals(Speed.raw(0), abs(Speed.raw(0)))
-		assertEquals(Speed.raw(5), abs(Speed.raw(-5)))
-		assertEquals(Speed.raw(5), abs(Speed.raw(5)))
-		assertEquals(Speed.raw(4), min(Speed.raw(6), Speed.raw(4)))
-		assertEquals(Speed.raw(6), max(Speed.raw(6), Speed.raw(4)))
+		assertEquals(Speed.raw(0f), abs(Speed.raw(0f)))
+		assertEquals(Speed.raw(5f), abs(Speed.raw(-5f)))
+		assertEquals(Speed.raw(5f), abs(Speed.raw(5f)))
+		assertEquals(Speed.raw(4f), min(Speed.raw(6f), Speed.raw(4f)))
+		assertEquals(Speed.raw(6f), max(Speed.raw(6f), Speed.raw(4f)))
 	}
 }

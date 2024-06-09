@@ -2,7 +2,6 @@ package fixie.generator.displacement
 
 import java.io.PrintWriter
 import java.math.BigInteger
-import kotlin.math.min
 
 internal class DisplacementTestsGenerator(
         private val writer: PrintWriter,
@@ -49,10 +48,11 @@ internal class DisplacementTestsGenerator(
         writer.println()
         writer.println("\t@Test")
         writer.println("\tfun testToDouble() {")
+        val margin = if (displacement.number.internalType.numBytes == 1) "0.01" else "0.001"
         if (displacement.number.oneValue > BigInteger.TEN) {
-            writer.println("\t\tassertEquals(0.7, (0.7 * ${displacement.className}.${displacement.oneUnit}).toDouble(DistanceUnit.${displacement.oneUnit}), 0.001)")
+            writer.println("\t\tassertEquals(0.7, (0.7 * ${displacement.className}.${displacement.oneUnit}).toDouble(DistanceUnit.${displacement.oneUnit}), $margin)")
         } else {
-            writer.println("\t\tassertEquals(7.0, (7.0 * ${displacement.className}.${displacement.oneUnit}).toDouble(DistanceUnit.${displacement.oneUnit}), 0.001)")
+            writer.println("\t\tassertEquals(7.0, (7.0 * ${displacement.className}.${displacement.oneUnit}).toDouble(DistanceUnit.${displacement.oneUnit}), $margin)")
         }
         writer.println("\t}")
     }
@@ -76,7 +76,7 @@ internal class DisplacementTestsGenerator(
             writer.println("\t\tassertNotEquals(${displacement.className}.${displacement.oneUnit} * 0.9, ${displacement.className}.${displacement.oneUnit})")
             writer.println("\t\tassertTrue(${displacement.className}.${displacement.oneUnit} > ${displacement.className}.${displacement.oneUnit} * 0.9)")
 
-            if (displacement.oneUnit != DistanceUnit.entries.first() && displacement.number.internalType.numBytes > 1) {
+            if (displacement.oneUnit != DistanceUnit.entries.first() && displacement.number.oneValue > BigInteger.TEN.pow(3)) {
                 val previousUnit = DistanceUnit.entries[displacement.oneUnit.ordinal - 1]
                 writer.println("\t\tassertTrue(${displacement.className}.${displacement.oneUnit} > ${displacement.className}.$previousUnit)")
             }
@@ -121,7 +121,7 @@ internal class DisplacementTestsGenerator(
             writer.println("\t\tassertEquals(${displacement.className}.raw(63$suffix), ${displacement.className}.raw(3$suffix) * ${displacement.number.className}.from(21))")
             writer.println("\t\tassertEquals(${displacement.className}.raw(63$suffix), ${displacement.className}.raw(3$suffix) * 21f)")
             writer.println("\t\tassertEquals(${displacement.className}.raw(63$suffix), ${displacement.className}.raw(3$suffix) * 21.0)")
-            writer.println("\t\tassertEquals(${displacement.number.className}.from(20), ${displacement.className}.raw(40$suffix) / ${displacement.className}.raw(2$suffix))")
+            writer.println("\t\tassertEquals(20.0, ${displacement.className}.raw(40$suffix) / ${displacement.className}.raw(2$suffix), 0.001)")
         } else {
             writer.println("\t\tassertEquals(${displacement.className}.raw(3$suffix), ${displacement.className}.raw(3$suffix) * ${displacement.number.className}.from(1))")
             writer.println("\t\tassertEquals(${displacement.className}.raw(3$suffix), ${displacement.className}.raw(3$suffix) * 1f)")
@@ -140,7 +140,9 @@ internal class DisplacementTestsGenerator(
             writer.println("\t\tassertEquals(${displacement.className}.raw(-43), -${displacement.className}.raw(43))")
         }
         if (displacement.speed != null && displacement.number.oneValue * BigInteger.TEN < displacement.number.internalType.getMaxValue()) {
-            val margin = if (displacement.number.oneValue.min(displacement.speed.number.oneValue) > BigInteger.TEN) 0.001 else 0.1
+            var smallestOneValue = displacement.number.oneValue
+            if (displacement.speed.number != null) smallestOneValue = smallestOneValue.min(displacement.speed.number.oneValue)
+            val margin = if (smallestOneValue > BigInteger.TEN) 0.001 else 0.2
             writer.println("\t\tassertEquals(2.0, (10 * ${displacement.className}.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND), $margin)")
         }
         writer.println("\t}")

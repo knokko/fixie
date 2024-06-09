@@ -5,7 +5,6 @@ import fixie.geometry.Geometry
 import fixie.geometry.Position
 import java.util.*
 import kotlin.math.*
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
@@ -30,7 +29,7 @@ internal class EntityMovement(
     private var deltaX = 0.m
     private var deltaY = 0.m
     var originalDelta = 0.m
-    private var remainingBudget = FixDisplacement.ONE
+    private var remainingBudget = 1.0
 
     class Intersection {
         var myX = 0.m
@@ -39,8 +38,8 @@ internal class EntityMovement(
         var otherY = 0.m
         var radius = 0.m
         var delta = 0.m
-        var bounce = FixDisplacement.ZERO
-        var friction = FixDisplacement.ZERO
+        var bounce = 0f
+        var friction = 0f
         var otherVelocity: Velocity? = null
         var otherRadius = 0.m
         var otherID: UUID = UUID.randomUUID()
@@ -67,7 +66,7 @@ internal class EntityMovement(
 
         intersections.clear()
         properIntersections.clear()
-        remainingBudget = FixDisplacement.ONE
+        remainingBudget = 1.0
     }
 
     fun determineInterestingTilesAndEntities() {
@@ -203,14 +202,14 @@ internal class EntityMovement(
         val directionX = vx / speed
         val directionY = vy / speed
 
-        var totalIntersectionFactor = FixDisplacement.ZERO
+        var totalIntersectionFactor = 0.0
         for (intersection in properIntersections) {
             if (intersection.otherVelocity == null == processTiles) {
                 totalIntersectionFactor += determineIntersectionFactor(intersection, directionX, directionY)
             }
         }
 
-        if (totalIntersectionFactor > FixDisplacement.ZERO) {
+        if (totalIntersectionFactor > 0.0) {
             val oldVelocityX = computeCurrentVelocityX()
             val oldVelocityY = computeCurrentVelocityY()
             for (intersection in properIntersections) {
@@ -239,7 +238,7 @@ internal class EntityMovement(
         processTileOrEntityIntersections(false)
     }
 
-    private fun determineIntersectionFactor(intersection: Intersection, directionX: Double, directionY: Double): FixDisplacement {
+    private fun determineIntersectionFactor(intersection: Intersection, directionX: Double, directionY: Double): Double {
         val normalX = (intersection.myX - intersection.otherX) / intersection.radius
         val normalY = (intersection.myY - intersection.otherY) / intersection.radius
 
@@ -247,14 +246,14 @@ internal class EntityMovement(
     }
 
     private fun determineIntersectionFactor(
-            normalX: FixDisplacement, normalY: FixDisplacement, directionX: Double, directionY: Double
-    ): FixDisplacement {
-        return max(FixDisplacement.ZERO, -directionX * normalX - directionY * normalY)
+            normalX: Double, normalY: Double, directionX: Double, directionY: Double
+    ): Double {
+        return max(0.0, -directionX * normalX - directionY * normalY)
     }
 
     private fun processIntersection(
             intersection: Intersection, oldVelocityX: Speed, oldVelocityY: Speed,
-            directionX: Double, directionY: Double, totalIntersectionFactor: FixDisplacement
+            directionX: Double, directionY: Double, totalIntersectionFactor: Double
     ) {
         val normalX = (intersection.myX - intersection.otherX) / intersection.radius
         val normalY = (intersection.myY - intersection.otherY) / intersection.radius

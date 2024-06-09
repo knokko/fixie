@@ -1,7 +1,6 @@
 package fixie.generator.displacement
 
 import java.io.PrintWriter
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
@@ -107,7 +106,7 @@ internal class DisplacementClassGenerator(
         next()
         writer.println("\toperator fun times(right: ${displacement.className}) = Area(this.value.toDouble() * right.value.toDouble())")
         next()
-        writer.println("\toperator fun div(right: ${displacement.className}) = this.value / right.value")
+        writer.println("\toperator fun div(right: ${displacement.className}) = this.value.toDouble() / right.value.toDouble()")
 
         if (displacement.speed != null) {
             next()

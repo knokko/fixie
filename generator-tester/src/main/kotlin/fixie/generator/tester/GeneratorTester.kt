@@ -6,6 +6,7 @@ import fixie.generator.displacement.DisplacementClass
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.module.FixieModule
 import fixie.generator.module.generateModule
+import fixie.generator.number.FloatType
 import fixie.generator.number.IntType
 import fixie.generator.number.NumberClass
 import fixie.generator.speed.SpeedClass
@@ -48,10 +49,12 @@ private fun createPhysicsModule(): FixieModule {
     ))
     val speed = listOf(SpeedClass(
             className = "Speed",
-            number = numbers[0],
+            number = null,
+            floatType = FloatType.SinglePrecision,
             oneUnit = SpeedUnit.METERS_PER_SECOND,
             displayUnit = SpeedUnit.METERS_PER_SECOND,
             displacementClassName = "Displacement",
+            displacementOneValue = numbers[0].oneValue,
             createNumberExtensions = true
     ))
     val displacements = listOf(DisplacementClass(
@@ -89,26 +92,53 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
     val displacements = mutableListOf<DisplacementClass>()
     val speed = mutableListOf<SpeedClass>()
     val angles = mutableListOf<AngleClass>()
-    for (index in arrayOf(0, oneValues.size - 1)) {
+    for (index in arrayOf(0, oneValues.size / 2, oneValues.size - 1)) {
+        var hasFloatSpeed = false
+
         val oneValue = oneValues[index]
         for (unit in arrayOf(SpeedUnit.MILES_PER_HOUR, SpeedUnit.KILOMETERS_PER_HOUR)) {
             speed.add(SpeedClass(
                     className = "Speed${if (unit == SpeedUnit.MILES_PER_HOUR) "M" else "K"}$oneValue",
                     number = numbers[index],
+                    floatType = null,
                     oneUnit = unit,
                     displayUnit = SpeedUnit.MILES_PER_HOUR,
                     displacementClassName = "Displacement2",
+                    displacementOneValue = BigInteger.TWO,
+                    createNumberExtensions = false
+            ))
+            if (signed && !checkOverflow && (numBits == 32 || numBits == 64) && oneValue == oneValues[0]) {
+                hasFloatSpeed = true
+                speed.add(SpeedClass(
+                        className = "SpeedF${if (unit == SpeedUnit.MILES_PER_HOUR) "M" else "K"}",
+                        number = null,
+                        floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision,
+                        oneUnit = unit,
+                        displayUnit = SpeedUnit.MILES_PER_HOUR,
+                        displacementClassName = "Displacement2",
+                        displacementOneValue = BigInteger.TWO,
+                        createNumberExtensions = false
+                ))
+            }
+        }
+
+        val speedsToTest = mutableListOf<SpeedClass?>()
+        if (oneValue == 2L) {
+            speedsToTest.add(speed.last())
+            if (hasFloatSpeed) speedsToTest.add(speed[speed.size - 2])
+        } else speedsToTest.add(null)
+
+        for (speedToTest in speedsToTest) {
+            val suffix = if (speedsToTest.size == 2 && speedToTest == speedsToTest[1]) "F" else ""
+            displacements.add(DisplacementClass(
+                    className = "Displacement$oneValue$suffix",
+                    number = numbers[index],
+                    speed = speedToTest,
+                    oneUnit = if (index == 0) DistanceUnit.FOOT else DistanceUnit.MILLIMETER,
+                    displayUnit = if (index == 0) DistanceUnit.YARD else DistanceUnit.METER,
                     createNumberExtensions = false
             ))
         }
-        displacements.add(DisplacementClass(
-                className = "Displacement$oneValue",
-                number = numbers[index],
-                speed = if (oneValue == 2L) speed.last() else null,
-                oneUnit = if (index == 0) DistanceUnit.FOOT else DistanceUnit.MILLIMETER,
-                displayUnit = if (index == 0) DistanceUnit.YARD else DistanceUnit.METER,
-                createNumberExtensions = false
-        ))
 
         if (!checkOverflow) {
             angles.add(AngleClass(

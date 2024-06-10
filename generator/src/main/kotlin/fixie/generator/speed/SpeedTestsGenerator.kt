@@ -182,6 +182,19 @@ internal class SpeedTestsGenerator(
             writer.println("\t\tassertEquals(${speed.className}.raw(63$suffix), 21f * ${speed.className}.raw(3$suffix))")
             writer.println("\t\tassertEquals(${speed.className}.raw(63$suffix), 21.0 * ${speed.className}.raw(3$suffix))")
         }
+
+        if (shouldTestSeconds()) {
+            val isSpeedAccurate = speed.number == null || speed.number.oneValue > BigInteger.TEN
+            val isDisplacementAccurate = speed.displacementOneValue == null || speed.displacementOneValue > BigInteger.TEN
+            val margin = if (isSpeedAccurate && isDisplacementAccurate) 0.01 else 5.0
+            if (speed.displacementClassName != null) {
+                writer.println("\t\tassertEquals(20.0, (2.seconds * (10 * ${speed.className}.METERS_PER_SECOND)).toDouble(DistanceUnit.METER), $margin)")
+            }
+            if (speed.acceleration != null) {
+                writer.println("\t\tassertEquals(0.5, (${speed.className}.METERS_PER_SECOND / 2.seconds).toDouble(), ${margin / 40})")
+            }
+        }
+
         if (speed.createNumberExtensions) {
             val abbreviation = speed.oneUnit.abbreviation.replace('/', 'p')
             writer.println("\t\tassertEquals(${speed.className}.${speed.oneUnit}, 1.$abbreviation)")

@@ -98,6 +98,10 @@ internal class SpeedClassGenerator(
             next()
             writer.println("\toperator fun times(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * ${speed.displacementClassName}.METER * right.toDouble(DurationUnit.SECONDS)")
         }
+        if (speed.acceleration != null) {
+            writer.println()
+            writer.println("\toperator fun div(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * ${speed.acceleration.className}.MPS2 / right.toDouble(DurationUnit.SECONDS)")
+        }
         next()
         writer.println("\toperator fun div(right: ${speed.className}) = this.value / right.value")
     }
@@ -150,6 +154,8 @@ internal class SpeedClassGenerator(
                 }
             }
         }
+        writer.println()
+        writer.println("operator fun Duration.times(right: ${speed.className}) = right * this")
     }
 
     private fun generateMathFunctions() {

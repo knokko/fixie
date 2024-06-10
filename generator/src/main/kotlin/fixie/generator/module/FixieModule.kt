@@ -1,5 +1,6 @@
 package fixie.generator.module
 
+import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.angle.AngleClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.number.NumberClass
@@ -10,6 +11,7 @@ class FixieModule(
         val numbers: List<NumberClass>,
         val displacements: List<DisplacementClass> = emptyList(),
         val speed: List<SpeedClass> = emptyList(),
+        val accelerations: List<AccelerationClass> = emptyList(),
         val angles: List<AngleClass> = emptyList()
 ) {
 

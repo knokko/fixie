@@ -1,5 +1,6 @@
 package fixie.generator.tester
 
+import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.angle.AngleClass
 import fixie.generator.angle.AngleUnit
 import fixie.generator.displacement.DisplacementClass
@@ -47,6 +48,12 @@ private fun createPhysicsModule(): FixieModule {
             oneValue = BigInteger.valueOf(1000 * 100),
             checkOverflow = true
     ))
+    val accelerations = listOf(AccelerationClass(
+            className = "Acceleration",
+            floatType = FloatType.SinglePrecision,
+            speedClassName = "Speed",
+            createNumberExtensions = true
+    ))
     val speed = listOf(SpeedClass(
             className = "Speed",
             number = null,
@@ -55,6 +62,7 @@ private fun createPhysicsModule(): FixieModule {
             displayUnit = SpeedUnit.METERS_PER_SECOND,
             displacementClassName = "Displacement",
             displacementOneValue = numbers[0].oneValue,
+            acceleration = accelerations[0],
             createNumberExtensions = true
     ))
     val displacements = listOf(DisplacementClass(
@@ -74,7 +82,7 @@ private fun createPhysicsModule(): FixieModule {
             allowComparisons = false
     ))
 
-    return FixieModule("fixie", numbers, displacements, speed, angles)
+    return FixieModule("fixie", numbers, displacements, speed, accelerations, angles)
 }
 
 private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, oneValues: LongArray): FixieModule {
@@ -91,11 +99,23 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
 
     val displacements = mutableListOf<DisplacementClass>()
     val speed = mutableListOf<SpeedClass>()
+    val accelerations = mutableListOf<AccelerationClass>()
     val angles = mutableListOf<AngleClass>()
+
+    if ((numBits == 32 || numBits == 64) && signed && !checkOverflow) {
+        accelerations.add(AccelerationClass(
+                className = "Acceleration",
+                floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision,
+                speedClassName = "SpeedFK",
+                createNumberExtensions = true
+        ))
+    }
+
     for (index in arrayOf(0, oneValues.size / 2, oneValues.size - 1)) {
         var hasFloatSpeed = false
 
         val oneValue = oneValues[index]
+
         for (unit in arrayOf(SpeedUnit.MILES_PER_HOUR, SpeedUnit.KILOMETERS_PER_HOUR)) {
             speed.add(SpeedClass(
                     className = "Speed${if (unit == SpeedUnit.MILES_PER_HOUR) "M" else "K"}$oneValue",
@@ -105,6 +125,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                     displayUnit = SpeedUnit.MILES_PER_HOUR,
                     displacementClassName = "Displacement2",
                     displacementOneValue = BigInteger.TWO,
+                    acceleration = accelerations.lastOrNull(),
                     createNumberExtensions = false
             ))
             if (signed && !checkOverflow && (numBits == 32 || numBits == 64) && oneValue == oneValues[0]) {
@@ -117,6 +138,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                         displayUnit = SpeedUnit.MILES_PER_HOUR,
                         displacementClassName = "Displacement2",
                         displacementOneValue = BigInteger.TWO,
+                        acceleration = accelerations.lastOrNull(),
                         createNumberExtensions = false
                 ))
             }
@@ -157,6 +179,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
             numbers = numbers,
             displacements = displacements,
             speed = speed,
+            accelerations = accelerations,
             angles = angles
     )
 }

@@ -1,6 +1,6 @@
 package fixie.generator.speed
 
-import fixie.generator.displacement.DisplacementClass
+import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
 import java.math.BigInteger
@@ -13,6 +13,7 @@ class SpeedClass(
         val displayUnit: SpeedUnit,
         val displacementClassName: String?,
         val displacementOneValue: BigInteger?,
+        val acceleration: AccelerationClass?,
         val createNumberExtensions: Boolean
 ) {
     init {

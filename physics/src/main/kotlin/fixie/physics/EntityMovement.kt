@@ -6,7 +6,6 @@ import fixie.geometry.Position
 import java.util.*
 import kotlin.math.*
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
 
 internal class EntityMovement(
         private val tileTree: TileTree,
@@ -56,7 +55,7 @@ internal class EntityMovement(
 
     private fun computeCurrentVelocityX() = entity.wipVelocity.x
 
-    private fun computeCurrentVelocityY() = entity.wipVelocity.y - 4.9.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
+    private fun computeCurrentVelocityY() = entity.wipVelocity.y - 4.9.mps2 * Scene.STEP_DURATION
 
     fun start(entity: Entity) {
         this.entity = entity
@@ -371,6 +370,6 @@ internal class EntityMovement(
         interestingTiles.clear()
         interestingEntities.clear()
 
-        entity.wipVelocity.y -= 9.8.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
+        entity.wipVelocity.y -= 9.8.mps2 * Scene.STEP_DURATION
     }
 }

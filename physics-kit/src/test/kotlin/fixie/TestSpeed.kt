@@ -78,6 +78,8 @@ class TestSpeed {
 		assertEquals(Speed.raw(63f), 21L * Speed.raw(3f))
 		assertEquals(Speed.raw(63f), 21f * Speed.raw(3f))
 		assertEquals(Speed.raw(63f), 21.0 * Speed.raw(3f))
+		assertEquals(20.0, (2.seconds * (10 * Speed.METERS_PER_SECOND)).toDouble(DistanceUnit.METER), 0.01)
+		assertEquals(0.5, (Speed.METERS_PER_SECOND / 2.seconds).toDouble(), 2.5E-4)
 		assertEquals(Speed.METERS_PER_SECOND, 1.mps)
 		assertEquals(Speed.METERS_PER_SECOND, 1L.mps)
 		assertEquals(0.5 * Speed.METERS_PER_SECOND, 0.5f.mps)

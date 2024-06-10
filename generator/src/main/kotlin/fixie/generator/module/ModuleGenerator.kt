@@ -1,5 +1,7 @@
 package fixie.generator.module
 
+import fixie.generator.acceleration.AccelerationClassGenerator
+import fixie.generator.acceleration.AccelerationTestsGenerator
 import fixie.generator.angle.AngleClassGenerator
 import fixie.generator.angle.AngleTestsGenerator
 import fixie.generator.angle.AngleUnit
@@ -61,6 +63,12 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
             module.speed, { it.className },
             { writer, speed -> SpeedClassGenerator(writer, speed, module.packageName).generate() },
             { writer, speed -> SpeedTestsGenerator(writer, speed, module.packageName).generate() }
+    )
+
+    generateFiles(
+            module.accelerations, { it.className },
+            { writer, acceleration -> AccelerationClassGenerator(writer, acceleration, module.packageName).generate() },
+            { writer, acceleration -> AccelerationTestsGenerator(writer, acceleration, module.packageName).generate() }
     )
 
     generateFiles(

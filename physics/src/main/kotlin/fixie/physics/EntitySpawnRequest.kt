@@ -8,7 +8,8 @@ class EntitySpawnRequest(
     val y: Displacement,
     val properties: EntityProperties,
     val velocityX: Speed = 0.mps,
-    val velocityY: Speed = 0.mps
+    val velocityY: Speed = 0.mps,
+    val angle: Angle = 0.degrees
 ) {
     var id: UUID? = null
 

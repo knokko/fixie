@@ -79,7 +79,8 @@ class Scene {
                     val entity = Entity(
                             properties = request.properties,
                             position = Position(request.x, request.y),
-                            velocity = Velocity(request.velocityX, request.velocityY)
+                            velocity = Velocity(request.velocityX, request.velocityY),
+                            angle = request.angle
                     )
                     entity.constraints.add(MaxAccelerationConstraint(400.milliseconds, 5.mps))
                     entity.constraints.add(NotMovingConstraint(200.milliseconds))
@@ -223,6 +224,7 @@ class Scene {
                     qe.position.y = p.y
                     qe.velocity.x = entity.velocity.x
                     qe.velocity.y = entity.velocity.y
+                    qe.angle = entity.angle
                 }
             }
         }

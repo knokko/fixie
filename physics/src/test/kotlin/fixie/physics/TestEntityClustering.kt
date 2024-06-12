@@ -9,7 +9,7 @@ import java.util.*
 class TestEntityClustering {
 
     private fun entity(props: EntityProperties, x: Displacement, y: Displacement): Entity {
-        val entity = Entity(properties = props, position = Position.origin(), velocity = Velocity.zero())
+        val entity = Entity(properties = props, position = Position.origin(), velocity = Velocity.zero(), angle = 0.degrees)
         entity.wipPosition.x = x
         entity.wipPosition.y = y
         return entity

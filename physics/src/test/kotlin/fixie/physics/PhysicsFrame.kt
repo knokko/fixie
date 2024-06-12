@@ -261,6 +261,19 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
 
             g.color = Color(toColorValue(entity.velocity.x), toColorValue(entity.velocity.y), blue)
             g.fillOval(minX, minY, maxX - minX, maxY - minY)
+
+            val spotOffset = 0.5f * entity.properties.radius
+            val spotRadius = 0.3f * entity.properties.radius
+            val spotX = entity.position.x + spotOffset * cos(entity.angle)
+            val spotY = entity.position.y + spotOffset * sin(entity.angle)
+
+            val minSpotX = transformX(spotX - spotRadius)
+            val minSpotY = transformY(spotY + spotRadius)
+            val maxSpotX = transformX(spotX + spotRadius)
+            val maxSpotY = transformY(spotY - spotRadius)
+
+            g.color = Color.PINK
+            g.fillOval(minSpotX, minSpotY, maxSpotX - minSpotX, maxSpotY - minSpotY)
         }
 
         if (Math.random() < 0.01) {

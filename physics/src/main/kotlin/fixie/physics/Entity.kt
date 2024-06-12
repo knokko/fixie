@@ -1,5 +1,6 @@
 package fixie.physics
 
+import fixie.Angle
 import fixie.geometry.Position
 import fixie.physics.constraint.MaxAccelerationConstraint
 import fixie.physics.constraint.VelocityConstraint
@@ -9,7 +10,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class Entity(
     val properties: EntityProperties,
     val position: Position,
-    val velocity: Velocity
+    val velocity: Velocity,
+    var angle: Angle
 ) {
     val id: UUID = UUID.randomUUID()
 

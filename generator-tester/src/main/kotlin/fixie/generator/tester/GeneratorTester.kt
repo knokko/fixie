@@ -12,6 +12,8 @@ import fixie.generator.number.IntType
 import fixie.generator.number.NumberClass
 import fixie.generator.speed.SpeedClass
 import fixie.generator.speed.SpeedUnit
+import fixie.generator.spin.SpinClass
+import fixie.generator.spin.SpinUnit
 import java.io.File
 import java.math.BigInteger
 import kotlin.math.min
@@ -73,16 +75,25 @@ private fun createPhysicsModule(): FixieModule {
             speed = speed[0],
             createNumberExtensions = true
     ))
+    val spins = listOf(SpinClass(
+            className = "Spin",
+            floatType = FloatType.SinglePrecision,
+            oneUnit = SpinUnit.DEGREES_PER_SECOND,
+            displayUnit = SpinUnit.DEGREES_PER_SECOND,
+            angleClassName = "Angle",
+            createNumberExtensions = true
+    ))
     val angles = listOf(AngleClass(
             className = "Angle",
             internalType = IntType(true, 4),
             displayUnit = AngleUnit.DEGREES,
             createNumberExtensions = true,
-            allowDivisionAndMultiplication = false,
-            allowComparisons = false
+            allowDivisionAndFloatMultiplication = false,
+            allowComparisons = false,
+            spinClass = spins.last()
     ))
 
-    return FixieModule("fixie", numbers, displacements, speed, accelerations, angles)
+    return FixieModule("fixie", numbers, displacements, speed, accelerations, angles, spins)
 }
 
 private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, oneValues: LongArray): FixieModule {
@@ -101,6 +112,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
     val speed = mutableListOf<SpeedClass>()
     val accelerations = mutableListOf<AccelerationClass>()
     val angles = mutableListOf<AngleClass>()
+    val spins = mutableListOf<SpinClass>()
 
     if ((numBits == 32 || numBits == 64) && signed && !checkOverflow) {
         accelerations.add(AccelerationClass(
@@ -116,6 +128,18 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
 
         val oneValue = oneValues[index]
 
+        if (!checkOverflow) {
+            angles.add(AngleClass(
+                    className = "Angle$oneValue",
+                    internalType = IntType(signed, numBits / 8),
+                    displayUnit = AngleUnit.entries[min(index, 1)],
+                    createNumberExtensions = false,
+                    allowComparisons = index == 0,
+                    allowDivisionAndFloatMultiplication = index != 1,
+                    spinClass = null
+            ))
+        }
+
         for (unit in arrayOf(SpeedUnit.MILES_PER_HOUR, SpeedUnit.KILOMETERS_PER_HOUR)) {
             speed.add(SpeedClass(
                     className = "Speed${if (unit == SpeedUnit.MILES_PER_HOUR) "M" else "K"}$oneValue",
@@ -129,11 +153,12 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                     createNumberExtensions = false
             ))
             if (signed && !checkOverflow && (numBits == 32 || numBits == 64) && oneValue == oneValues[0]) {
+                val floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision
                 hasFloatSpeed = true
                 speed.add(SpeedClass(
                         className = "SpeedF${if (unit == SpeedUnit.MILES_PER_HOUR) "M" else "K"}",
                         number = null,
-                        floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision,
+                        floatType = floatType,
                         oneUnit = unit,
                         displayUnit = SpeedUnit.MILES_PER_HOUR,
                         displacementClassName = "Displacement2",
@@ -141,6 +166,29 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                         acceleration = accelerations.lastOrNull(),
                         createNumberExtensions = false
                 ))
+                for (spinUnit in SpinUnit.entries) {
+                    val angleClass = angles.removeLast()
+                    val spinClass = SpinClass(
+                            className = "Spin${spinUnit.name[0]}",
+                            floatType = floatType,
+                            oneUnit = spinUnit,
+                            displayUnit = SpinUnit.DEGREES_PER_SECOND,
+                            angleClassName = if (angleClass.spinClass == null) angleClass.className else null,
+                            createNumberExtensions = spins.isEmpty()
+                    )
+                    if (angleClass.spinClass == null) {
+                        angles.add(AngleClass(
+                                className = angleClass.className,
+                                internalType = angleClass.internalType,
+                                displayUnit = angleClass.displayUnit,
+                                createNumberExtensions = angleClass.createNumberExtensions,
+                                allowDivisionAndFloatMultiplication = angleClass.allowDivisionAndFloatMultiplication,
+                                allowComparisons = angleClass.allowComparisons,
+                                spinClass = spinClass
+                        ))
+                    } else angles.add(angleClass)
+                    spins.add(spinClass)
+                }
             }
         }
 
@@ -162,16 +210,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
             ))
         }
 
-        if (!checkOverflow) {
-            angles.add(AngleClass(
-                    className = "Angle$oneValue",
-                    internalType = IntType(signed, numBits / 8),
-                    displayUnit = AngleUnit.entries[min(index, 1)],
-                    createNumberExtensions = false,
-                    allowComparisons = index == 0,
-                    allowDivisionAndMultiplication = index > 0
-            ))
-        }
+
     }
 
     return FixieModule(
@@ -180,6 +219,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
             displacements = displacements,
             speed = speed,
             accelerations = accelerations,
-            angles = angles
+            angles = angles,
+            spins = spins
     )
 }

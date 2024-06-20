@@ -29,6 +29,9 @@ internal class AngleTestsGenerator(
         writer.println("import org.junit.jupiter.api.Assertions.*")
         writer.println("import org.junit.jupiter.api.assertThrows")
         writer.println("import kotlin.math.PI")
+        if (angle.allowDivisionAndFloatMultiplication && angle.spinClass != null) {
+            writer.println("import kotlin.time.Duration.Companion.seconds")
+        }
         writer.println()
         writer.println("class Test${angle.className} {")
     }
@@ -65,8 +68,9 @@ internal class AngleTestsGenerator(
         }
         writer.println("\t\tassertEquals(\"0°\", ${angle.className}.degrees(0).toString(AngleUnit.DEGREES, 1))")
         writer.println("\t\tassertEquals(\"0rad\", ${angle.className}.degrees(0).toString(AngleUnit.RADIANS, 2))")
-        writer.println("\t\tassertEquals(\"0°\", ${angle.className}.radians(0).toString(AngleUnit.DEGREES, 1))")
+        writer.println("\t\tassertEquals(\"0°\", ${angle.className}.radians(0L).toString(AngleUnit.DEGREES, 1))")
         writer.println("\t\tassertEquals(\"0rad\", ${angle.className}.radians(0).toString(AngleUnit.RADIANS, 2))")
+        writer.println("\t\tassertEquals(\"90°\", ${angle.className}.radians(0.5 * PI).toString(AngleUnit.DEGREES, 0))")
 
         writer.println("\t}")
     }
@@ -117,7 +121,7 @@ internal class AngleTestsGenerator(
             writer.println("\t\tassertTrue(${angle.className}.degrees(100) > ${angle.className}.radians(0.5 * PI))")
             writer.println("\t\tassertFalse(${angle.className}.degrees(100) > ${angle.className}.radians(0.7 * PI))")
             writer.println("\t\tassertTrue(${angle.className}.degrees(50) < ${angle.className}.degrees(100))")
-            writer.println("\t\tassertFalse(${angle.className}.radians(3) < ${angle.className}.radians(2.9))")
+            writer.println("\t\tassertFalse(${angle.className}.radians(3f) < ${angle.className}.radians(2.9))")
 
             if (angle.internalType.signed) {
                 writer.println("\t\tassertTrue(${angle.className}.degrees(-50) < ${angle.className}.degrees(0))")
@@ -144,14 +148,18 @@ internal class AngleTestsGenerator(
         writer.println("\t@Test")
         writer.println("\tfun testArithmetic() {")
         writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(30) + ${angle.className}.degrees(20))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(0), ${angle.className}.degrees(180) + ${angle.className}.degrees(180))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.radians(0f), ${angle.className}.degrees(180) + ${angle.className}.degrees(180))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.radians(0f), ${angle.className}.radians(PI) + ${angle.className}.degrees(180))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.radians(0.25f * PI.toFloat()), ${angle.className}.radians(0.75 * PI) - ${angle.className}.degrees(90))")
         writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(300), ${angle.className}.degrees(320) + ${angle.className}.degrees(340))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(30), ${angle.className}.degrees(50) - ${angle.className}.degrees(20))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(180), ${angle.className}.degrees(180) - ${angle.className}.degrees(0))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(320), ${angle.className}.degrees(300) - ${angle.className}.degrees(340))")
-        if (angle.allowDivisionAndMultiplication) {
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2 * ${angle.className}.degrees(50))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(30f), ${angle.className}.degrees(50) - ${angle.className}.degrees(20))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(180), ${angle.className}.degrees(180L) - ${angle.className}.degrees(0))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(320L), ${angle.className}.degrees(300) - ${angle.className}.degrees(340))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100L), 2 * ${angle.className}.degrees(50))")
+        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2L * ${angle.className}.degrees(50))")
+        if (angle.allowDivisionAndFloatMultiplication) {
             writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2)")
+            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2L)")
             writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2f * ${angle.className}.degrees(50))")
             writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2f)")
             writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2.0 * ${angle.className}.degrees(50))")
@@ -168,26 +176,24 @@ internal class AngleTestsGenerator(
                 writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(90), 1.5 * ${angle.className}.degrees(300))")
                 writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(60), ${angle.className}.degrees(90) / 1.5)")
             }
+
+            if (angle.spinClass != null) {
+                writer.println("\t\tassertEquals(5.0, (${angle.className}.degrees(15) / 3.seconds).toDouble(SpinUnit.DEGREES_PER_SECOND), 0.001)")
+            }
         }
         writer.println("\t}")
     }
 
     private fun generateExtensionFunctions() {
-        if (angle.allowDivisionAndMultiplication || angle.createNumberExtensions) {
+        if (angle.createNumberExtensions) {
             writer.println()
             writer.println("\t@Test")
             writer.println("\tfun testExtensionFunctions() {")
-            if (angle.allowDivisionAndMultiplication) {
-                writer.println("\t\tassertNearlyEquals(${angle.className}.raw(63$suffix), 21 * ${angle.className}.raw(3$suffix))")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.raw(63$suffix), 21f * ${angle.className}.raw(3$suffix))")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.raw(63$suffix), 21.0 * ${angle.className}.raw(3$suffix))")
-            }
-            if (angle.createNumberExtensions) {
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), 123.degrees)")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(-45), -45f.degrees)")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.radians(1.5), 1.5.radians)")
-                if (angle.allowComparisons) writer.println("\t\tassertTrue(1.degrees < 1.radians)")
-            }
+            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), 123.degrees)")
+            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), 123L.degrees)")
+            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(-45), -45f.degrees)")
+            writer.println("\t\tassertNearlyEquals(${angle.className}.radians(1.5), 1.5.radians)")
+            if (angle.allowComparisons) writer.println("\t\tassertTrue(1L.degrees < 1.radians)")
             writer.println("\t}")
         }
     }

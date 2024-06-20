@@ -13,6 +13,8 @@ import fixie.generator.number.NumberTestsGenerator
 import fixie.generator.speed.SpeedClassGenerator
 import fixie.generator.speed.SpeedTestsGenerator
 import fixie.generator.speed.SpeedUnit
+import fixie.generator.spin.SpinClassGenerator
+import fixie.generator.spin.SpinTestsGenerator
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
@@ -77,6 +79,12 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
             { writer, angle -> AngleTestsGenerator(writer, angle, module.packageName).generate() }
     )
 
+    generateFiles(
+            module.spins, { it.className },
+            { writer, spin -> SpinClassGenerator(writer, spin, module.packageName).generate() },
+            { writer, spin -> SpinTestsGenerator(writer, spin, module.packageName).generate() }
+    )
+
     generateMathFile(module.numbers, module.angles, module.packageName, File("$sourceDirectory/ExtraMath.kt"))
 
     if (module.numbers.find { it.checkOverflow } != null) {
@@ -93,6 +101,10 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 
     if (module.angles.isNotEmpty()) {
         generateAngleUnit(File("$sourceDirectory/AngleUnit.kt"), module.packageName)
+    }
+
+    if (module.spins.isNotEmpty()) {
+        generateSpinUnit(File("$sourceDirectory/SpinUnit.kt"), module.packageName)
     }
 }
 
@@ -120,7 +132,7 @@ private fun generateDistanceUnit(file: File, packageName: String) {
     writer.println("enum class DistanceUnit(val abbreviation: String, val isMetric: Boolean, val divisor: Long) {")
 
     for (unit in DistanceUnit.entries) {
-        writer.print("    ${unit.name}(\"${unit.abbreviation}\", ${unit.isMetric}, ${unit.divisor})")
+        writer.print("\t${unit.name}(\"${unit.abbreviation}\", ${unit.isMetric}, ${unit.divisor})")
         if (unit == DistanceUnit.entries.last()) writer.println(";") else writer.println(",")
     }
 
@@ -152,10 +164,24 @@ private fun generateAngleUnit(file: File, packageName: String) {
     writer.println("enum class AngleUnit(val suffix: String, val maxValue: Double) {")
 
     for (unit in AngleUnit.entries) {
-        writer.print("    ${unit.name}(\"${unit.suffix}\", ${unit.maxValue})")
+        writer.print("\t${unit.name}(\"${unit.suffix}\", ${unit.maxValue})")
         if (unit == AngleUnit.entries.last()) writer.println(";") else writer.println(",")
     }
 
+    writer.println("}")
+    writer.flush()
+    writer.close()
+}
+
+private fun generateSpinUnit(file: File, packageName: String) {
+    val writer = PrintWriter(file)
+    writer.println("package $packageName")
+    writer.println()
+    writer.println("import kotlin.math.PI")
+    writer.println()
+    writer.println("enum class SpinUnit(val suffix: String, val abbreviation: String, val angleMax: Double) {")
+    writer.println("\tDEGREES_PER_SECOND(\"°/s\", \"degps\", 360.0),")
+    writer.println("\tRADIANS_PER_SECOND(\"rad/s\", \"radps\", 2 * PI)")
     writer.println("}")
     writer.flush()
     writer.close()

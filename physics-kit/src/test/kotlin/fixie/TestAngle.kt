@@ -27,8 +27,9 @@ class TestAngle {
 		assertEquals("1.23rad", Angle.radians(1.23).toString(AngleUnit.RADIANS, 2))
 		assertEquals("0°", Angle.degrees(0).toString(AngleUnit.DEGREES, 1))
 		assertEquals("0rad", Angle.degrees(0).toString(AngleUnit.RADIANS, 2))
-		assertEquals("0°", Angle.radians(0).toString(AngleUnit.DEGREES, 1))
+		assertEquals("0°", Angle.radians(0L).toString(AngleUnit.DEGREES, 1))
 		assertEquals("0rad", Angle.radians(0).toString(AngleUnit.RADIANS, 2))
+		assertEquals("90°", Angle.radians(0.5 * PI).toString(AngleUnit.DEGREES, 0))
 	}
 
 	@Test
@@ -50,16 +51,21 @@ class TestAngle {
 	@Test
 	fun testArithmetic() {
 		assertNearlyEquals(Angle.degrees(50), Angle.degrees(30) + Angle.degrees(20))
-		assertNearlyEquals(Angle.degrees(0), Angle.degrees(180) + Angle.degrees(180))
+		assertNearlyEquals(Angle.radians(0f), Angle.degrees(180) + Angle.degrees(180))
+		assertNearlyEquals(Angle.radians(0f), Angle.radians(PI) + Angle.degrees(180))
+		assertNearlyEquals(Angle.radians(0.25f * PI.toFloat()), Angle.radians(0.75 * PI) - Angle.degrees(90))
 		assertNearlyEquals(Angle.degrees(300), Angle.degrees(320) + Angle.degrees(340))
-		assertNearlyEquals(Angle.degrees(30), Angle.degrees(50) - Angle.degrees(20))
-		assertNearlyEquals(Angle.degrees(180), Angle.degrees(180) - Angle.degrees(0))
-		assertNearlyEquals(Angle.degrees(320), Angle.degrees(300) - Angle.degrees(340))
+		assertNearlyEquals(Angle.degrees(30f), Angle.degrees(50) - Angle.degrees(20))
+		assertNearlyEquals(Angle.degrees(180), Angle.degrees(180L) - Angle.degrees(0))
+		assertNearlyEquals(Angle.degrees(320L), Angle.degrees(300) - Angle.degrees(340))
+		assertNearlyEquals(Angle.degrees(100L), 2 * Angle.degrees(50))
+		assertNearlyEquals(Angle.degrees(100), 2L * Angle.degrees(50))
 	}
 
 	@Test
 	fun testExtensionFunctions() {
 		assertNearlyEquals(Angle.degrees(123), 123.degrees)
+		assertNearlyEquals(Angle.degrees(123), 123L.degrees)
 		assertNearlyEquals(Angle.degrees(-45), -45f.degrees)
 		assertNearlyEquals(Angle.radians(1.5), 1.5.radians)
 	}

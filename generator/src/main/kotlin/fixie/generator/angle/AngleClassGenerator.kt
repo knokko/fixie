@@ -1,11 +1,11 @@
 package fixie.generator.angle
 
+import fixie.generator.spin.SpinUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.math.roundToLong
 
 internal class AngleClassGenerator(
         private val writer: PrintWriter,
@@ -32,6 +32,10 @@ internal class AngleClassGenerator(
         writer.println("import java.text.DecimalFormat")
         writer.println("import java.util.Locale")
         writer.println("import kotlin.math.*")
+        if (angle.spinClass != null && angle.allowDivisionAndFloatMultiplication) {
+            writer.println("import kotlin.time.Duration")
+            writer.println("import kotlin.time.DurationUnit")
+        }
         writer.println()
         writer.println("@JvmInline")
         writer.print("value class ${angle.className} internal constructor(val raw: ${angle.internalType}) ")
@@ -68,7 +72,7 @@ internal class AngleClassGenerator(
             writer.println("\toverride operator fun compareTo(other: ${angle.className}) = this.raw.compareTo(other.raw)")
         }
 
-        fun conversion(value: String) = if (angle.internalType.numBytes >= 4) value
+        fun conversion(value: String, numBytes: Int = 4) = if (angle.internalType.numBytes >= numBytes) value
                 else "($value).to${angle.internalType}()"
 
         writer.println()
@@ -83,7 +87,8 @@ internal class AngleClassGenerator(
         writer.println()
         writer.println("\toperator fun minus(right: ${angle.className}) = ${angle.className}(${conversion("this.raw - right.raw")})")
 
-        if (angle.allowDivisionAndMultiplication) {
+        val fixSign = if (angle.internalType.signed) "" else ".toUInt()"
+        if (angle.allowDivisionAndFloatMultiplication) {
             if (angle.internalType.numBytes == 8) {
                 for ((functionName, operator) in arrayOf(Pair("times", "*"), Pair("div", "/"))) {
                     writer.println()
@@ -110,15 +115,25 @@ internal class AngleClassGenerator(
                 }
             }
 
-            val fixSign = if (angle.internalType.signed) "" else ".toUInt()"
-            writer.println()
-            writer.println("\toperator fun times(right: Int) = ${angle.className}(${conversion("this.raw * right$fixSign")})")
             writer.println()
             writer.println("\toperator fun div(right: Int) = ${angle.className}(${conversion("this.raw / right$fixSign")})")
+            writer.println()
+            writer.println("\toperator fun div(right: Long) = ${angle.className}(${conversion("this.raw / right$fixSign", 8)})")
 
             writer.println()
             writer.println("\toperator fun div(right: ${angle.className}) = this.raw.toDouble() / right.raw.toDouble()")
+
+            if (angle.spinClass != null) {
+                writer.println()
+                val angleUnit = if (angle.spinClass.oneUnit == SpinUnit.DEGREES_PER_SECOND) AngleUnit.DEGREES else AngleUnit.RADIANS
+                writer.println("\toperator fun div(right: Duration) = ${angle.spinClass.className}.${angle.spinClass.oneUnit} * this.toDouble(AngleUnit.$angleUnit) / right.toDouble(DurationUnit.SECONDS)")
+            }
         }
+
+        writer.println()
+        writer.println("\toperator fun times(right: Int) = ${angle.className}(${conversion("this.raw * right$fixSign")})")
+        writer.println()
+        writer.println("\toperator fun times(right: Long) = ${angle.className}(${conversion("this.raw * right$fixSign", 8)})")
     }
 
     private fun generateCompanionObject() {
@@ -157,8 +172,7 @@ internal class AngleClassGenerator(
                 }
             }
 
-
-            for (typeName in arrayOf("Int", "Float")) {
+            for (typeName in arrayOf("Int", "Long", "Float")) {
                 writer.println()
                 val functionName = unit.name.lowercase(Locale.ROOT)
                 writer.println("\t\tfun $functionName(value: $typeName) = $functionName(value.toDouble())")
@@ -169,8 +183,8 @@ internal class AngleClassGenerator(
     }
 
     private fun generateExtensionFunctions() {
-        for (typeName in arrayOf("Int", "Float", "Double")) {
-            if (angle.allowDivisionAndMultiplication) {
+        for (typeName in arrayOf("Int", "Long", "Float", "Double")) {
+            if (angle.allowDivisionAndFloatMultiplication || typeName == "Int" || typeName == "Long") {
                 writer.println()
                 writer.println("operator fun $typeName.times(right: ${angle.className}) = right * this")
             }

@@ -145,6 +145,9 @@ internal class DisplacementTestsGenerator(
             val margin = if (smallestOneValue > BigInteger.TEN) 0.001 else 0.2
             writer.println("\t\tassertEquals(2.0, (10 * ${displacement.className}.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND), $margin)")
         }
+
+        val safeMaxValue = (displacement.number.internalType.getMaxValue() / BigInteger.TWO).min(BigInteger.TWO.pow(40))
+        writer.println("\t\tassertEquals(${displacement.className}.raw($safeMaxValue$suffix), ${displacement.className}.raw(1$suffix) * $safeMaxValue.0)")
         writer.println("\t}")
     }
 
@@ -159,6 +162,7 @@ internal class DisplacementTestsGenerator(
         writer.println("\t\tassertEquals(${displacement.number.className}.from(2), (2 * one * one) / (one * one))")
         writer.println("\t\tassertTrue(2 * one * one <= one * 3 * one)")
         writer.println("\t\tassertTrue(4 * one * one >= one * 3 * one)")
+        writer.println("\t\tassertEquals(5 * one * one, (2 * one * one) * 2.5)")
         writer.println("\t}")
     }
 

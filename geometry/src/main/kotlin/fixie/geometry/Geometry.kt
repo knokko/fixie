@@ -43,9 +43,9 @@ object Geometry {
         var smallestUnsafeDistance = fullDistance
         var candidateMovement = smallestUnsafeMovement
         while ((smallestUnsafeMovement - largestSafeMovement) > 0.1.mm && largestSafeDistance - cr > 0.1.mm) {
-            val movementFactor = candidateMovement.toDouble(DistanceUnit.METER) / totalMovement.toDouble(DistanceUnit.METER)
-            val newX = cx + (movementFactor * cvx.toDouble(DistanceUnit.METER)).m
-            val newY = cy + (movementFactor * cvy.toDouble(DistanceUnit.METER)).m
+            val movementFactor = candidateMovement / totalMovement
+            val newX = cx + movementFactor * cvx
+            val newY = cy + movementFactor * cvy
             val distance = distanceBetweenPointAndLineSegment(
                 newX, newY, lsx, lsy, lslx, lsly, outPointOnLine
             )
@@ -86,10 +86,10 @@ object Geometry {
             }
         }
 
-        val movementFactor = largestSafeMovement.toDouble(DistanceUnit.METER) / totalMovement.toDouble(DistanceUnit.METER)
+        val movementFactor = largestSafeMovement / totalMovement
 
-        val newX = cx + (movementFactor * cvx.toDouble(DistanceUnit.METER)).m
-        val newY = cy + (movementFactor * cvy.toDouble(DistanceUnit.METER)).m
+        val newX = cx + movementFactor * cvx
+        val newY = cy + movementFactor * cvy
         outCirclePosition.x = newX
         outCirclePosition.y = newY
         distanceBetweenPointAndLineSegment(newX, newY, lsx, lsy, lslx, lsly, outPointOnLine)
@@ -97,68 +97,72 @@ object Geometry {
     }
 
     fun sweepCircleToCircle(
-        x1: Displacement, y1: Displacement, r1: Displacement, vx: Displacement, vy: Displacement,
-        x2: Displacement, y2: Displacement, r2: Displacement, outPosition: Position
+            x1: Displacement, y1: Displacement, r1: Displacement, vx: Displacement, vy: Displacement,
+            x2: Displacement, y2: Displacement, r2: Displacement, outPosition: Position
     ): Boolean {
+        if (vx.value.raw == 0 && vy.value.raw == 0) return false
+
         val r = r1 + r2
-        val originalDistance = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
-        if (originalDistance <= r) {
-            throw IllegalArgumentException("Circle at ($x1, $y1) with r=$r1 is already inside ($x2, $y2) with r=$r2 since d=$originalDistance")
+        val rSquared = r * r
+
+        val originalDistanceSquared = Position.distanceSquared(x1, y1, x2, y2)
+        if (originalDistanceSquared <= rSquared) {
+            throw IllegalArgumentException("Circle at ($x1, $y1) with r=$r1 is already inside ($x2, $y2) with r=$r2 since d=$originalDistanceSquared")
         }
 
-        findClosestPointOnLineToPoint(x2, y2, x1, y1, vx, vy, outPosition)
+        val distanceAtIdealDestinationSquared = Position.distanceSquared(x1 + vx, y1 + vy, x2, y2)
 
-        val minDistance = sqrt((x2 - outPosition.x) * (x2 - outPosition.x) + (y2 - outPosition.y) * (y2 - outPosition.y))
-        if (minDistance > r + 1.mm) return false
+        val closestB = solveClosestPointOnLineToPoint(x2, y2, x1, y1, vx, vy)
 
-        if (minDistance > r * 0.99) {
-            val dx = x1 + vx - x2
-            val dy = y1 + vy - y2
+        if (distanceAtIdealDestinationSquared > rSquared && (closestB <= 0.0 || closestB >= 1.0)) return false
 
-            // Dirty trick: allow the moving circle to move 1% 'through' the other circle,
-            // provided that it doesn't intersect with the other circle if it were moved to the final position.
+        // The point that is closest to (x2, y2) and lies on the line through (x1, y1) with direction (vx, vy)
+        val closestX = x1 + closestB * vx
+        val closestY = y1 + closestB * vy
 
-            // This weird rule smoothens some disturbances that are caused by rounding errors when one ball is rolling
-            // over another ball. It also improves performance in other cases because the rest of this method can
-            // be skipped.
-            if (sqrt(dx * dx + dy * dy) > r) return false
-        }
+        val closestDistanceToCenter2Squared = Position.distanceSquared(closestX, closestY, x2, y2)
 
-        val dx = outPosition.x - x1
-        val dy = outPosition.y - y1
+        // Dirty trick
+        if (distanceAtIdealDestinationSquared > rSquared && closestDistanceToCenter2Squared > rSquared * 0.99) return false
 
-        if (abs(vx) >= abs(vy)) {
-            if ((vx >= 0.m) != (dx >= 0.m)) return false
-        } else {
-            if ((vy >= 0.m) != (dy >= 0.m)) return false
-        }
-
-        val idealX = x1 + vx
-        val idealY = y1 + vy
-        val idealDistance = sqrt(vx * vx + vy * vy)
-
-        val blockedDistance = sqrt(r * r - minDistance * minDistance)
-        val maxDistance = sqrt(dx * dx + dy * dy)
-        var maxMoveDistance = maxDistance - blockedDistance
-        if (maxMoveDistance <= 0.m) {
+        // Rare precision edge case
+        if (closestB <= 0.0) {
             outPosition.x = x1
             outPosition.y = y1
             return true
         }
 
-        if (idealDistance <= maxMoveDistance) {
-            if (sqrt((idealX - x2) * (idealX - x2) + (idealY - y2) * (idealY - y2)) > r) return false
-        }
+        val originalToClosestDistance = Position.distance(x1, y1, closestX, closestY)
+        val originalToIdealDistance = sqrt(vx * vx + vy * vy)
+        val requiredDistanceToClosest = sqrt(rSquared - closestDistanceToCenter2Squared)
+        var estimatedMaxDistance = min(originalToIdealDistance, originalToClosestDistance - requiredDistanceToClosest)
 
+        var backtrackDistance = 0.1.mm
+        var testX: Displacement
+        var testY: Displacement
+
+        val invOriginalToIdealDistance = 1.0 / originalToIdealDistance.value.toDouble()
         do {
-            val movementFactor = maxMoveDistance.toDouble(DistanceUnit.METER) / idealDistance.toDouble(DistanceUnit.METER)
-            val testX = x1 + (movementFactor * vx.toDouble(DistanceUnit.METER)).m
-            val testY = y1 + (movementFactor * vy.toDouble(DistanceUnit.METER)).m
-            val testDistance = sqrt((testX - x2) * (testX - x2) + (testY - y2) * (testY - y2))
-            maxMoveDistance -= 0.03.mm
-            outPosition.x = testX
-            outPosition.y = testY
-        } while (testDistance <= r)
+            if (estimatedMaxDistance.value.raw <= 0) {
+                outPosition.x = x1
+                outPosition.y = y1
+                return true
+            }
+
+            val movementFactor = estimatedMaxDistance.value.toDouble() * invOriginalToIdealDistance
+            testX = x1 + movementFactor * vx
+            testY = y1 + movementFactor * vy
+
+            val testDX = testX - x2
+            val testDY = testY - y2
+            val testDistance = testDX * testDX + testDY * testDY
+            estimatedMaxDistance -= backtrackDistance
+            backtrackDistance += 0.1.mm
+
+        } while (testDistance <= rSquared)
+
+        outPosition.x = testX
+        outPosition.y = testY
 
         return true
     }
@@ -286,17 +290,22 @@ object Geometry {
         px, py, line.startX, line.startY, line.lengthX, line.lengthY, outPointOnLine
     )
 
-    fun findClosestPointOnLineToPoint(
+    /**
+     * Consider the line **l** that goes through the points (lx, ly) and (lx + ldx, ly + ldy).
+     * This method computes *b* such that (lx, ly) + b * (ldx, ldy) is
+     * the closest point to (px, py) that lies on the line **l**.
+     */
+    private fun solveClosestPointOnLineToPoint(
         px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
-        ldx: Displacement, ldy: Displacement, outPointOnLine: Position
-    ) {
+        ldx: Displacement, ldy: Displacement
+    ): Double {
         // Place the point position in the origin and convert the rest to double to obtain maximum precision
-        val offsetX = (lx - px).toDouble(DistanceUnit.METER)
-        val offsetY = (ly - py).toDouble(DistanceUnit.METER)
+        val offsetX = (px - lx).toDouble(DistanceUnit.METER)
+        val offsetY = (py - ly).toDouble(DistanceUnit.METER)
         val lengthX = ldx.toDouble(DistanceUnit.METER)
         val lengthY = ldy.toDouble(DistanceUnit.METER)
 
-        // First, we need to find the intersection with the line through (px, py) perpendicular to l. Use:
+        // We need to find the intersection with the line through (px, py) perpendicular to l. Use:
         // - perp(endicular)X = ldy
         // - perp(endicular)Y = -ldx
 
@@ -305,53 +314,49 @@ object Geometry {
         // (2) py + a * perpY = ly + b * ldy
 
         // Isolating a gives:
-        // (3) a = (lx + b * ldx - px) / perpX = (offsetX + b * lengthX) / perpX
-        // (4) a = (ly + b * ldy - py) / perpY = (offsetY + b * lengthY) / perpY
+        // (3) a = (lx + b * ldx - px) / perpX = (b * lengthX - offsetX) / perpX
+        // (4) a = (ly + b * ldy - py) / perpY = (b * lengthY - offsetY) / perpY
 
         // Combining (3) and (4) gives:
-        // (5) (offsetX + b * lengthX) / perpX = (offsetY + b * lengthY) / perpY
+        // (5) (b * lengthX - offsetX) / perpX = (b * lengthY - offsetY) / perpY
 
         // Multiplying both sides by perpX * perpY gives:
-        // (6) perpY * (offsetX + b * lengthX) = perpX * (offsetY + b * lengthY)
+        // (6) perpY * (b * lengthX - offsetX) = perpX * (b * lengthY - offsetY)
 
         // Isolate b...
-        // (7) b * lengthX * perpY - b * lengthY * perpX = perpX * offsetY - perpY * offsetX
-        // (8) b * (lengthX * perpY - lengthY * perpX) = perpX * offsetY - perpY * offsetX
-        // (9) b = (perpX * offsetY - perpY * offsetX) / (lengthX * perpY - lengthY * perpX)
+        // (7) b * lengthX * perpY - b * lengthY * perpX = perpY * offsetX - perpX * offsetY
+        // (8) b * (lengthX * perpY - lengthY * perpX) = perpY * offsetX - perpX * offsetY
+        // (9) b = (perpY * offsetX - perpX * offsetY) / (lengthX * perpY - lengthY * perpX)
 
         // Replace perpX with lengthY and perpY with -lengthX:
-        // (10) b = (lengthY * offsetY + lengthX * offsetX) / (-lengthX * lengthX - lengthY * lengthY)
+        // (10) b = (-lengthX * offsetX - lengthY * offsetY) / (-lengthX * lengthX - lengthY * lengthY)
 
         // Simplify...
-        // (11) b = -(lengthX * offsetX + lengthY * offsetY) / (lengthX * lengthX + lengthY * lengthY)
-        val b = -(lengthX * offsetX + lengthY * offsetY) / (lengthX * lengthX + lengthY * lengthY)
+        // (11) b = (lengthX * offsetX + lengthY * offsetY) / (lengthX * lengthX + lengthY * lengthY)
+        return (lengthX * offsetX + lengthY * offsetY) / (lengthX * lengthX + lengthY * lengthY)
+    }
 
-        // The point on the line is given by:
-        // (12) x = lx + ldx * b
-        // (13) y = ly + ldy * b
+    fun findClosestPointOnLineSegmentToPoint(
+            px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
+            ldx: Displacement, ldy: Displacement, outPointOnLine: Position
+    ) {
+        var b = solveClosestPointOnLineToPoint(px, py, lx, ly, ldx, ldy)
+        if (b < 0.0) b = 0.0
+        if (b > 1.0) b = 1.0
 
-        outPointOnLine.x = lx + (b * lengthX).m
-        outPointOnLine.y = ly + (b * lengthY).m
+        outPointOnLine.x = lx + b * ldx
+        outPointOnLine.y = ly + b * ldy
     }
 
     internal fun distanceBetweenPointAndLineSegment(
         px: Displacement, py: Displacement, lx: Displacement, ly: Displacement,
         ldx: Displacement, ldy: Displacement, outPointOnLine: Position
     ): Displacement {
-        findClosestPointOnLineToPoint(px, py, lx, ly, ldx, ldy, outPointOnLine)
+        findClosestPointOnLineSegmentToPoint(px, py, lx, ly, ldx, ldy, outPointOnLine)
 
-        // The closest point on the *line* may or may not lie on the line *segment*
-        val minX = min(lx, lx + ldx)
-        val maxX = max(lx, lx + ldx)
-        val x = min(max(outPointOnLine.x, minX), maxX)
+        val dx = outPointOnLine.x - px
+        val dy = outPointOnLine.y - py
 
-        val minY = min(ly, ly + ldy)
-        val maxY = max(ly, ly + ldy)
-        val y = min(max(outPointOnLine.y, minY), maxY)
-
-        outPointOnLine.x = x
-        outPointOnLine.y = y
-
-        return sqrt((x - px) * (x - px) + (y - py) * (y - py))
+        return sqrt(dx * dx + dy * dy)
     }
 }

@@ -64,6 +64,7 @@ class TestDisplacement {
 		assertEquals(Displacement.raw(20), Displacement.raw(50) / 2.5)
 		assertEquals(Displacement.raw(-43), -Displacement.raw(43))
 		assertEquals(2.0, (10 * Displacement.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND), 0.001)
+		assertEquals(Displacement.raw(1073741823), Displacement.raw(1) * 1073741823.0)
 	}
 
 	@Test
@@ -75,6 +76,7 @@ class TestDisplacement {
 		assertEquals(FixDisplacement.from(2), (2 * one * one) / (one * one))
 		assertTrue(2 * one * one <= one * 3 * one)
 		assertTrue(4 * one * one >= one * 3 * one)
+		assertEquals(5 * one * one, (2 * one * one) * 2.5)
 	}
 
 	@Test

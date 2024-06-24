@@ -252,6 +252,7 @@ class TestGeometry {
         assertTrue(Geometry.sweepCircleToCircle(100.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
         this.assertEquals(Position(105.m, 100.m), point, 0.2.mm)
 
+        // See case 2 of sketches/sweep-circle-to-circle
         assertTrue(Geometry.sweepCircleToCircle(96.m, 100.m, 1.m, 10.m, 0.m, 108.m, 104.m, 4.m, point))
         this.assertEquals(Position(105.m, 100.m), point, 0.2.mm)
 
@@ -261,24 +262,60 @@ class TestGeometry {
         assertTrue(Geometry.sweepCircleToCircle(0.79.m, 101.1.mm, 100.mm, 30.mm, -1.mm, 1.m, 0.1.m, 100.mm, point))
 
         assertFalse(Geometry.sweepCircleToCircle(5.92579.m, 0.10908.m, 0.109.m, -0.00191.m, 0.51.mm, 5.65642.m, 0.32833.m, 0.213.m, point))
+
+        assertTrue(Geometry.sweepCircleToCircle(
+                0.m, -9.41707.m, 100.mm, 0.46.mm, 0.03.mm,
+                0.03.mm, -9.01706.m, 300.mm, point
+        ))
+
+        // See case 8 of sketches/sweep-circle-to-circle
+        assertTrue(Geometry.sweepCircleToCircle(
+                -299.9.mm, -9417.19.mm, 200.mm, 50.mm, -150.04.mm,
+                0.m, -9717.1.mm, 200.mm, point
+        ))
+        assertEquals(point.distance(0.m, -9717.1.mm), 400.mm, 0.1.mm)
+
+        assertFalse(Geometry.sweepCircleToCircle(
+                -3.96452.m, -5.89396.m, 100.mm, 0.03.mm, -0.03.mm,
+                -2.67293.m, -7.04412.m, 200.mm, point
+        ))
+
+        assertTrue(Geometry.sweepCircleToCircle(
+                0.m, -9.41709.m, 100.mm, 0.73.mm, 0.01.mm,
+                0.01.mm, -9.01708.m, 300.01.mm, point
+        ))
+        assertEquals(point.distance(0.01.mm, -9.01708.m), 400.mm, 0.1.mm)
+
+        assertTrue(Geometry.sweepCircleToCircle(
+                337.35.mm, -8037.48.mm, 100.mm, 11.67.mm, -5.95.mm,
+                213.27.mm, -8310.96.mm, 200.01.mm, point
+        ))
+        assertEquals(point.distance(213.27.mm, -8310.96.mm), 300.mm, 0.1.mm)
+
+        assertTrue(Geometry.sweepCircleToCircle(
+                -4.69896.m, -12.73651.m, 260.mm, -0.01686.m, -0.00296.m,
+                -4.63889.m, -13.17675.m, 184.mm, point
+        ))
+        assertEquals(point.distance(-4.63889.m, -13.17675.m), 444.mm, 0.1.mm)
     }
 
     @Test
-    fun testClosestPointOnLineToPointRegression() {
+    fun testClosestPointOnLineSegmentToPointRegression() {
         val point = Position.origin()
-        Geometry.findClosestPointOnLineToPoint(
+
+        // See case 1 of sketches/closest-point-on-line-to-point
+        Geometry.findClosestPointOnLineSegmentToPoint(
             1.m, 100.02.mm, 799.99.mm, 100.14.mm, 0.05.mm, -0.1.mm, point
         )
-        assertTrue(sqrt((point.x - 1.m) * (point.x - 1.m) + (point.y - 100.mm) * (point.y - 100.mm)) < 199.mm)
+        assertEquals(Position(800.04.mm, 100.04.mm), point, 0.1.mm)
 
-        // p is (5.65642m, 0.32833m) and l is (5.92579m, 0.10908m) and ld is (-0.00191m, 5.1E-4m)
-        Geometry.findClosestPointOnLineToPoint(
+        // See case 2 of sketches/closest-point-on-line-to-point
+        Geometry.findClosestPointOnLineSegmentToPoint(
             Displacement.raw(565642), Displacement.raw(32833),
             Displacement.raw(592579), Displacement.raw(10908),
             Displacement.raw(-191), Displacement.raw(51),
             point
         )
-
-        assertEquals(Position(5.62.m, 0.2.m), point, 10.mm)
+        assertEquals(Position(5923.88.mm, 109.59.mm), point, 0.1.mm)
     }
 }

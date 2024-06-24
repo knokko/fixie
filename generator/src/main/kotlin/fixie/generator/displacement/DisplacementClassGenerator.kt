@@ -96,11 +96,17 @@ internal class DisplacementClassGenerator(
         next()
         writer.println("\toperator fun minus(right: ${displacement.className}) = ${displacement.className}(this.value - right.value)")
 
-        for (typeName in arrayOf("Int", "Long", "Float", "Double", displacement.number.className)) {
+        for (typeName in arrayOf("Int", "Long", displacement.number.className)) {
             next()
             writer.println("\toperator fun times(right: $typeName) = ${displacement.className}(this.value * right)")
             next()
             writer.println("\toperator fun div(right: $typeName) = ${displacement.className}(this.value / right)")
+        }
+        for (typeName in arrayOf("Float", "Double")) {
+            next()
+            writer.println("\toperator fun times(right: $typeName) = ${displacement.className}(${displacement.number.className}.from(this.value.toDouble() * right))")
+            next()
+            writer.println("\toperator fun div(right: $typeName) = ${displacement.className}(${displacement.number.className}.from(this.value.toDouble() / right))")
         }
 
         next()
@@ -152,6 +158,8 @@ internal class DisplacementClassGenerator(
         writer.println("\t\toperator fun minus(right: Area) = Area(this.raw - right.raw)")
         writer.println()
         writer.println("\t\toperator fun div(right: Area) = ${displacement.number.className}.from(this.raw / right.raw)")
+        writer.println()
+        writer.println("\t\toperator fun times(right: Double) = Area(this.raw * right)")
         writer.println()
         writer.println("\t\toverride operator fun compareTo(other: Area) = this.raw.compareTo(other.raw)")
         writer.println("\t}")

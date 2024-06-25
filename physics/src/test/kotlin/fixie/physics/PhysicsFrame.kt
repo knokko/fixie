@@ -14,6 +14,7 @@ import java.awt.Toolkit
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
 import java.awt.event.KeyListener
+import java.lang.System.nanoTime
 import java.util.*
 import javax.swing.JFrame
 import javax.swing.JPanel
@@ -23,6 +24,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.DurationUnit
 
 private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
@@ -179,17 +181,22 @@ fun main() {
     frame.add(panel)
 
     val updateCounter = UpdateCounter()
-    Thread(UpdateLoop({ updateLoop ->
+    val updateThread = Thread(UpdateLoop({ updateLoop ->
         updateCounter.increment()
+        val startUpdateTime = nanoTime()
         scene.update(Scene.STEP_DURATION)
+        val finishUpdateTime = nanoTime()
+        panel.lastUpdateTime = (startUpdateTime + finishUpdateTime) / 2
         if (!frame.isDisplayable) {
             updateLoop.stop()
             panel.storage.getThreadStorage(Thread.currentThread().id).print(System.out, 60, 1.0)
         }
         if (Math.random() < 0.01) println("UPS is ${updateCounter.value}")
-    }, Scene.STEP_DURATION.inWholeNanoseconds)).start()
+    }, Scene.STEP_DURATION.inWholeNanoseconds))
+    updateThread.start()
 
     UpdateLoop({ renderLoop ->
+        if (!updateThread.isAlive) frame.dispose()
         frame.repaint()
         if (!frame.isDisplayable) {
             renderLoop.stop()
@@ -203,6 +210,7 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
 
     private val sceneQuery = SceneQuery()
     private val counter = UpdateCounter()
+    var lastUpdateTime = 0L
 
     val storage: SampleStorage<FrequencyThreadStorage> = SampleStorage.frequency()
     val profiler = SampleProfiler(storage)
@@ -216,7 +224,13 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
     override fun paint(g: Graphics?) {
         profiler.isPaused = false
         threadID = Thread.currentThread().id
-        val startTime = System.nanoTime()
+        val startTime = nanoTime()
+
+        var extrapolationTime = 0.nanoseconds
+        if (lastUpdateTime > 0L) extrapolationTime = (startTime - lastUpdateTime).nanoseconds
+
+        val extrapolationFactor = min(1.0, extrapolationTime / Scene.STEP_DURATION)
+
         counter.increment()
         val width = this.width
         val height = this.height
@@ -229,9 +243,39 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
                 playerPosition.x + viewDistance, playerPosition.y + viewDistance
         )
 
+        val miniScene = Scene()
+        val miniPlayerProperties = EntityProperties(radius = 100.mm)
+        for (index in 0 until sceneQuery.entities.size) {
+            val entity = sceneQuery.entities[index]
+            miniScene.spawnEntity(EntitySpawnRequest(
+                    entity.position.x, entity.position.y, if (entity.id == playerID) miniPlayerProperties else entity.properties,
+                    entity.velocity.x, entity.velocity.y, entity.angle
+            ))
+        }
+        for (index in 0 until sceneQuery.tiles.size) {
+            val tile = sceneQuery.tiles[index]
+            miniScene.addTile(TilePlaceRequest(collider = tile.collider, properties = tile.properties))
+        }
+        miniScene.update(Scene.STEP_DURATION)
+
+        val miniQuery = SceneQuery()
+        miniScene.read(
+                miniQuery, playerPosition.x - viewDistance, playerPosition.y - viewDistance,
+                playerPosition.x + viewDistance, playerPosition.y + viewDistance
+        )
+
         var playerPosition = playerPosition
         for (index in 0 until sceneQuery.entities.size) {
             val entity = sceneQuery.entities[index]
+            for (miniIndex in 0 until miniQuery.entities.size) {
+                val miniEntity = miniQuery.entities[miniIndex]
+
+                if (miniEntity.properties === entity.properties || (entity.id == playerID && miniEntity.properties == miniPlayerProperties)) {
+                    entity.position.x = (1.0 - extrapolationFactor) * entity.position.x + extrapolationFactor * miniEntity.position.x
+                    entity.position.y = (1.0 - extrapolationFactor) * entity.position.y + extrapolationFactor * miniEntity.position.y
+                    break
+                }
+            }
             if (entity.id == playerID) playerPosition = entity.position
         }
 
@@ -278,7 +322,7 @@ class PhysicsPanel(private val scene: Scene, private val playerPosition: Positio
 
         if (Math.random() < 0.01) {
             println("FPS is ${counter.value}")
-            println("Took ${(System.nanoTime() - startTime) / 1000}us")
+            println("Took ${(nanoTime() - startTime) / 1000}us")
         }
 
         //profiler.isPaused = true

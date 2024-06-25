@@ -8,6 +8,10 @@ class Position(
 ) {
     override fun toString() = "Pos($x, $y)"
 
+    override fun equals(other: Any?) = other is Position && this.x == other.x && this.y == other.y
+
+    override fun hashCode() = x.hashCode() - 13 * y.hashCode()
+
     fun distance(otherX: Displacement, otherY: Displacement) = distance(this.x, this.y, otherX, otherY)
 
     companion object {

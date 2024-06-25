@@ -6,11 +6,9 @@ import fixie.geometry.LineSegment
 import fixie.geometry.Position
 import fixie.physics.constraint.MaxAccelerationConstraint
 import fixie.physics.constraint.NotMovingConstraint
-import fixie.physics.constraint.NotStuckConstraint
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 private val LIMIT = 10.km
 
@@ -84,7 +82,6 @@ class Scene {
                     )
                     entity.constraints.add(MaxAccelerationConstraint(400.milliseconds, 5.mps))
                     entity.constraints.add(NotMovingConstraint(200.milliseconds))
-                    entity.constraints.add(NotStuckConstraint(0.2.mps, 1.seconds) { entity.stuckCounter = 0 })
                     entities.add(entity)
                     request.id = entity.id
                 }
@@ -134,7 +131,6 @@ class Scene {
         synchronized(this) {
             var index = 0
             for (entity in entities) {
-                if (entity.stuckCounter > 0) entity.stuckCounter -= 1
                 entity.position.x = entity.wipPosition.x
                 entity.position.y = entity.wipPosition.y
                 entity.velocity.x = entity.wipVelocity.x

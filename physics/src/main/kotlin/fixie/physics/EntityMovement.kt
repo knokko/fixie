@@ -315,10 +315,6 @@ internal class EntityMovement(
         }
     }
 
-    private fun retryAngle(angle: Double, totalDelta: Displacement): Displacement {
-        return retryDelta(cos(angle) * totalDelta, sin(angle) * totalDelta)
-    }
-
     private fun retryDelta(dx: Displacement, dy: Displacement): Displacement {
         retryDestination.x = entity.wipPosition.x + dx
         retryDestination.y = entity.wipPosition.y + dy
@@ -330,20 +326,6 @@ internal class EntityMovement(
         return sqrt(distanceX * distanceX + distanceY * distanceY)
     }
 
-    private fun retryAngles(originalAngle: Double, totalDelta: Displacement) {
-        if (retryDelta(deltaX, deltaY) > 0.m) return
-
-        if (entity.stuckCounter > 0) return
-
-        val angleIncrement = 0.01
-        for (counter in 1 until 6) {
-            if (retryAngle(originalAngle + angleIncrement * counter * counter, totalDelta) > 0.m) return
-            if (retryAngle(originalAngle - angleIncrement * counter * counter, totalDelta) > 0.m) return
-        }
-
-        entity.stuckCounter = (5.seconds / Scene.STEP_DURATION).roundToLong()
-    }
-
     fun retry() {
         val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         remainingBudget -= finalDelta / originalDelta
@@ -353,9 +335,10 @@ internal class EntityMovement(
         val totalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         if (totalDelta < 0.1.mm) return
 
-        val oldAngle = atan2(deltaY.value.toDouble(), deltaX.value.toDouble())
-
-        retryAngles(oldAngle, totalDelta)
+        if (retryDelta(deltaX, deltaY) <= 0.m) {
+            createMargin(entity, interestingEntities, interestingTiles, 1.mm)
+            retryDelta(deltaX, deltaY)
+        }
 
         deltaX = retryDestination.x - entity.wipPosition.x
         deltaY = retryDestination.y - entity.wipPosition.y

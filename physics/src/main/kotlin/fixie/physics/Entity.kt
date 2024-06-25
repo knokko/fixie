@@ -20,7 +20,6 @@ class Entity(
     internal val wipPosition = Position.origin()
     internal val wipVelocity = Velocity.zero()
     internal val clusteringLists = mutableListOf<MutableList<Entity>>()
-    internal var stuckCounter = 0L
     internal var isAlreadyPresent = false
 
     override fun equals(other: Any?) = other is Entity && other.id == this.id

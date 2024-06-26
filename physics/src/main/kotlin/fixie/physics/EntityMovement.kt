@@ -68,12 +68,20 @@ internal class EntityMovement(
         remainingBudget = 1.0
     }
 
+    fun determineSafeRadius(entity: Entity): Displacement {
+        val vx = entity.velocity.x * Scene.STEP_DURATION
+        val vy = computeCurrentVelocityY(entity.velocity.y) * Scene.STEP_DURATION
+        val marginDistance = 1.mm
+        val marginFactor = 1.1
+        return marginFactor * (abs(vx) + abs(vy) + marginDistance + entity.properties.radius)
+    }
+
     fun determineInterestingTilesAndEntities() {
-        val safeRadius = 2 * entity.properties.radius + 2 * originalDelta
-        val safeMinX = entity.wipPosition.x - safeRadius
-        val safeMinY = entity.wipPosition.y - safeRadius
-        val safeMaxX = entity.wipPosition.x + safeRadius
-        val safeMaxY = entity.wipPosition.y + safeRadius
+        val safeRadius = determineSafeRadius(entity)
+        val safeMinX = entity.position.x - safeRadius
+        val safeMinY = entity.position.y - safeRadius
+        val safeMaxX = entity.position.x + safeRadius
+        val safeMaxY = entity.position.y + safeRadius
         queryTiles.clear()
         interestingTiles.clear()
         tileTree.query(safeMinX, safeMinY, safeMaxX, safeMaxY, queryTiles)
@@ -151,8 +159,8 @@ internal class EntityMovement(
         }
     }
 
-    fun moveSafely() {
-        if (intersections.size > 0) {
+    fun moveSafely(allowTeleport: Boolean) {
+        if (intersections.size > 0 && !allowTeleport) {
             var firstIntersection = intersections[0]
             for (index in 1 until intersections.size) {
                 val otherIntersection = intersections[index]
@@ -163,14 +171,18 @@ internal class EntityMovement(
             deltaY = firstIntersection.myY - entity.wipPosition.y
         }
 
+        val safeDistance = determineSafeRadius(entity) - entity.properties.radius - 1.mm
         while (true) {
-            val vx = entity.velocity.x * Scene.STEP_DURATION
-            val vy = entity.velocity.y * Scene.STEP_DURATION
+
             val dx = entity.wipPosition.x + deltaX - entity.position.x
             val dy = entity.wipPosition.y + deltaY - entity.position.y
-            if (sqrt(dx * dx + dy * dy) > sqrt(vx * vx + vy * vy) + 0.1 * entity.properties.radius) {
-                deltaX /= 2
-                deltaY /= 2
+            val actualDistance = sqrt(dx * dx + dy * dy)
+
+            if (actualDistance > safeDistance) {
+                if (deltaX != 0.m || deltaY != 0.m) {
+                    deltaX /= 2
+                    deltaY /= 2
+                } else throw Error("moveSafely() violated: actual distance is $actualDistance and safe distance is $safeDistance ")
             } else break
         }
 
@@ -321,10 +333,30 @@ internal class EntityMovement(
         val oldBudget = remainingBudget
         if (oldBudget > 0.5) {
             updateRetryBudget()
-            if (remainingBudget > 0.4) {
-                createMargin(entity, interestingEntities, interestingTiles, 0.2.mm)
-            }
+            if (remainingBudget > 0.4) tryMargin()
             retryStep()
+        }
+    }
+
+    private fun tryMargin() {
+        val oldX = entity.wipPosition.x
+        val oldY = entity.wipPosition.y
+        val oldTargetX = entity.wipPosition.x + deltaX
+        val oldTargetY = entity.wipPosition.y + deltaY
+
+        createMargin(entity, interestingEntities, interestingTiles, 0.2.mm)
+
+        val newX = entity.wipPosition.x
+        val newY = entity.wipPosition.y
+
+        if (newX != oldX || newY != oldY) {
+            entity.wipPosition.x = oldX
+            entity.wipPosition.y = oldY
+            deltaX = newX - oldX
+            deltaY = newY - oldY
+            moveSafely(true)
+            deltaX = oldTargetX - entity.wipPosition.x
+            deltaY = oldTargetY - entity.wipPosition.y
         }
     }
 
@@ -344,7 +376,7 @@ internal class EntityMovement(
         properIntersections.clear()
         determineTileIntersections()
         determineEntityIntersections()
-        moveSafely()
+        moveSafely(false)
         processIntersections()
     }
 

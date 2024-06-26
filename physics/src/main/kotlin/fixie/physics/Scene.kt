@@ -155,7 +155,7 @@ class Scene {
         movement.determineTileIntersections()
         movement.determineEntityIntersections()
 
-        movement.moveSafely()
+        movement.moveSafely(false)
         movement.processIntersections()
 
         if (movement.intersections.size > 0 && movement.originalDelta > 0.1.mm) movement.retry()
@@ -165,9 +165,7 @@ class Scene {
 
     private fun updateEntities() {
         for (entity in entities) {
-            val vx = entity.wipVelocity.x * STEP_DURATION
-            val vy = entity.wipVelocity.y * STEP_DURATION
-            entityClustering.insert(entity, 1.1 * (entity.properties.radius + abs(vx) + abs(vy)))
+            entityClustering.insert(entity, movement.determineSafeRadius(entity))
 
             for (constraint in entity.constraints) {
                 constraint.check(entity.wipPosition, entity.wipVelocity)

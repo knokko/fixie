@@ -5,13 +5,13 @@ import fixie.geometry.Geometry
 import fixie.geometry.Position
 import java.util.*
 import kotlin.math.*
-import kotlin.time.Duration.Companion.seconds
 
 internal class EntityMovement(
         private val tileTree: TileTree,
         private val entityClustering: EntityClustering
 ) {
     val intersections = GrowingBuffer.withMutableElements(5) { Intersection() }
+    private val processedIntersections = mutableListOf<UUID>()
     private val properIntersections = mutableListOf<Intersection>()
 
     private val interestingTiles = mutableListOf<Tile>()
@@ -21,7 +21,6 @@ internal class EntityMovement(
 
     private val entityIntersection = Position.origin()
     private val tileIntersection = Position.origin()
-    private val retryDestination = Position.origin()
 
     private lateinit var entity: Entity
 
@@ -55,7 +54,7 @@ internal class EntityMovement(
 
     private fun computeCurrentVelocityX() = entity.wipVelocity.x
 
-    private fun computeCurrentVelocityY() = entity.wipVelocity.y - 4.9.mps2 * Scene.STEP_DURATION
+    private fun computeCurrentVelocityY(vy: Speed = entity.wipVelocity.y) = vy - 4.9.mps2 * Scene.STEP_DURATION
 
     fun start(entity: Entity) {
         this.entity = entity
@@ -65,6 +64,7 @@ internal class EntityMovement(
 
         intersections.clear()
         properIntersections.clear()
+        processedIntersections.clear()
         remainingBudget = 1.0
     }
 
@@ -230,7 +230,9 @@ internal class EntityMovement(
 
         for (index in 0 until intersections.size) {
             val intersection = intersections[index]
-            if (intersection.delta <= firstIntersection.delta + 1.mm) properIntersections.add(intersection)
+            if (intersection.delta <= firstIntersection.delta + 1.mm && !processedIntersections.contains(intersection.otherID)) {
+                properIntersections.add(intersection)
+            }
         }
 
         processTileOrEntityIntersections(true)
@@ -254,6 +256,8 @@ internal class EntityMovement(
             intersection: Intersection, oldVelocityX: Speed, oldVelocityY: Speed,
             directionX: Double, directionY: Double, totalIntersectionFactor: Double
     ) {
+        processedIntersections.add(intersection.otherID)
+
         val normalX = (intersection.myX - intersection.otherX) / intersection.radius
         val normalY = (intersection.myY - intersection.otherY) / intersection.radius
 
@@ -268,85 +272,80 @@ internal class EntityMovement(
         val bounceConstant = entity.properties.bounceFactor + intersection.bounce + 1
         val frictionConstant = 0.01 * entity.properties.frictionFactor * intersection.friction
 
-        val opposingFactor = bounceConstant * (normalX * oldVelocityX + normalY * oldVelocityY)
-        val frictionFactor = frictionConstant * (normalY * oldVelocityX - normalX * oldVelocityY)
-
-        val impulseX = intersectionFactor * (opposingFactor * normalX + frictionFactor * normalY)
-        if (opposingFactor > 1.kmps) {
-            println("uh ooh: ${normalX * normalX + normalY * normalY}")
-        }
-        val impulseY = intersectionFactor * (opposingFactor * normalY - frictionFactor * normalX)
-
-        entity.wipVelocity.x -= impulseX
-        entity.wipVelocity.y -= impulseY
-
+        var otherVelocityX = 0.mps
+        var otherVelocityY = 0.mps
         val otherVelocity = intersection.otherVelocity
         if (otherVelocity != null) {
+            otherVelocityX = otherVelocity.x
+            otherVelocityY = computeCurrentVelocityY(otherVelocity.y)
+        }
+
+        val relativeVelocityX = oldVelocityX - otherVelocityX
+        val relativeVelocityY = oldVelocityY - otherVelocityY
+
+        val opposingImpulse = bounceConstant * (normalX * oldVelocityX + normalY * oldVelocityY)
+        val frictionImpulse = frictionConstant * (normalY * oldVelocityX - normalX * oldVelocityY)
+
+        var impulseX = intersectionFactor * (opposingImpulse * normalX + frictionImpulse * normalY)
+        if (opposingImpulse > 1.kmps) {
+            println("uh ooh: ${normalX * normalX + normalY * normalY}")
+        }
+        var impulseY = intersectionFactor * (opposingImpulse * normalY - frictionImpulse * normalX)
+
+        if (otherVelocity != null) {
             val massFactor = (entity.properties.radius / intersection.otherRadius) * (entity.properties.radius / intersection.otherRadius)
+
+            val thresholdFactor = 2.0
+            var dimmer = 1.0
+
+            val relativeVelocity = sqrt(relativeVelocityX.value * relativeVelocityX.value + relativeVelocityY.value * relativeVelocityY.value)
+            val impulse = sqrt(impulseX.value * impulseX.value + impulseY.value * impulseY.value)
+            val push = massFactor * impulse / (relativeVelocity + 0.5.mps.value / massFactor)
+            if (push > thresholdFactor) dimmer = push / thresholdFactor
+
+            impulseX /= dimmer
+            impulseY /= dimmer
+
             otherVelocity.x += massFactor * impulseX
             otherVelocity.y += massFactor * impulseY
         }
-    }
 
-    private fun retryTiles() {
-        for (tile in interestingTiles) {
-            if (Geometry.sweepCircleToLineSegment(
-                            entity.wipPosition.x, entity.wipPosition.y,
-                            retryDestination.x - entity.wipPosition.x,
-                            retryDestination.y - entity.wipPosition.y, entity.properties.radius,
-                            tile.collider, entityIntersection, tileIntersection
-                    )) {
-                retryDestination.x = entityIntersection.x
-                retryDestination.y = entityIntersection.y
-            }
-        }
-    }
-
-    private fun retryEntities() {
-        for (other in interestingEntities) {
-            if (Geometry.sweepCircleToCircle(
-                            entity.wipPosition.x, entity.wipPosition.y, entity.properties.radius,
-                            retryDestination.x - entity.wipPosition.x, retryDestination.y - entity.wipPosition.y,
-                            other.wipPosition.x, other.wipPosition.y, other.properties.radius, entityIntersection
-                    )) {
-                retryDestination.x = entityIntersection.x
-                retryDestination.y = entityIntersection.y
-            }
-        }
-    }
-
-    private fun retryDelta(dx: Displacement, dy: Displacement): Displacement {
-        retryDestination.x = entity.wipPosition.x + dx
-        retryDestination.y = entity.wipPosition.y + dy
-        retryTiles()
-        retryEntities()
-
-        val distanceX = retryDestination.x - entity.wipPosition.x
-        val distanceY = retryDestination.y - entity.wipPosition.y
-        return sqrt(distanceX * distanceX + distanceY * distanceY)
+        entity.wipVelocity.x -= impulseX
+        entity.wipVelocity.y -= impulseY
     }
 
     fun retry() {
+        updateRetryBudget()
+        retryStep()
+
+        val oldBudget = remainingBudget
+        if (oldBudget > 0.5) {
+            updateRetryBudget()
+            if (remainingBudget > 0.4) {
+                createMargin(entity, interestingEntities, interestingTiles, 0.2.mm)
+            }
+            retryStep()
+        }
+    }
+
+    private fun updateRetryBudget() {
         val finalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         remainingBudget -= finalDelta / originalDelta
 
         deltaX = remainingBudget * computeCurrentVelocityX() * Scene.STEP_DURATION
         deltaY = remainingBudget * computeCurrentVelocityY() * Scene.STEP_DURATION
+    }
+
+    private fun retryStep() {
         val totalDelta = sqrt(deltaX * deltaX + deltaY * deltaY)
         if (totalDelta < 0.1.mm) return
 
-        if (retryDelta(deltaX, deltaY) <= 0.m) {
-            createMargin(entity, interestingEntities, interestingTiles, 1.mm)
-            retryDelta(deltaX, deltaY)
-        }
-
-        deltaX = retryDestination.x - entity.wipPosition.x
-        deltaY = retryDestination.y - entity.wipPosition.y
-
         intersections.clear()
         properIntersections.clear()
-
+        determineTileIntersections()
+        determineEntityIntersections()
         moveSafely()
+        processIntersections()
     }
 
     fun finish() {

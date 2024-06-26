@@ -14,6 +14,8 @@ class Position(
 
     fun distance(otherX: Displacement, otherY: Displacement) = distance(this.x, this.y, otherX, otherY)
 
+    fun distance(other: Position) = distance(other.x, other.y)
+
     companion object {
 
         fun origin() = Position(0.m, 0.m)

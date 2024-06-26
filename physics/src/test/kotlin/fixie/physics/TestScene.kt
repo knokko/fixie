@@ -2,6 +2,7 @@ package fixie.physics
 
 import fixie.geometry.LineSegment
 import fixie.*
+import fixie.geometry.Position
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -72,6 +73,99 @@ class TestScene {
         // The test should succeed when both balls are still within the (-5, -5) to (5, 5) region, and it should
         // fail when the small ball is pushed out of it.
         assertEquals(2, query.entities.size)
+    }
+
+    @Test
+    fun slowRollRegressionTest() {
+        // This test reproduces a former bug that caused an acceleration ball that is rolling uphill to be
+        // much slower than it should. See sketches/scene/slow-roll.png
+
+        val scene = Scene()
+
+        var passedTime = 0.seconds
+        val entityProperties = EntityProperties(radius = 100.mm) { _, velocity ->
+            passedTime += Scene.STEP_DURATION
+
+            // After 0.5 seconds, the ball will accelerate to the right with 5m/s^2, which should cause it to leave the
+            // area within 5 seconds
+            if (passedTime > 500.milliseconds) {
+                velocity.x += 5.mps2 * Scene.STEP_DURATION
+            }
+        }
+
+        scene.spawnEntity(EntitySpawnRequest(x = 1.61.m, y = 2.63.m, properties = entityProperties))
+
+        val tiles = listOf(
+                LineSegment(startX = 1.5.m, startY = 2.5.m, lengthX = 0.3.m, lengthY = 70.mm),
+                LineSegment(startX = 1.5.m, startY = 2.5.m, lengthX = -2.m, lengthY = -0.5.m),
+                LineSegment(startX = 1.5.m, startY = 2.59.m, lengthX = -2.m, lengthY = -0.5.m)
+        )
+        for (tile in tiles) scene.addTile(TilePlaceRequest(collider = tile, properties = TileProperties()))
+
+        scene.update(5.seconds)
+
+        val query = SceneQuery()
+        scene.read(query, 1.m, 2.m, 3.m, 3.m)
+
+        assertEquals(0, query.entities.size)
+    }
+
+    @Test
+    fun testNotMovingConstraint() {
+        // This scene is depicted in sketches/scene/not-moving.png. The balls should fall into this position within
+        // 20 seconds, after which they should stabilize. This test checks that their velocities stay nearly zero and
+        // that their positions don't change too much.
+        val scene = Scene()
+
+        val length = 10.m
+
+        scene.addTile(TilePlaceRequest(LineSegment(
+                startX = -length, startY = 0.m, lengthX = length, lengthY = -length
+        ), TileProperties()))
+        scene.addTile(TilePlaceRequest(LineSegment(
+                startX = length, startY = 0.m, lengthX = -length, lengthY = -length
+        ), TileProperties()))
+
+        for (counter in -5 .. 5) {
+            scene.spawnEntity(EntitySpawnRequest(
+                    x = counter.m, y = 0.m, properties = EntityProperties(radius = 0.2.m)
+            ))
+            scene.spawnEntity(EntitySpawnRequest(
+                    x = counter.m, y = 0.4.m, properties = EntityProperties(radius = 0.1.m)
+            ))
+            scene.spawnEntity(EntitySpawnRequest(
+                    x = counter.m, y = 0.9.m, properties = EntityProperties(radius = 0.3.m)
+            ))
+        }
+
+        // The scene should be stabilized after 20 seconds
+        scene.update(20.seconds)
+
+        val stablePositions = Array(33) { Position.origin() }
+        val query = SceneQuery()
+        for (counter in 0 until 100) {
+            scene.read(query, -10.m, -10.m, 10.m, 10.m)
+            assertEquals(33, query.entities.size)
+
+            for (index in 0 until query.entities.size) {
+                val entity = query.entities[index]
+                val threshold = 2.mps
+                assertTrue(
+                        abs(entity.velocity.x) < threshold && abs(entity.velocity.y) < threshold,
+                        "The velocity components ${entity.velocity} can be at most $threshold"
+                )
+                val stablePosition = stablePositions[index]
+                if (stablePosition == Position.origin()) {
+                    stablePosition.x = entity.position.x
+                    stablePosition.y = entity.position.y
+                }
+
+                val distance = stablePosition.distance(entity.position)
+                assertTrue(distance < 50.mm, "Distance $distance to stable position can be at most 50mm")
+            }
+
+            scene.update(Scene.STEP_DURATION)
+        }
     }
 
     @Test

@@ -38,7 +38,7 @@ internal class NotMovingConstraint(
            val actualDistance = abs(position.x - oldPosition.x) + abs(position.y - oldPosition.y)
            val expectedDistance = lowestSpeed * Scene.STEP_DURATION * age
 
-           if (expectedDistance > 2 * actualDistance) {
+           if (expectedDistance > 2 * actualDistance && currentSpeed > 0.5.mps) {
                velocity.x /= 2
                velocity.y /= 2
            }

@@ -339,21 +339,14 @@ internal class EntityMovement(
     }
 
     private fun tryMargin() {
-        val oldX = entity.wipPosition.x
-        val oldY = entity.wipPosition.y
-        val oldTargetX = entity.wipPosition.x + deltaX
-        val oldTargetY = entity.wipPosition.y + deltaY
+        entityIntersection.x = entity.wipPosition.x
+        entityIntersection.y = entity.wipPosition.y
 
-        createMargin(entity, interestingEntities, interestingTiles, 0.2.mm)
-
-        val newX = entity.wipPosition.x
-        val newY = entity.wipPosition.y
-
-        if (newX != oldX || newY != oldY) {
-            entity.wipPosition.x = oldX
-            entity.wipPosition.y = oldY
-            deltaX = newX - oldX
-            deltaY = newY - oldY
+        if (createMargin(entityIntersection, entity.properties.radius, interestingEntities, interestingTiles, 0.2.mm)) {
+            val oldTargetX = entity.wipPosition.x + deltaX
+            val oldTargetY = entity.wipPosition.y + deltaY
+            deltaX = entityIntersection.x - entity.wipPosition.x
+            deltaY = entityIntersection.y - entity.wipPosition.y
             moveSafely(true)
             deltaX = oldTargetX - entity.wipPosition.x
             deltaY = oldTargetY - entity.wipPosition.y

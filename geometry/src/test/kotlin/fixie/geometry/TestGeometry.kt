@@ -212,8 +212,8 @@ class TestGeometry {
         val point2 = Position.origin()
 
         assertEquals(18.05.mm, Geometry.distanceBetweenLineSegments(
-            -6.397.m, 1.27852.m, -1.43524.m, 2.18087.m, point1,
-            -65.174.m, -25.146.m, 78.468.m, 39.172.m, point2
+            LineSegment(-6.397.m, 1.27852.m, -1.43524.m, 2.18087.m), point1,
+            LineSegment(-65.174.m, -25.146.m, 78.468.m, 39.172.m), point2
         ))
         assertEquals(Position(-7.83224.m, 3.45939.m), point1)
         assertEquals(Position(-7.84031.m, 3.47554.m), point2)

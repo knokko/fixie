@@ -25,7 +25,20 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
-import kotlin.time.DurationUnit
+
+private fun narrowPipesScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
+    val scene = Scene()
+
+    val spawnPlayer = EntitySpawnRequest(x = 1.m, y = 5.m, properties = playerProperties)
+    scene.spawnEntity(spawnPlayer)
+    scene.spawnEntity(EntitySpawnRequest(x = 3.3.m, y = 5.m, properties = EntityProperties(radius = 100.mm)))
+
+    addNarrowPipes(scene, playerProperties.radius)
+
+    scene.update(Duration.ZERO)
+
+    return Pair(scene, spawnPlayer.id!!)
+}
 
 private fun simpleSplitScene(playerProperties: EntityProperties): Pair<Scene, UUID> {
     val scene = Scene()
@@ -159,8 +172,8 @@ fun main() {
     val playerProperties = EntityProperties(
             radius = 0.1.m,
             updateFunction = { position, velocity ->
-                if (moveLeft) velocity.x -= 5.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
-                if (moveRight) velocity.x += 5.mps * Scene.STEP_DURATION.toDouble(DurationUnit.SECONDS)
+                if (moveLeft) velocity.x -= 5.mps2 * Scene.STEP_DURATION
+                if (moveRight) velocity.x += 5.mps2 * Scene.STEP_DURATION
                 if (shouldJump) {
                     velocity.y += 4.mps
                     shouldJump = false

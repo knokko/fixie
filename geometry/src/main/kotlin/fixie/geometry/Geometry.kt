@@ -23,19 +23,24 @@ object Geometry {
         )
 
         // When the line segment distance is larger than the radius, there is no collision
-        if (fullDistance > cr) return false
+        if (fullDistance > cr + 1.mm) return false
 
         val totalMovement = sqrt(cvx * cvx + cvy * cvy)
 
         // Sanity check to avoid potential endless loops
-        if (distanceBetweenPointAndLineSegment(cx, cy, lsx, lsy, lslx, lsly, outPointOnLine) <= cr) {
+        var largestSafeDistance = distanceBetweenPointAndLineSegment(cx, cy, lsx, lsy, lslx, lsly, outPointOnLine)
+        if (largestSafeDistance <= cr) {
             throw IllegalArgumentException("circle at ($cx, $cy) with radius $cr is already in line ($lsx, $lsy, $lslx, $lsly)")
         }
+
+        val idealDistance = distanceBetweenPointAndLineSegment(cx + cvx, cy + cvy, lsx, lsy, lslx, lsly, outPointOnLine)
+
+        // Dirty trick
+        if (idealDistance > cr && fullDistance > 0.99 * cr) return false
 
         var useBinarySearch = false
         var signumCounter = 0
         var largestSafeMovement = 0.m
-        var largestSafeDistance = distanceBetweenPointAndLineSegment(cx, cy, lsx, lsy, lslx, lsly, outPointOnLine)
 
         val dix = outCirclePosition.x - cx
         val diy = outCirclePosition.y - cy
@@ -166,6 +171,13 @@ object Geometry {
 
         return true
     }
+
+    fun distanceBetweenLineSegments(
+        l1: LineSegment, outPoint1: Position, l2: LineSegment, outPoint2: Position
+    ) = distanceBetweenLineSegments(
+        l1.startX, l1.startY, l1.lengthX, l1.lengthY, outPoint1,
+        l2.startX, l2.startY, l2.lengthX, l2.lengthY, outPoint2
+    )
 
     fun distanceBetweenLineSegments(
         x1: Displacement, y1: Displacement, lx1: Displacement, ly1: Displacement, outPoint1: Position,

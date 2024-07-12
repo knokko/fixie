@@ -22,18 +22,36 @@ class FixieModule(
             throw IllegalArgumentException("Packages should be separated by dots instead of slashes")
         }
 
-        fun <T> checkPresent(
-                description: String, elements: List<T>,
-                extractName: (T) -> String, extractNumber: (T) -> NumberClass
+        fun <S, T, R> checkPresent(
+                sourceDescription: String, targetDescription: String,
+                sourceElements: List<S>, targetElements: List<T>,
+                extractSource: (S) -> R?, extractTarget: (T) -> R,
+                extractSourceName: (S) -> String
         ) {
-            for (element in elements) {
-                if (!numbers.contains(extractNumber(element))) {
-                    throw IllegalArgumentException("Missing number class for $description class ${extractName(element)}")
+            for (element in sourceElements) {
+                val sourceResult = extractSource(element) ?: continue
+                if (!targetElements.map(extractTarget).contains(sourceResult)) {
+                    throw IllegalArgumentException("Missing $targetDescription class for $sourceDescription class ${extractSourceName(element)}")
                 }
             }
         }
 
-        checkPresent("displacement", displacements, { it.className }) { it.number }
-        checkPresent("speed", speed.filter { it.number != null }, { it.className }) { it.number!! }
+        checkPresent("displacement", "number", displacements, numbers, { it.number }, { it }, { it.className })
+        checkPresent("displacement", "speed", displacements, speed, { it.speed }, { it }, { it.className })
+        checkPresent("speed", "number", speed, numbers, { it.number }, { it }, { it.className })
+        checkPresent("speed", "displacement", speed, displacements, { it.displacementClassName }, { it.className }, { it.className })
+        checkPresent("speed", "acceleration", speed, accelerations, { it.acceleration }, { it }, { it.className })
+        checkPresent("acceleration", "speed", accelerations, speed, { it.speedClassName }, { it.className }, { it.className })
+        checkPresent("angle", "spin", angles, numbers, { it.spinClass }, { it }, { it.className })
+        checkPresent("spin", "angle", spins, angles, { it.angleClassName }, { it.className }, { it.className })
+
+        val allClassNames = numbers.map { it.className } + displacements.map { it.className } + speed.map { it.className } +
+                accelerations.map { it.className } + angles.map { it.className } + spins.map { it.className }
+
+        for (className in allClassNames) {
+            if (allClassNames.count { it == className } > 1) {
+                throw IllegalArgumentException("Duplicate class name $className")
+            }
+        }
     }
 }

@@ -46,7 +46,7 @@ class FixieModule(
         checkPresent("speed", "displacement", speed, displacements, { it.displacementClassName }, { it.className }, { it.className })
         checkPresent("speed", "acceleration", speed, accelerations, { it.acceleration }, { it }, { it.className })
         checkPresent("acceleration", "speed", accelerations, speed, { it.speedClassName }, { it.className }, { it.className })
-        checkPresent("angle", "spin", angles, numbers, { it.spinClass }, { it }, { it.className })
+        checkPresent("angle", "spin", angles, spins, { it.spinClass }, { it }, { it.className })
         checkPresent("spin", "angle", spins, angles, { it.angleClassName }, { it.className }, { it.className })
 
         val allClassNames = numbers.map { it.className } +

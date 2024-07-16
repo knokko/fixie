@@ -219,28 +219,30 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                         acceleration = accelerations.lastOrNull(),
                         createNumberExtensions = false
                 ))
-                for (spinUnit in SpinUnit.entries) {
-                    val angleClass = angles.removeLast()
-                    val spinClass = SpinClass(
-                            className = "Spin${spinUnit.name[0]}",
-                            floatType = floatType,
-                            oneUnit = spinUnit,
-                            displayUnit = SpinUnit.DEGREES_PER_SECOND,
-                            angleClassName = if (angleClass.spinClass == null) angleClass.className else null,
-                            createNumberExtensions = spins.isEmpty()
-                    )
-                    if (angleClass.spinClass == null) {
-                        angles.add(AngleClass(
-                                className = angleClass.className,
-                                internalType = angleClass.internalType,
-                                displayUnit = angleClass.displayUnit,
-                                createNumberExtensions = angleClass.createNumberExtensions,
-                                allowDivisionAndFloatMultiplication = angleClass.allowDivisionAndFloatMultiplication,
-                                allowComparisons = angleClass.allowComparisons,
-                                spinClass = spinClass
-                        ))
-                    } else angles.add(angleClass)
-                    spins.add(spinClass)
+                if (unit == SpeedUnit.KILOMETERS_PER_HOUR) {
+                    for (spinUnit in SpinUnit.entries) {
+                        val angleClass = angles.removeLast()
+                        val spinClass = SpinClass(
+                                className = "Spin${spinUnit.name[0]}",
+                                floatType = floatType,
+                                oneUnit = spinUnit,
+                                displayUnit = SpinUnit.DEGREES_PER_SECOND,
+                                angleClassName = if (angleClass.spinClass == null) angleClass.className else null,
+                                createNumberExtensions = spins.isEmpty()
+                        )
+                        if (angleClass.spinClass == null) {
+                            angles.add(AngleClass(
+                                    className = angleClass.className,
+                                    internalType = angleClass.internalType,
+                                    displayUnit = angleClass.displayUnit,
+                                    createNumberExtensions = angleClass.createNumberExtensions,
+                                    allowDivisionAndFloatMultiplication = angleClass.allowDivisionAndFloatMultiplication,
+                                    allowComparisons = angleClass.allowComparisons,
+                                    spinClass = spinClass
+                            ))
+                        } else angles.add(angleClass)
+                        spins.add(spinClass)
+                    }
                 }
             }
         }

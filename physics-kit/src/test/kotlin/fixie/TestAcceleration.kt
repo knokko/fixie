@@ -15,7 +15,7 @@ class TestAcceleration {
 
 	@Test
 	fun testToDouble() {
-		assertEquals(1.23, 1.23.mps2.toDouble(), 0.001)
+		assertEquals(1.23, (1.23 * Acceleration.MPS2).toDouble(), 0.001)
 	}
 
 	@Test

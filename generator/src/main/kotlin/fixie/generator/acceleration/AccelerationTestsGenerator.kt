@@ -44,7 +44,7 @@ internal class AccelerationTestsGenerator(
         writer.println()
         writer.println("\t@Test")
         writer.println("\tfun testToDouble() {")
-        writer.println("\t\tassertEquals(1.23, 1.23.mps2.toDouble(), 0.001)")
+        writer.println("\t\tassertEquals(1.23, (1.23 * ${acceleration.className}.MPS2).toDouble(), 0.001)")
         writer.println("\t}")
     }
 

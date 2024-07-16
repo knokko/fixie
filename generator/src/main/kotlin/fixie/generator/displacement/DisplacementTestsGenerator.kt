@@ -19,7 +19,6 @@ internal class DisplacementTestsGenerator(
         generateCompanionConstructors()
         generateCompareTo()
         generateArithmetic()
-        if (displacement.number.oneValue * BigInteger.TEN < displacement.number.internalType.getMaxValue()) generateAreaClass()
         generateExtensionFunctions()
         generateMathFunctions()
         writer.println("}")
@@ -148,21 +147,6 @@ internal class DisplacementTestsGenerator(
 
         val safeMaxValue = (displacement.number.internalType.getMaxValue() / BigInteger.TWO).min(BigInteger.TWO.pow(40))
         writer.println("\t\tassertEquals(${displacement.className}.raw($safeMaxValue$suffix), ${displacement.className}.raw(1$suffix) * $safeMaxValue.0)")
-        writer.println("\t}")
-    }
-
-    private fun generateAreaClass() {
-        writer.println()
-        writer.println("\t@Test")
-        writer.println("\tfun testAreaClass() {")
-        writer.println("\t\tval one = ${displacement.className}.${displacement.oneUnit}")
-        writer.println("\t\tassertEquals((2 * one) * (2 * one), one * (2 * one) + (2 * one) * one)")
-        writer.println("\t\tassertEquals(one * one, (2 * one) * one - one * one)")
-        writer.println("\t\tassertEquals(5 * one, sqrt((3 * one) * (3 * one) + (4 * one) * (4 * one)))")
-        writer.println("\t\tassertEquals(${displacement.number.className}.from(2), (2 * one * one) / (one * one))")
-        writer.println("\t\tassertTrue(2 * one * one <= one * 3 * one)")
-        writer.println("\t\tassertTrue(4 * one * one >= one * 3 * one)")
-        writer.println("\t\tassertEquals(5 * one * one, (2 * one * one) * 2.5)")
         writer.println("\t}")
     }
 

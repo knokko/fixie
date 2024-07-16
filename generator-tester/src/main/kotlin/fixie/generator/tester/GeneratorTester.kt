@@ -3,6 +3,8 @@ package fixie.generator.tester
 import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.angle.AngleClass
 import fixie.generator.angle.AngleUnit
+import fixie.generator.area.AreaClass
+import fixie.generator.area.AreaUnit
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.module.FixieModule
@@ -67,12 +69,20 @@ private fun createPhysicsModule(): FixieModule {
             acceleration = accelerations[0],
             createNumberExtensions = true
     ))
+    val areas = listOf(AreaClass(
+            className = "Area",
+            floatType = FloatType.DoublePrecision,
+            displayUnit = AreaUnit.SQUARE_METER,
+            displacementClassName = "Displacement",
+            createNumberExtensions = true
+    ))
     val displacements = listOf(DisplacementClass(
             className = "Displacement",
             number = numbers[0],
             oneUnit = DistanceUnit.METER,
             displayUnit = DistanceUnit.METER,
             speed = speed[0],
+            area = areas[0],
             createNumberExtensions = true
     ))
     val spins = listOf(SpinClass(
@@ -93,7 +103,7 @@ private fun createPhysicsModule(): FixieModule {
             spinClass = spins.last()
     ))
 
-    return FixieModule("fixie", numbers, displacements, speed, accelerations, angles, spins)
+    return FixieModule("fixie", numbers, displacements, areas, speed, accelerations, angles, spins)
 }
 
 private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, oneValues: LongArray): FixieModule {
@@ -109,17 +119,61 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
     }
 
     val displacements = mutableListOf<DisplacementClass>()
+    val areas = mutableListOf<AreaClass>()
     val speed = mutableListOf<SpeedClass>()
     val accelerations = mutableListOf<AccelerationClass>()
     val angles = mutableListOf<AngleClass>()
     val spins = mutableListOf<SpinClass>()
 
+    val floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision
+
     if ((numBits == 32 || numBits == 64) && signed && !checkOverflow) {
         accelerations.add(AccelerationClass(
                 className = "Acceleration",
-                floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision,
+                floatType = floatType,
                 speedClassName = "SpeedFK",
                 createNumberExtensions = true
+        ))
+        areas.add(AreaClass(
+                className = "LonelyArea",
+                floatType = floatType,
+                displayUnit = AreaUnit.HECTARE,
+                displacementClassName = null,
+                createNumberExtensions = false
+        ))
+
+        areas.add(AreaClass(
+                className = "AreaM2",
+                floatType = floatType,
+                displayUnit = AreaUnit.SQUARE_METER,
+                displacementClassName = "DisplacementAreaM2",
+                createNumberExtensions = false
+        ))
+        displacements.add(DisplacementClass(
+                className = "DisplacementAreaM2",
+                number = numbers[numbers.size / 2],
+                area = areas.last(),
+                speed = null,
+                oneUnit = DistanceUnit.FOOT,
+                displayUnit = DistanceUnit.YARD,
+                createNumberExtensions = false
+        ))
+
+        areas.add(AreaClass(
+                className = "AreaI2",
+                floatType = floatType,
+                displayUnit = AreaUnit.SQUARE_INCH,
+                displacementClassName = "DisplacementAreaI2",
+                createNumberExtensions = true
+        ))
+        displacements.add(DisplacementClass(
+                className = "DisplacementAreaI2",
+                number = numbers[numbers.size / 2],
+                area = areas.last(),
+                speed = null,
+                oneUnit = DistanceUnit.METER,
+                displayUnit = DistanceUnit.INCH,
+                createNumberExtensions = false
         ))
     }
 
@@ -153,7 +207,6 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                     createNumberExtensions = false
             ))
             if (signed && !checkOverflow && (numBits == 32 || numBits == 64) && oneValue == oneValues[0]) {
-                val floatType = if (numBits == 32) FloatType.SinglePrecision else FloatType.DoublePrecision
                 hasFloatSpeed = true
                 speed.add(SpeedClass(
                         className = "SpeedF${if (unit == SpeedUnit.MILES_PER_HOUR) "M" else "K"}",
@@ -203,20 +256,20 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
             displacements.add(DisplacementClass(
                     className = "Displacement$oneValue$suffix",
                     number = numbers[index],
+                    area = null,
                     speed = speedToTest,
                     oneUnit = if (index == 0) DistanceUnit.FOOT else DistanceUnit.MILLIMETER,
                     displayUnit = if (index == 0) DistanceUnit.YARD else DistanceUnit.METER,
                     createNumberExtensions = false
             ))
         }
-
-
     }
 
     return FixieModule(
             packageName = "fixie$numBits",
             numbers = numbers,
             displacements = displacements,
+            areas = areas,
             speed = speed,
             accelerations = accelerations,
             angles = angles,

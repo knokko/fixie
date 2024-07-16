@@ -5,6 +5,9 @@ import fixie.generator.acceleration.AccelerationTestsGenerator
 import fixie.generator.angle.AngleClassGenerator
 import fixie.generator.angle.AngleTestsGenerator
 import fixie.generator.angle.AngleUnit
+import fixie.generator.area.AreaClassGenerator
+import fixie.generator.area.AreaTestsGenerator
+import fixie.generator.area.AreaUnit
 import fixie.generator.displacement.DisplacementClassGenerator
 import fixie.generator.displacement.DisplacementTestsGenerator
 import fixie.generator.displacement.DistanceUnit
@@ -62,6 +65,12 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
     )
 
     generateFiles(
+            module.areas, { it.className },
+            { writer, area -> AreaClassGenerator(writer, area, module.packageName).generate() },
+            { writer, area -> AreaTestsGenerator(writer, area, module.packageName).generate() }
+    )
+
+    generateFiles(
             module.speed, { it.className },
             { writer, speed -> SpeedClassGenerator(writer, speed, module.packageName).generate() },
             { writer, speed -> SpeedTestsGenerator(writer, speed, module.packageName).generate() }
@@ -93,6 +102,10 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 
     if (module.displacements.isNotEmpty()) {
         generateDistanceUnit(File("$sourceDirectory/DistanceUnit.kt"), module.packageName)
+    }
+
+    if (module.areas.isNotEmpty()) {
+        generateAreaUnit(File("$sourceDirectory/AreaUnit.kt"), module.packageName)
     }
 
     if (module.speed.isNotEmpty()) {
@@ -134,6 +147,22 @@ private fun generateDistanceUnit(file: File, packageName: String) {
     for (unit in DistanceUnit.entries) {
         writer.print("\t${unit.name}(\"${unit.abbreviation}\", ${unit.isMetric}, ${unit.divisor})")
         if (unit == DistanceUnit.entries.last()) writer.println(";") else writer.println(",")
+    }
+
+    writer.println("}")
+    writer.flush()
+    writer.close()
+}
+
+private fun generateAreaUnit(file: File, packageName: String) {
+    val writer = PrintWriter(file)
+    writer.println("package $packageName")
+    writer.println()
+    writer.println("enum class AreaUnit(val abbreviation: String, val factor: Double) {")
+
+    for (unit in AreaUnit.entries) {
+        writer.print("\t${unit.name}(\"${unit.abbreviation}\", ${unit.factor})")
+        if (unit == AreaUnit.entries.last()) writer.println(";") else writer.println(",")
     }
 
     writer.println("}")

@@ -68,18 +68,6 @@ class TestDisplacement {
 	}
 
 	@Test
-	fun testAreaClass() {
-		val one = Displacement.METER
-		assertEquals((2 * one) * (2 * one), one * (2 * one) + (2 * one) * one)
-		assertEquals(one * one, (2 * one) * one - one * one)
-		assertEquals(5 * one, sqrt((3 * one) * (3 * one) + (4 * one) * (4 * one)))
-		assertEquals(FixDisplacement.from(2), (2 * one * one) / (one * one))
-		assertTrue(2 * one * one <= one * 3 * one)
-		assertTrue(4 * one * one >= one * 3 * one)
-		assertEquals(5 * one * one, (2 * one * one) * 2.5)
-	}
-
-	@Test
 	fun testExtensionFunctions() {
 		assertEquals(Displacement.raw(63), 21 * Displacement.raw(3))
 		assertEquals(Displacement.raw(63), 21L * Displacement.raw(3))

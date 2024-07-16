@@ -190,16 +190,16 @@ object Geometry {
         val yTo2 = y2 + ly2
 
         // Whether the starting point of line segment 1 is 'above' line 2
-        val start1Above2 = (lx2 * (y1 - y2) - ly2 * (x1 - x2)).raw >= 0
+        val start1Above2 = (lx2 * (y1 - y2) - ly2 * (x1 - x2)).value >= 0
 
         // Whether the end point of line segment 1 is 'above' line 2
-        val end1Above2 = (lx2 * (yTo1 - y2) - ly2 * (xTo1 - x2)).raw >= 0
+        val end1Above2 = (lx2 * (yTo1 - y2) - ly2 * (xTo1 - x2)).value >= 0
 
         // Whether the starting point of line segment 2 is 'above' line 1
-        val start2Above1 = (lx1 * (y2 - y1) - ly1 * (x2 - x1)).raw >= 0
+        val start2Above1 = (lx1 * (y2 - y1) - ly1 * (x2 - x1)).value >= 0
 
         // Whether the end point of line segment 2 is 'above' line 1
-        val end2Above1 = (lx1 * (yTo2 - y1) - ly1 * (xTo2 - x1)).raw >= 0
+        val end2Above1 = (lx1 * (yTo2 - y1) - ly1 * (xTo2 - x1)).value >= 0
 
         // Case 1: intersection
         if (start1Above2 != end1Above2 && start2Above1 != end2Above1) {

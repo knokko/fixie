@@ -20,7 +20,7 @@ class Position(
 
         fun origin() = Position(0.m, 0.m)
 
-        fun distanceSquared(x1: Displacement, y1: Displacement, x2: Displacement, y2: Displacement): Displacement.Area {
+        fun distanceSquared(x1: Displacement, y1: Displacement, x2: Displacement, y2: Displacement): Area {
             val dx = x2 - x1
             val dy = y2 - y1
             return dx * dx + dy * dy

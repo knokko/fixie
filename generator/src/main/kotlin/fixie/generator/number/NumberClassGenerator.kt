@@ -267,9 +267,9 @@ internal class NumberClassGenerator(
             if (exponent != null) {
                 if (number.checkOverflow) {
                     if (number.internalType.signed) {
-                        writer.println("\t\tif (highProductBits < -(1 shl ${exponent - 1}) || highProductBits >= (1 shl ${exponent - 1})) {")
+                        writer.println("\t\tif (highProductBits < -(1L shl ${exponent - 1}) || highProductBits >= (1L shl ${exponent - 1})) {")
                     } else {
-                        writer.println("\t\tif (highProductBits >= (1u shl $exponent)) {")
+                        writer.println("\t\tif (highProductBits >= (1uL shl $exponent)) {")
                     }
                     writer.println("\t\t\tthrow FixedPointException(\"Can't represent \$this * \$right\")")
                     writer.println("\t\t}")

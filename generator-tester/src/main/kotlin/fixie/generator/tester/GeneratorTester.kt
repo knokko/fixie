@@ -35,7 +35,7 @@ fun main(args: Array<String>) {
                         2, 10, 5000, 1048576, 10_000_000, 123456789, 1_000_000_000, Int.MAX_VALUE.toLong()
                 )), File(moduleName(32)), true)
                 generateModule(createModule(64, signed, checkOverflow, longArrayOf(
-                        2, 10, 80_000_000, 1 shl 40, Long.MAX_VALUE / 1234567, Long.MAX_VALUE
+                        2, 10, 80_000_000, 1L shl 40, Long.MAX_VALUE / 1234567, Long.MAX_VALUE
                 )), File(moduleName(64)), true)
             }
         }

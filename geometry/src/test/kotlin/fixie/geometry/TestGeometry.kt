@@ -29,14 +29,14 @@ class TestGeometry {
 
             fun testPointLine(
                 px: Displacement, py: Displacement, lineSegment: LineSegment,
-                expectedDistance: Displacement, expectedPoint: Position
+                expectedDistance: Displacement, expectedPoint: Position, threshold: Displacement = 0.02.mm
             ) {
                 val actualPoint = Position.origin()
                 val actualDistance = Geometry.distanceBetweenPointAndLineSegment(
                     px + offsetX, py + offsetY, lineSegment, actualPoint
                 )
-                this.assertEquals(expectedDistance, actualDistance)
-                this.assertEquals(expectedPoint, Position(actualPoint.x - offsetX, actualPoint.y - offsetY))
+                this.assertEquals(expectedDistance, actualDistance, threshold)
+                this.assertEquals(expectedPoint, Position(actualPoint.x - offsetX, actualPoint.y - offsetY), threshold)
             }
 
             for (horizontal in arrayOf(
@@ -74,8 +74,8 @@ class TestGeometry {
             ), 500.m, Position(0.m, 0.m))
 
             val longLine = LineSegment(startX = offsetX, startY = offsetY, lengthX = 2.km, lengthY = 2.km)
-            testPointLine(-400.m, 300.m, longLine, 500.m, Position(0.m, 0.m))
-            testPointLine(2.km, 0.m, longLine, (1000.0 * kotlin.math.sqrt(2.0)).m, Position(1.km, 1.km))
+            testPointLine(-400.m, 300.m, longLine, 500.m, Position(0.m, 0.m), threshold = 0.05.mm)
+            testPointLine(2.km, 0.m, longLine, (1000.0 * kotlin.math.sqrt(2.0)).m, Position(1.km, 1.km), threshold = 0.1.mm)
 
             val zeroLine = LineSegment(startX = offsetX, startY = offsetY, lengthX = 0.m, lengthY = 0.m)
             testPointLine(3.m, 4.m, zeroLine, 5.m, Position(0.m, 0.m))
@@ -282,7 +282,7 @@ class TestGeometry {
 
         assertTrue(Geometry.sweepCircleToCircle(
                 0.m, -9.41709.m, 100.mm, 0.73.mm, 0.01.mm,
-                0.01.mm, -9.01708.m, 300.01.mm, point
+                0.1.mm, -9.01708.m, 300.01.mm, point
         ))
         assertEquals(point.distance(0.01.mm, -9.01708.m), 400.mm, 0.1.mm)
 

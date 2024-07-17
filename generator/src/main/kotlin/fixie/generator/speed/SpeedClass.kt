@@ -24,4 +24,6 @@ class SpeedClass(
             throw IllegalArgumentException("Displacement class name must be null if and only if displacement one value is null")
         }
     }
+
+    override fun toString() = "$className(${number?.toString() ?: ""}${floatType?.toString() ?: ""}"
 }

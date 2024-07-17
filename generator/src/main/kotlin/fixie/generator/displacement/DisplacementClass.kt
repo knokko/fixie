@@ -12,4 +12,6 @@ class DisplacementClass(
         val oneUnit: DistanceUnit,
         val displayUnit: DistanceUnit,
         val createNumberExtensions: Boolean
-)
+) {
+    override fun toString() = "$className($number)"
+}

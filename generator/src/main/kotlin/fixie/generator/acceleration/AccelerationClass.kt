@@ -7,4 +7,6 @@ class AccelerationClass(
         val floatType: FloatType,
         val speedClassName: String?,
         val createNumberExtensions: Boolean
-)
+) {
+    override fun toString() = "$className($floatType)"
+}

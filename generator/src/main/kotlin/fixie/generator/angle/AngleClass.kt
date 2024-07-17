@@ -11,4 +11,6 @@ class AngleClass(
         val allowDivisionAndFloatMultiplication: Boolean,
         val allowComparisons: Boolean,
         val spinClass: SpinClass?
-)
+) {
+    override fun toString() = "$className($internalType)"
+}

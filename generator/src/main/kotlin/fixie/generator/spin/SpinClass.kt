@@ -9,4 +9,6 @@ class SpinClass(
         val displayUnit: SpinUnit,
         val angleClassName: String?,
         val createNumberExtensions: Boolean
-)
+) {
+    override fun toString() = "$className($floatType)"
+}

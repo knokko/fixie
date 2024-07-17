@@ -8,4 +8,6 @@ class AreaClass(
         val displayUnit: AreaUnit,
         val displacementClassName: String?,
         val createNumberExtensions: Boolean
-)
+) {
+    override fun toString() = "$className($floatType)"
+}

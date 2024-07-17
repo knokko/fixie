@@ -14,4 +14,6 @@ class NumberClass(
             throw IllegalArgumentException("oneValue must not exceed the maximum value of the internal type $internalType")
         }
     }
+
+    override fun toString() = "$className(intType=$internalType, one=$oneValue)"
 }

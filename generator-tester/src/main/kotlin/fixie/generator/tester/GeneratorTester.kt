@@ -65,7 +65,7 @@ private fun createPhysicsModule(): FixieModule {
             oneUnit = SpeedUnit.METERS_PER_SECOND,
             displayUnit = SpeedUnit.METERS_PER_SECOND,
             displacementClassName = "Displacement",
-            displacementOneValue = numbers[0].oneValue,
+            displacementNumber = numbers[0],
             acceleration = accelerations[0],
             createNumberExtensions = true
     ))
@@ -202,7 +202,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                     oneUnit = unit,
                     displayUnit = SpeedUnit.MILES_PER_HOUR,
                     displacementClassName = "Displacement2",
-                    displacementOneValue = BigInteger.TWO,
+                    displacementNumber = numbers[0],
                     acceleration = accelerations.lastOrNull(),
                     createNumberExtensions = false
             ))
@@ -215,7 +215,7 @@ private fun createModule(numBits: Int, signed: Boolean, checkOverflow: Boolean, 
                         oneUnit = unit,
                         displayUnit = SpeedUnit.MILES_PER_HOUR,
                         displacementClassName = "Displacement2",
-                        displacementOneValue = BigInteger.TWO,
+                        displacementNumber = numbers[0],
                         acceleration = accelerations.lastOrNull(),
                         createNumberExtensions = false
                 ))

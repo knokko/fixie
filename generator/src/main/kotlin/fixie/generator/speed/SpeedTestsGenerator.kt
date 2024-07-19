@@ -161,7 +161,7 @@ internal class SpeedTestsGenerator(
         }
         if (shouldTestSeconds()) {
             val isSpeedAccurate = speed.number == null || speed.number.oneValue > BigInteger.TEN
-            val isDisplacementAccurate = speed.displacementOneValue == null || speed.displacementOneValue > BigInteger.TEN
+            val isDisplacementAccurate = speed.displacementNumber?.oneValue == null || speed.displacementNumber.oneValue > BigInteger.TEN
             val margin = if (isSpeedAccurate && isDisplacementAccurate) 0.01 else 5.0
             writer.println("\t\tassertEquals(20.0, (10 * ${speed.className}.METERS_PER_SECOND * 2.seconds).toDouble(DistanceUnit.METER), $margin)")
 
@@ -185,7 +185,7 @@ internal class SpeedTestsGenerator(
 
         if (shouldTestSeconds()) {
             val isSpeedAccurate = speed.number == null || speed.number.oneValue > BigInteger.TEN
-            val isDisplacementAccurate = speed.displacementOneValue == null || speed.displacementOneValue > BigInteger.TEN
+            val isDisplacementAccurate = speed.displacementNumber?.oneValue == null || speed.displacementNumber.oneValue > BigInteger.TEN
             val margin = if (isSpeedAccurate && isDisplacementAccurate) 0.01 else 5.0
             if (speed.displacementClassName != null) {
                 writer.println("\t\tassertEquals(20.0, (2.seconds * (10 * ${speed.className}.METERS_PER_SECOND)).toDouble(DistanceUnit.METER), $margin)")

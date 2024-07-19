@@ -1,14 +1,13 @@
 package fixie.generator.spin
 
 import fixie.generator.number.FloatType
+import fixie.generator.quantity.FloatQuantityClass
 
 class SpinClass(
-        val className: String,
-        val floatType: FloatType,
+        className: String,
+        floatType: FloatType,
         val oneUnit: SpinUnit,
         val displayUnit: SpinUnit,
         val angleClassName: String?,
-        val createNumberExtensions: Boolean
-) {
-    override fun toString() = "$className($floatType)"
-}
+        createNumberExtensions: Boolean
+) : FloatQuantityClass(className, floatType, createNumberExtensions)

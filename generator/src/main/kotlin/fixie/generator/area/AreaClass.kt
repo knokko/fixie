@@ -1,13 +1,12 @@
 package fixie.generator.area
 
 import fixie.generator.number.FloatType
+import fixie.generator.quantity.FloatQuantityClass
 
 class AreaClass(
-        val className: String,
-        val floatType: FloatType,
+        className: String,
+        floatType: FloatType,
         val displayUnit: AreaUnit,
         val displacementClassName: String?,
-        val createNumberExtensions: Boolean
-) {
-    override fun toString() = "$className($floatType)"
-}
+        createNumberExtensions: Boolean
+) : FloatQuantityClass(className, floatType, createNumberExtensions)

@@ -3,27 +3,23 @@ package fixie.generator.speed
 import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
+import fixie.generator.quantity.HybridQuantityClass
 import java.math.BigInteger
 
 class SpeedClass(
-        val className: String,
-        val number: NumberClass?,
-        val floatType: FloatType?,
+        className: String,
+        number: NumberClass?,
+        floatType: FloatType?,
         val oneUnit: SpeedUnit,
         val displayUnit: SpeedUnit,
         val displacementClassName: String?,
-        val displacementOneValue: BigInteger?,
+        val displacementNumber: NumberClass?,
         val acceleration: AccelerationClass?,
-        val createNumberExtensions: Boolean
-) {
+        createNumberExtensions: Boolean
+) : HybridQuantityClass(className, number, floatType, createNumberExtensions){
     init {
-        if ((number != null) == (floatType != null)) {
-            throw IllegalArgumentException("Speed classes must have either a floatType or a number")
-        }
-        if ((displacementClassName != null) != (displacementOneValue != null)) {
-            throw IllegalArgumentException("Displacement class name must be null if and only if displacement one value is null")
+        if ((displacementClassName != null) != (displacementNumber != null)) {
+            throw IllegalArgumentException("Displacement class name must be null if and only if displacement number is null")
         }
     }
-
-    override fun toString() = "$className(${number?.toString() ?: ""}${floatType?.toString() ?: ""}"
 }

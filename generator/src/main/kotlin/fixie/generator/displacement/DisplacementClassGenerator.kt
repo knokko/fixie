@@ -2,16 +2,12 @@ package fixie.generator.displacement
 
 import fixie.generator.quantity.FixedQuantityClassGenerator
 import java.io.PrintWriter
-import kotlin.math.abs
-import kotlin.math.roundToLong
 
 internal class DisplacementClassGenerator(
         writer: PrintWriter,
         displacement: DisplacementClass,
         packageName: String
 ) : FixedQuantityClassGenerator<DisplacementClass>(writer, displacement, packageName) {
-
-    private var unitConstants = mutableListOf(displacement.oneUnit)
 
     override fun getImports() = super.getImports() + if (quantity.speed != null) {
         arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
@@ -71,26 +67,14 @@ internal class DisplacementClassGenerator(
         super.generateCompanionContent()
         writer.println("\t\tval ${quantity.oneUnit} = ${quantity.className}(${quantity.number.className}.ONE)")
 
-        for (unit in DistanceUnit.entries.reversed()) {
-            if (unit != quantity.oneUnit) {
-                val conversionFactor = if (quantity.oneUnit.isMetric == unit.isMetric) 1.0
-                else if (unit.isMetric) 1.609344 else 1.0 / 1.609344
-
-                val divisor = conversionFactor * unit.divisor.toDouble() / quantity.oneUnit.divisor.toDouble()
-                val rawValue = (quantity.number.oneValue.toDouble() / divisor).roundToLong()
-                val revertedValue = (rawValue * divisor).roundToLong()
-                val lostPrecision = (quantity.number.oneValue.toDouble() - revertedValue) / quantity.number.oneValue.toDouble()
-                if (quantity.number.internalType.canRepresent(rawValue) && abs(lostPrecision) < 0.1) {
-                    writer.println()
-                    writer.println("\t\tval $unit = raw($rawValue${if (quantity.number.internalType.signed) "" else "u"})")
-                    unitConstants.add(unit)
-                }
-            }
+        for ((unit, rawValue) in quantity.computeSupportedUnits()) {
+            writer.println()
+            writer.println("\t\tval $unit = raw($rawValue${if (quantity.number.internalType.signed) "" else "u"})")
         }
     }
 
     override fun generateNumberUnitExtensionFunctions(typeName: String) {
-        for (unit in unitConstants) {
+        for (unit in quantity.computeSupportedUnits().map { it.first } + arrayOf(quantity.oneUnit)) {
             writer.println()
             writer.println("val $typeName.${unit.abbreviation}")
             writer.println("\tget() = ${quantity.className}.$unit * this")

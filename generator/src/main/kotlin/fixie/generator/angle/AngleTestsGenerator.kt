@@ -1,220 +1,203 @@
 package fixie.generator.angle
 
+import fixie.generator.quantity.QuantityTestsGenerator
+import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
+import java.util.*
 
 internal class AngleTestsGenerator(
-        private val writer: PrintWriter,
-        private val angle: AngleClass,
-        private val packageName: String
-) {
+        writer: PrintWriter,
+        angle: AngleClass,
+        packageName: String
+) : QuantityTestsGenerator<AngleClass>(writer, angle, packageName) {
+    override fun canBeNegative() = quantity.internalType.signed
 
-    private val suffix = if (angle.internalType.signed) "" else "u"
+    override fun getImports() = super.getImports() + arrayOf("kotlin.math.PI") + if (
+        quantity.allowDivisionAndFloatMultiplication && quantity.spinClass != null
+    ) arrayOf("kotlin.time.Duration.Companion.seconds") else emptyArray()
 
-    fun generate() {
-        generateClassPrefix()
-        generateNearlyEquals()
-        generateToString()
-        generateCompanionConstructors()
-        generateCompareTo()
-        generateArithmetic()
-        generateExtensionFunctions()
-        generateMathFunctions()
-        writer.println("}")
-    }
+    override fun generateNearlyEquals() {
 
-    private fun generateClassPrefix() {
-        writer.println("package $packageName")
+        val maxError = if (quantity.internalType.numBytes == 1) 3.0 else 0.1
         writer.println()
-        writer.println("import org.junit.jupiter.api.Test")
-        writer.println("import org.junit.jupiter.api.Assertions.*")
-        writer.println("import org.junit.jupiter.api.assertThrows")
-        writer.println("import kotlin.math.PI")
-        if (angle.allowDivisionAndFloatMultiplication && angle.spinClass != null) {
-            writer.println("import kotlin.time.Duration.Companion.seconds")
-        }
-        writer.println()
-        writer.println("class Test${angle.className} {")
-    }
-
-    private fun generateNearlyEquals() {
-        writer.println()
-        writer.println("\tprivate fun assertNearlyEquals(expected: ${angle.className}, actual: ${angle.className}) {")
+        writer.println("\tprivate fun assertEquals(expected: ${quantity.className}, actual: ${quantity.className}) {")
         writer.println("\t\tval difference = (expected - actual).toDouble(AngleUnit.DEGREES)")
-        val maxError = if (angle.internalType.numBytes == 1) 3.0 else 0.1
-        if (angle.internalType.signed) {
-            writer.println("\t\tif (difference > $maxError || difference < -$maxError) assertEquals(expected, actual)")
+        if (quantity.internalType.signed) {
+            writer.println("\t\tif (difference > $maxError || difference < -$maxError) " +
+                    "org.junit.jupiter.api.Assertions.assertEquals(expected, actual)")
         } else {
-            writer.println("\t\tif (difference > $maxError && difference < ${360 - maxError}) assertEquals(expected, actual)")
+            writer.println("\t\tif (difference > $maxError && difference < ${360 - maxError}) " +
+                    "org.junit.jupiter.api.Assertions.assertEquals(expected, actual)")
         }
         writer.println("\t}")
         writer.println()
-        writer.println("\t@Test")
-        writer.println("\tfun testAssertNearlyEquals() {")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), ${angle.className}.degrees(123))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), ${angle.className}.degrees(123.0001))")
-        writer.println("\t\tassertThrows<AssertionError> { assertNearlyEquals(${angle.className}.degrees(0), ${angle.className}.degrees(5)) }")
-        writer.println("\t\tassertThrows<AssertionError> { assertNearlyEquals(${angle.className}.degrees(0), ${angle.className}.degrees(-5)) }")
-        writer.println("\t\tassertThrows<AssertionError> { assertNearlyEquals(${angle.className}.degrees(355), ${angle.className}.degrees(359)) }")
+        writer.println("\tprivate fun assertNotEquals(expected: ${quantity.className}, actual: ${quantity.className}) {")
+        writer.println("\t\tassertThrows<AssertionError> { assertEquals(expected, actual) }")
         writer.println("\t}")
-    }
-
-    private fun generateToString() {
         writer.println()
         writer.println("\t@Test")
-        writer.println("\tfun testToString() {")
-        if (angle.internalType.numBytes > 1) {
-            writer.println("\t\tassertEquals(\"100°\", ${angle.className}.degrees(100).toString(AngleUnit.DEGREES, 1))")
-            writer.println("\t\tassertEquals(\"1.23rad\", ${angle.className}.radians(1.23).toString(AngleUnit.RADIANS, 2))")
-        }
-        writer.println("\t\tassertEquals(\"0°\", ${angle.className}.degrees(0).toString(AngleUnit.DEGREES, 1))")
-        writer.println("\t\tassertEquals(\"0rad\", ${angle.className}.degrees(0).toString(AngleUnit.RADIANS, 2))")
-        writer.println("\t\tassertEquals(\"0°\", ${angle.className}.radians(0L).toString(AngleUnit.DEGREES, 1))")
-        writer.println("\t\tassertEquals(\"0rad\", ${angle.className}.radians(0).toString(AngleUnit.RADIANS, 2))")
-        writer.println("\t\tassertEquals(\"90°\", ${angle.className}.radians(0.5 * PI).toString(AngleUnit.DEGREES, 0))")
-
+        writer.println("\tfun testAssertEquals() {")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(123), ${quantity.className}.degrees(123))")
+        writer.println("\t\tassertThrows<AssertionError> { assertNotEquals(${quantity.className}.degrees(123), ${quantity.className}.degrees(123)) }")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(123), ${quantity.className}.degrees(123.0001))")
+        writer.println("\t\tassertThrows<AssertionError> { assertEquals(${quantity.className}.degrees(0), ${quantity.className}.degrees(5)) }")
+        writer.println("\t\tassertNotEquals(${quantity.className}.degrees(0), ${quantity.className}.degrees(5))")
+        writer.println("\t\tassertThrows<AssertionError> { assertEquals(${quantity.className}.degrees(0), ${quantity.className}.degrees(-5)) }")
+        writer.println("\t\tassertThrows<AssertionError> { assertEquals(${quantity.className}.degrees(355), ${quantity.className}.degrees(359)) }")
         writer.println("\t}")
     }
 
-    private fun generateCompanionConstructors() {
-        writer.println()
-        writer.println("\t@Test")
-        writer.println("\tfun testCompanionConstructors() {")
-        if (angle.internalType.numBytes == 1) {
-            writer.println("\t\tassertNotEquals(${angle.className}.degrees(100), ${angle.className}.degrees(103))")
-            writer.println("\t\tassertNotEquals(${angle.className}.radians(1.2), ${angle.className}.radians(1.3))")
-        } else {
-            writer.println("\t\tassertNotEquals(${angle.className}.degrees(100), ${angle.className}.degrees(101))")
-            writer.println("\t\tassertNotEquals(${angle.className}.radians(1.2), ${angle.className}.radians(1.21))")
-        }
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), ${angle.className}.degrees(820))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(60f), ${angle.className}.degrees(-300f))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(260.0), ${angle.className}.degrees(-100))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(0), ${angle.className}.degrees(360))")
-        val degreeDelta = if (angle.internalType.numBytes == 1) 2.0 else 0.01
-        writer.println("\t\tassertEquals(123.0, ${angle.className}.degrees(123).toDouble(AngleUnit.DEGREES), $degreeDelta)")
-        writer.println("\t\tassertEquals(45.0, ${angle.className}.degrees(45f).toDouble(AngleUnit.DEGREES), $degreeDelta)")
-        val expectedValue = if (angle.internalType.signed) -60.0 else 300.0
-        writer.println("\t\tassertEquals($expectedValue, ${angle.className}.degrees(-60.0).toDouble(AngleUnit.DEGREES), $degreeDelta)")
-        writer.println("\t\tassertEquals(1.23, ${angle.className}.radians(1.23).toDouble(AngleUnit.RADIANS), ${degreeDelta / 10})")
-        writer.println(angle.internalType.declareValue("\t\tval rawValue", 123))
-        writer.println("\t\tassertEquals(rawValue, ${angle.className}.raw(rawValue).raw)")
-        writer.println("\t}")
+    override fun getUnits() = AngleUnit.entries.map { QuantityUnit(
+        name = it.name,
+        enumName = "AngleUnit",
+        suffix = it.suffix,
+        extensionName = it.name.lowercase(Locale.ROOT),
+        minDelta = quantity.internalType.getMaxValue().toDouble() / it.maxValue,
+        maxAmount = 1e6
+    ) }
+
+    override fun canSupportMultipleUnits() = true
+
+    override fun generateToDoubleBody() {
+        if (quantity.allowDivisionAndFloatMultiplication) super.generateToDoubleBody()
+        val degreesMargin = if (quantity.internalType.numBytes == 1) "3.0" else "0.1"
+        writer.println("\t\tassertEquals(12.0, ${quantity.className}.degrees(12).toDouble(AngleUnit.DEGREES), $degreesMargin)")
+        writer.println("\t\tassertEquals(90.0, ${quantity.className}.radians(0.5 * PI).toDouble(AngleUnit.DEGREES), $degreesMargin)")
+
+        val radiansMargin = if (quantity.internalType.numBytes == 1) "0.1" else "0.001"
+        writer.println("\t\tassertEquals(2.0, ${quantity.className}.radians(2).toDouble(AngleUnit.RADIANS), $radiansMargin)")
+        writer.println("\t\tassertEquals(0.5 * PI, ${quantity.className}.degrees(90).toDouble(AngleUnit.RADIANS), $radiansMargin)")
     }
 
-    private fun generateCompareTo() {
-        if (angle.allowComparisons) {
-            writer.println()
-            writer.println("\t@Test")
-            writer.println("\tfun testCompareTo() {")
-            writer.println("\t\tassertTrue(${angle.className}.raw(40$suffix) < ${angle.className}.raw(41$suffix))")
-            writer.println("\t\tassertTrue(${angle.className}.raw(40$suffix) <= ${angle.className}.raw(41$suffix))")
-            writer.println("\t\tassertTrue(${angle.className}.raw(40$suffix) <= ${angle.className}.raw(40$suffix))")
-            writer.println("\t\tassertTrue(${angle.className}.raw(40$suffix) >= ${angle.className}.raw(40$suffix))")
-            writer.println("\t\tassertFalse(${angle.className}.raw(40$suffix) >= ${angle.className}.raw(41$suffix))")
-            writer.println("\t\tassertFalse(${angle.className}.raw(40$suffix) > ${angle.className}.raw(41$suffix))")
-            writer.println()
-            writer.println("\t\tassertFalse(${angle.className}.raw(40$suffix) < ${angle.className}.raw(39$suffix))")
-            writer.println("\t\tassertFalse(${angle.className}.raw(40$suffix) <= ${angle.className}.raw(39$suffix))")
-            writer.println("\t\tassertTrue(${angle.className}.raw(40$suffix) >= ${angle.className}.raw(39$suffix))")
-            writer.println("\t\tassertTrue(${angle.className}.raw(40$suffix) > ${angle.className}.raw(39$suffix))")
-            writer.println()
-            writer.println("\t\tassertTrue(${angle.className}.degrees(100) > ${angle.className}.radians(0.5 * PI))")
-            writer.println("\t\tassertFalse(${angle.className}.degrees(100) > ${angle.className}.radians(0.7 * PI))")
-            writer.println("\t\tassertTrue(${angle.className}.degrees(50) < ${angle.className}.degrees(100))")
-            writer.println("\t\tassertFalse(${angle.className}.radians(3f) < ${angle.className}.radians(2.9))")
+    override fun generateToStringBody() {
+        if (quantity.internalType.numBytes > 1) {
+            writer.println("\t\tassertEquals(\"100°\", ${quantity.className}.degrees(100).toString(AngleUnit.DEGREES, 1))")
+            writer.println("\t\tassertEquals(\"1.23rad\", ${quantity.className}.radians(1.23).toString(AngleUnit.RADIANS, 2))")
+        }
+        writer.println("\t\tassertEquals(\"0°\", ${quantity.className}.degrees(0).toString(AngleUnit.DEGREES, 1))")
+        writer.println("\t\tassertEquals(\"0rad\", ${quantity.className}.degrees(0).toString(AngleUnit.RADIANS, 2))")
+        writer.println("\t\tassertEquals(\"0°\", ${quantity.className}.radians(0L).toString(AngleUnit.DEGREES, 1))")
+        writer.println("\t\tassertEquals(\"0rad\", ${quantity.className}.radians(0).toString(AngleUnit.RADIANS, 2))")
+        writer.println("\t\tassertEquals(\"90°\", ${quantity.className}.radians(0.5 * PI).toString(AngleUnit.DEGREES, 0))")
+    }
 
-            if (angle.internalType.signed) {
-                writer.println("\t\tassertTrue(${angle.className}.degrees(-50) < ${angle.className}.degrees(0))")
-                writer.println("\t\tassertTrue(${angle.className}.degrees(300) < ${angle.className}.degrees(0))")
-                writer.println("\t\tfor (angle in -170 until 170) assertTrue(${angle.className}.degrees(angle) < ${angle.className}.degrees(angle + 10))")
-                writer.println("\t\tfor (angle in -400 until -200) assertTrue(${angle.className}.degrees(angle) < ${angle.className}.degrees(angle + 10))")
-                writer.println("\t\tfor (angle in 190 until 400) assertTrue(${angle.className}.degrees(angle) < ${angle.className}.degrees(angle + 10))")
-                writer.println("\t\tfor (angle in -3 until 3) assertTrue(${angle.className}.radians(angle) < ${angle.className}.radians(angle + 1.0))")
-                writer.println("\t\tfor (angle in -8 until -4) assertTrue(${angle.className}.radians(angle) < ${angle.className}.radians(angle + 1.0))")
-                writer.println("\t\tfor (angle in 4 until 9) assertTrue(${angle.className}.radians(angle) < ${angle.className}.radians(angle + 1.0))")
+    override fun generateCompareToBody() {
+        val suffix = if (quantity.internalType.signed) "" else "u"
+        if (quantity.allowComparisons) {
+            if (quantity.allowDivisionAndFloatMultiplication) super.generateCompareToBody()
+            writer.println("\t\tassertTrue(${quantity.className}.raw(40$suffix) < ${quantity.className}.raw(41$suffix))")
+            writer.println("\t\tassertTrue(${quantity.className}.raw(40$suffix) <= ${quantity.className}.raw(41$suffix))")
+            writer.println("\t\tassertTrue(${quantity.className}.raw(40$suffix) <= ${quantity.className}.raw(40$suffix))")
+            writer.println("\t\tassertTrue(${quantity.className}.raw(40$suffix) >= ${quantity.className}.raw(40$suffix))")
+            writer.println("\t\tassertFalse(${quantity.className}.raw(40$suffix) >= ${quantity.className}.raw(41$suffix))")
+            writer.println("\t\tassertFalse(${quantity.className}.raw(40$suffix) > ${quantity.className}.raw(41$suffix))")
+            writer.println()
+            writer.println("\t\tassertFalse(${quantity.className}.raw(40$suffix) < ${quantity.className}.raw(39$suffix))")
+            writer.println("\t\tassertFalse(${quantity.className}.raw(40$suffix) <= ${quantity.className}.raw(39$suffix))")
+            writer.println("\t\tassertTrue(${quantity.className}.raw(40$suffix) >= ${quantity.className}.raw(39$suffix))")
+            writer.println("\t\tassertTrue(${quantity.className}.raw(40$suffix) > ${quantity.className}.raw(39$suffix))")
+            writer.println()
+            writer.println("\t\tassertTrue(${quantity.className}.degrees(100) > ${quantity.className}.radians(0.5 * PI))")
+            writer.println("\t\tassertFalse(${quantity.className}.degrees(100) > ${quantity.className}.radians(0.7 * PI))")
+            writer.println("\t\tassertTrue(${quantity.className}.degrees(50) < ${quantity.className}.degrees(100))")
+            writer.println("\t\tassertFalse(${quantity.className}.radians(3f) < ${quantity.className}.radians(2.9))")
+
+            if (quantity.internalType.signed) {
+                writer.println("\t\tassertTrue(${quantity.className}.degrees(-50) < ${quantity.className}.degrees(0))")
+                writer.println("\t\tassertTrue(${quantity.className}.degrees(300) < ${quantity.className}.degrees(0))")
+                writer.println("\t\tfor (angle in -170 until 170) assertTrue(${quantity.className}.degrees(angle) < ${quantity.className}.degrees(angle + 10))")
+                writer.println("\t\tfor (angle in -400 until -200) assertTrue(${quantity.className}.degrees(angle) < ${quantity.className}.degrees(angle + 10))")
+                writer.println("\t\tfor (angle in 190 until 400) assertTrue(${quantity.className}.degrees(angle) < ${quantity.className}.degrees(angle + 10))")
+                writer.println("\t\tfor (angle in -3 until 3) assertTrue(${quantity.className}.radians(angle) < ${quantity.className}.radians(angle + 1.0))")
+                writer.println("\t\tfor (angle in -8 until -4) assertTrue(${quantity.className}.radians(angle) < ${quantity.className}.radians(angle + 1.0))")
+                writer.println("\t\tfor (angle in 4 until 9) assertTrue(${quantity.className}.radians(angle) < ${quantity.className}.radians(angle + 1.0))")
             } else {
-                writer.println("\t\tfor (angle in 0 until 350) assertTrue(${angle.className}.degrees(angle) < ${angle.className}.degrees(angle + 10))")
-                writer.println("\t\tfor (angle in 370 until 700) assertTrue(${angle.className}.degrees(angle) < ${angle.className}.degrees(angle + 10))")
-                writer.println("\t\tfor (angle in 0 until 6) assertTrue(${angle.className}.radians(angle) < ${angle.className}.radians(angle + 1.0))")
-                writer.println("\t\tfor (angle in 7 until 12) assertTrue(${angle.className}.radians(angle) < ${angle.className}.radians(angle + 1.0))")
+                writer.println("\t\tfor (angle in 0 until 350) assertTrue(${quantity.className}.degrees(angle) < ${quantity.className}.degrees(angle + 10))")
+                writer.println("\t\tfor (angle in 370 until 700) assertTrue(${quantity.className}.degrees(angle) < ${quantity.className}.degrees(angle + 10))")
+                writer.println("\t\tfor (angle in 0 until 6) assertTrue(${quantity.className}.radians(angle) < ${quantity.className}.radians(angle + 1.0))")
+                writer.println("\t\tfor (angle in 7 until 12) assertTrue(${quantity.className}.radians(angle) < ${quantity.className}.radians(angle + 1.0))")
             }
-
-            writer.println("\t}")
         }
+        if (quantity.internalType.numBytes == 1) {
+            writer.println("\t\tassertNotEquals(${quantity.className}.degrees(100), ${quantity.className}.degrees(105))")
+            writer.println("\t\tassertNotEquals(${quantity.className}.radians(1.2), ${quantity.className}.radians(1.4))")
+        } else {
+            writer.println("\t\tassertNotEquals(${quantity.className}.degrees(100), ${quantity.className}.degrees(101))")
+            writer.println("\t\tassertNotEquals(${quantity.className}.radians(1.2), ${quantity.className}.radians(1.21))")
+        }
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(100), ${quantity.className}.degrees(820))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(60f), ${quantity.className}.degrees(-300f))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(260.0), ${quantity.className}.degrees(-100))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(0), ${quantity.className}.degrees(360))")
+        val degreeDelta = if (quantity.internalType.numBytes == 1) 2.0 else 0.01
+        writer.println("\t\tassertEquals(123.0, ${quantity.className}.degrees(123).toDouble(AngleUnit.DEGREES), $degreeDelta)")
+        writer.println("\t\tassertEquals(45.0, ${quantity.className}.degrees(45f).toDouble(AngleUnit.DEGREES), $degreeDelta)")
+        val expectedValue = if (quantity.internalType.signed) -60.0 else 300.0
+        writer.println("\t\tassertEquals($expectedValue, ${quantity.className}.degrees(-60.0).toDouble(AngleUnit.DEGREES), $degreeDelta)")
+        writer.println("\t\tassertEquals(1.23, ${quantity.className}.radians(1.23).toDouble(AngleUnit.RADIANS), ${degreeDelta / 10})")
+        writer.println(quantity.internalType.declareValue("\t\tval rawValue", 123))
+        writer.println("\t\tassertEquals(rawValue, ${quantity.className}.raw(rawValue).raw)")
     }
 
-    private fun generateArithmetic() {
-        writer.println()
-        writer.println("\t@Test")
-        writer.println("\tfun testArithmetic() {")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(30) + ${angle.className}.degrees(20))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.radians(0f), ${angle.className}.degrees(180) + ${angle.className}.degrees(180))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.radians(0f), ${angle.className}.radians(PI) + ${angle.className}.degrees(180))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.radians(0.25f * PI.toFloat()), ${angle.className}.radians(0.75 * PI) - ${angle.className}.degrees(90))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(300), ${angle.className}.degrees(320) + ${angle.className}.degrees(340))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(30f), ${angle.className}.degrees(50) - ${angle.className}.degrees(20))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(180), ${angle.className}.degrees(180L) - ${angle.className}.degrees(0))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(320L), ${angle.className}.degrees(300) - ${angle.className}.degrees(340))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100L), 2 * ${angle.className}.degrees(50))")
-        writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2L * ${angle.className}.degrees(50))")
-        if (angle.allowDivisionAndFloatMultiplication) {
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2)")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2L)")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2f * ${angle.className}.degrees(50))")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2f)")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(100), 2.0 * ${angle.className}.degrees(50))")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(50), ${angle.className}.degrees(100) / 2.0)")
+    override fun generateArithmeticBody() {
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(50), ${quantity.className}.degrees(30) + ${quantity.className}.degrees(20))")
+        writer.println("\t\tassertEquals(${quantity.className}.radians(0f), ${quantity.className}.degrees(180) + ${quantity.className}.degrees(180))")
+        writer.println("\t\tassertEquals(${quantity.className}.radians(0f), ${quantity.className}.radians(PI) + ${quantity.className}.degrees(180))")
+        writer.println("\t\tassertEquals(${quantity.className}.radians(0.25f * PI.toFloat()), ${quantity.className}.radians(0.75 * PI) - ${quantity.className}.degrees(90))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(300), ${quantity.className}.degrees(320) + ${quantity.className}.degrees(340))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(30f), ${quantity.className}.degrees(50) - ${quantity.className}.degrees(20))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(180), ${quantity.className}.degrees(180L) - ${quantity.className}.degrees(0))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(320L), ${quantity.className}.degrees(300) - ${quantity.className}.degrees(340))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(100L), 2 * ${quantity.className}.degrees(50))")
+        writer.println("\t\tassertEquals(${quantity.className}.degrees(100), 2L * ${quantity.className}.degrees(50))")
+        if (quantity.allowDivisionAndFloatMultiplication) {
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(50), ${quantity.className}.degrees(100) / 2)")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(50), ${quantity.className}.degrees(100) / 2L)")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(100), 2f * ${quantity.className}.degrees(50))")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(50), ${quantity.className}.degrees(100) / 2f)")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(100), 2.0 * ${quantity.className}.degrees(50))")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(50), ${quantity.className}.degrees(100) / 2.0)")
 
-            if (angle.internalType.signed) {
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(-90), 1.5 * ${angle.className}.degrees(-60))")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(-60), ${angle.className}.degrees(-90) / 1.5)")
+            if (quantity.internalType.signed) {
+                writer.println("\t\tassertEquals(${quantity.className}.degrees(-90), 1.5 * ${quantity.className}.degrees(-60))")
+                writer.println("\t\tassertEquals(${quantity.className}.degrees(-60), ${quantity.className}.degrees(-90) / 1.5)")
                 writer.println("\t\t// Note that 1.5 * 160 = 240 = 360 - 120")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(-120), 1.5 * ${angle.className}.degrees(160))")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(120), 1.5 * ${angle.className}.degrees(-160))")
+                writer.println("\t\tassertEquals(${quantity.className}.degrees(-120), 1.5 * ${quantity.className}.degrees(160))")
+                writer.println("\t\tassertEquals(${quantity.className}.degrees(120), 1.5 * ${quantity.className}.degrees(-160))")
             } else {
                 writer.println("\t\t// Note that 1.5 * 300 = 450 = 360 + 90")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(90), 1.5 * ${angle.className}.degrees(300))")
-                writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(60), ${angle.className}.degrees(90) / 1.5)")
+                writer.println("\t\tassertEquals(${quantity.className}.degrees(90), 1.5 * ${quantity.className}.degrees(300))")
+                writer.println("\t\tassertEquals(${quantity.className}.degrees(60), ${quantity.className}.degrees(90) / 1.5)")
             }
 
-            if (angle.spinClass != null) {
-                writer.println("\t\tassertEquals(5.0, (${angle.className}.degrees(15) / 3.seconds).toDouble(SpinUnit.DEGREES_PER_SECOND), 0.001)")
+            if (quantity.spinClass != null) {
+                writer.println("\t\tassertEquals(5.0, (${quantity.className}.degrees(15) / 3.seconds).toDouble(SpinUnit.DEGREES_PER_SECOND), 0.001)")
             }
-        }
-        writer.println("\t}")
-    }
-
-    private fun generateExtensionFunctions() {
-        if (angle.createNumberExtensions) {
-            writer.println()
-            writer.println("\t@Test")
-            writer.println("\tfun testExtensionFunctions() {")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), 123.degrees)")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(123), 123L.degrees)")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(-45), -45f.degrees)")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.radians(1.5), 1.5.radians)")
-            if (angle.allowComparisons) writer.println("\t\tassertTrue(1L.degrees < 1.radians)")
-            writer.println("\t}")
         }
     }
 
-    private fun generateMathFunctions() {
-        writer.println()
-        writer.println("\t@Test")
-        writer.println("\tfun testMathFunctions() {")
-        if (angle.internalType.signed) {
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(0), abs(${angle.className}.degrees(0)))")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(40), abs(${angle.className}.degrees(40)))")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(40), abs(${angle.className}.degrees(-40)))")
+    override fun generateExtensionFunctionsBody() {
+        if (quantity.createNumberExtensions) {
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(123), 123.degrees)")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(123), 123L.degrees)")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(-45), -45f.degrees)")
+            writer.println("\t\tassertEquals(${quantity.className}.radians(1.5), 1.5.radians)")
         }
-        if (angle.allowComparisons) {
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(4), min(${angle.className}.degrees(6), ${angle.className}.degrees(4)))")
-            writer.println("\t\tassertNearlyEquals(${angle.className}.degrees(6), max(${angle.className}.degrees(6), ${angle.className}.degrees(4)))")
+    }
+
+    override fun generateMathFunctionsBody() {
+        if (quantity.internalType.signed) {
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(0), abs(${quantity.className}.degrees(0)))")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(40), abs(${quantity.className}.degrees(40)))")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(40), abs(${quantity.className}.degrees(-40)))")
         }
-        val margin = if (angle.internalType.numBytes == 1) "0.1" else "0.01"
-        writer.println("\t\tassertEquals(0.5, sin(${angle.className}.degrees(30)), $margin)")
-        writer.println("\t\tassertEquals(-1.0, cos(${angle.className}.radians(PI)), $margin)")
-        writer.println("\t\tassertEquals(1.0, tan(${angle.className}.degrees(45)), $margin)")
-        writer.println("\t}")
+        if (quantity.allowComparisons) {
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(4), min(${quantity.className}.degrees(6), ${quantity.className}.degrees(4)))")
+            writer.println("\t\tassertEquals(${quantity.className}.degrees(6), max(${quantity.className}.degrees(6), ${quantity.className}.degrees(4)))")
+        }
+        val margin = if (quantity.internalType.numBytes == 1) "0.1" else "0.01"
+        writer.println("\t\tassertEquals(0.5, sin(${quantity.className}.degrees(30)), $margin)")
+        writer.println("\t\tassertEquals(-1.0, cos(${quantity.className}.radians(PI)), $margin)")
+        writer.println("\t\tassertEquals(1.0, tan(${quantity.className}.degrees(45)), $margin)")
     }
 }

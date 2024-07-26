@@ -3,16 +3,12 @@ package fixie.generator.speed
 import fixie.generator.number.FloatType
 import fixie.generator.quantity.HybridQuantityClassGenerator
 import java.io.PrintWriter
-import java.math.BigDecimal
-import java.math.BigInteger
 
 internal class SpeedClassGenerator(
         writer: PrintWriter,
         speed: SpeedClass,
         packageName: String
 ) : HybridQuantityClassGenerator<SpeedClass>(writer, speed, packageName) {
-
-    private var unitConstants = mutableListOf(speed.oneUnit)
 
     override fun getImports() = super.getImports() + arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
 
@@ -60,26 +56,19 @@ internal class SpeedClassGenerator(
         else if (quantity.floatType == FloatType.SinglePrecision) "1f" else "1.0"
         writer.println("\t\tval ${quantity.oneUnit} = ${quantity.className}($oneValue)")
 
-        for (unit in SpeedUnit.entries) {
-            if (unit != quantity.oneUnit) {
+        for ((unit, rawValue) in quantity.computeSupportedUnits()) {
+            writer.println()
+            if (quantity.number != null) {
+                writer.println("\t\tval $unit = raw($rawValue${if (quantity.number.internalType.signed) "" else "u"})")
+            } else {
                 val factor = quantity.oneUnit.factor / unit.factor
-
-                val canRepresent = if (quantity.number != null) {
-                    val rawValue = BigDecimal.valueOf(quantity.number.oneValue.toDouble()) * BigDecimal.valueOf(factor)
-                    quantity.number.internalType.canRepresent(rawValue.toBigInteger() + BigInteger.TWO)
-                } else true
-
-                if (canRepresent) {
-                    writer.println()
-                    writer.println("\t\tval $unit = ${quantity.oneUnit} * $factor")
-                    unitConstants.add(unit)
-                }
+                writer.println("\t\tval $unit = ${quantity.oneUnit} * $factor")
             }
         }
     }
 
     override fun generateNumberUnitExtensionFunctions(typeName: String) {
-        for (unit in unitConstants) {
+        for (unit in quantity.computeSupportedUnits().map { it.first } + arrayOf(quantity.oneUnit)) {
             writer.println()
             writer.println("val $typeName.${unit.abbreviation.replace('/', 'p')}")
             writer.println("\tget() = ${quantity.className}.$unit * this")

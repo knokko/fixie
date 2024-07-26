@@ -24,8 +24,10 @@ abstract class FloatQuantityClassGenerator<T : FloatQuantityClass>(
         writer.println("\toperator fun plus(right: ${quantity.className}) = ${quantity.className}(this.value + right.value)")
         writer.println()
         writer.println("\toperator fun minus(right: ${quantity.className}) = ${quantity.className}(this.value - right.value)")
+
+        val toDouble = if (quantity.floatType == FloatType.SinglePrecision) ".toDouble()" else ""
         writer.println()
-        writer.println("\toperator fun div(right: ${quantity.className}) = this.value / right.value")
+        writer.println("\toperator fun div(right: ${quantity.className}) = this.value$toDouble / right.value$toDouble")
 
         for (typeName in arrayOf("Int", "Long", "Float", "Double")) {
             val rightSuffix = if (typeName == "Double" && quantity.floatType == FloatType.SinglePrecision) ".toFloat()" else ""

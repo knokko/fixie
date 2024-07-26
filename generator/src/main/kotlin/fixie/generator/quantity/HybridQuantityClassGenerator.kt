@@ -45,8 +45,9 @@ abstract class HybridQuantityClassGenerator<T : HybridQuantityClass>(
             writer.println("\toperator fun div(right: $typeName) = ${quantity.className}(this.value / right$rightSuffix)")
         }
 
-        next()
-        writer.println("\toperator fun div(right: ${quantity.className}) = this.value / right.value")
+        writer.println()
+        val toDouble = if (quantity.floatType == FloatType.DoublePrecision) "" else ".toDouble()"
+        writer.println("\toperator fun div(right: ${quantity.className}) = this.value$toDouble / right.value$toDouble")
     }
 
     override fun generateCompanionContent() {

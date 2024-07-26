@@ -156,6 +156,9 @@ internal class AngleClassGenerator(
                 val functionName = unit.name.lowercase(Locale.ROOT)
                 writer.println("\t\tfun $functionName(value: $typeName) = $functionName(value.toDouble())")
             }
+
+            writer.println()
+            writer.println("\t\tval ${unit.name} = ${unit.name.lowercase(Locale.ROOT)}(1)")
         }
     }
 

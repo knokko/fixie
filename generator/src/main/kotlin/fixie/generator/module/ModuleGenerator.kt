@@ -13,6 +13,9 @@ import fixie.generator.displacement.DisplacementTestsGenerator
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.number.NumberClassGenerator
 import fixie.generator.number.NumberTestsGenerator
+import fixie.generator.quantity.QuantityClass
+import fixie.generator.quantity.QuantityClassGenerator
+import fixie.generator.quantity.QuantityTestsGenerator
 import fixie.generator.speed.SpeedClassGenerator
 import fixie.generator.speed.SpeedTestsGenerator
 import fixie.generator.speed.SpeedUnit
@@ -52,47 +55,30 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
         }
     }
 
+    fun <Q : QuantityClass, C: QuantityClassGenerator<Q>, T: QuantityTestsGenerator<Q>> generateQuantityFiles(
+        elements: List<Q>,
+        classGeneratorConstructor: (PrintWriter, Q, String) -> C,
+        testsGeneratorConstructor: (PrintWriter, Q, String) -> T
+    ) {
+        generateFiles(
+            elements, { it.className },
+            { writer, quantity -> classGeneratorConstructor(writer, quantity, module.packageName).generate() },
+            { writer, quantity -> testsGeneratorConstructor(writer, quantity, module.packageName).generate() }
+        )
+    }
+
     generateFiles(
             module.numbers, { it.className },
             { writer, number -> NumberClassGenerator(writer, number, module.packageName).generate() },
             { writer, number -> NumberTestsGenerator(writer, number, module.packageName).generate() }
     )
 
-    generateFiles(
-            module.displacements, { it.className },
-            { writer, displacement -> DisplacementClassGenerator(writer, displacement, module.packageName).generate() },
-            { writer, displacement -> DisplacementTestsGenerator(writer, displacement, module.packageName).generate() }
-    )
-
-    generateFiles(
-            module.areas, { it.className },
-            { writer, area -> AreaClassGenerator(writer, area, module.packageName).generate() },
-            { writer, area -> AreaTestsGenerator(writer, area, module.packageName).generate() }
-    )
-
-    generateFiles(
-            module.speed, { it.className },
-            { writer, speed -> SpeedClassGenerator(writer, speed, module.packageName).generate() },
-            { writer, speed -> SpeedTestsGenerator(writer, speed, module.packageName).generate() }
-    )
-
-    generateFiles(
-            module.accelerations, { it.className },
-            { writer, acceleration -> AccelerationClassGenerator(writer, acceleration, module.packageName).generate() },
-            { writer, acceleration -> AccelerationTestsGenerator(writer, acceleration, module.packageName).generate() }
-    )
-
-    generateFiles(
-            module.angles, { it.className },
-            { writer, angle -> AngleClassGenerator(writer, angle, module.packageName).generate() },
-            { writer, angle -> AngleTestsGenerator(writer, angle, module.packageName).generate() }
-    )
-
-    generateFiles(
-            module.spins, { it.className },
-            { writer, spin -> SpinClassGenerator(writer, spin, module.packageName).generate() },
-            { writer, spin -> SpinTestsGenerator(writer, spin, module.packageName).generate() }
-    )
+    generateQuantityFiles(module.displacements, ::DisplacementClassGenerator, ::DisplacementTestsGenerator)
+    generateQuantityFiles(module.areas, ::AreaClassGenerator, ::AreaTestsGenerator)
+    generateQuantityFiles(module.speed, ::SpeedClassGenerator, ::SpeedTestsGenerator)
+    generateQuantityFiles(module.accelerations, ::AccelerationClassGenerator, ::AccelerationTestsGenerator)
+    generateQuantityFiles(module.angles, ::AngleClassGenerator, ::AngleTestsGenerator)
+    generateQuantityFiles(module.spins, ::SpinClassGenerator, ::SpinTestsGenerator)
 
     generateMathFile(module.numbers, module.angles, module.packageName, File("$sourceDirectory/ExtraMath.kt"))
 
@@ -100,118 +86,89 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
         generateFixedPointException(File("$sourceDirectory/FixedPointException.kt"), module.packageName)
     }
 
-    if (module.displacements.isNotEmpty()) {
-        generateDistanceUnit(File("$sourceDirectory/DistanceUnit.kt"), module.packageName)
+    fun <T: QuantityClass> maybeGenerateUnitEnum(elements: List<T>, unitName: String, generateUnit: (File, String) -> Unit) {
+        if (elements.isNotEmpty()) generateUnit(File("$sourceDirectory/$unitName.kt"), module.packageName)
     }
 
-    if (module.areas.isNotEmpty()) {
-        generateAreaUnit(File("$sourceDirectory/AreaUnit.kt"), module.packageName)
-    }
-
-    if (module.speed.isNotEmpty()) {
-        generateSpeedUnit(File("$sourceDirectory/SpeedUnit.kt"), module.packageName)
-    }
-
-    if (module.angles.isNotEmpty()) {
-        generateAngleUnit(File("$sourceDirectory/AngleUnit.kt"), module.packageName)
-    }
-
-    if (module.spins.isNotEmpty()) {
-        generateSpinUnit(File("$sourceDirectory/SpinUnit.kt"), module.packageName)
-    }
+    maybeGenerateUnitEnum(module.displacements, "DistanceUnit", ::generateDistanceUnit)
+    maybeGenerateUnitEnum(module.areas, "AreaUnit", ::generateAreaUnit)
+    maybeGenerateUnitEnum(module.speed, "SpeedUnit", ::generateSpeedUnit)
+    maybeGenerateUnitEnum(module.angles, "AngleUnit", ::generateAngleUnit)
+    maybeGenerateUnitEnum(module.spins, "SpinUnit", ::generateSpinUnit)
 }
 
 private fun generateFile(directory: File, name: String, write: (PrintWriter) -> Unit) {
-    val writer = PrintWriter(File("$directory/$name.kt"))
+    generateFile(File("$directory/$name.kt"), write)
+}
+
+private fun generateFile(file: File, write: (PrintWriter) -> Unit) {
+    val writer = PrintWriter(file)
     write(writer)
     writer.flush()
     writer.close()
 }
 
-private fun generateFixedPointException(file: File, packageName: String) {
-    val writer = PrintWriter(file)
-    writer.println("package $packageName")
-    writer.println()
-    writer.println("class FixedPointException(message: String): RuntimeException(message)")
+private fun generateKotlinClass(file: File, packageName: String, generateClass: (PrintWriter) -> Unit) {
+    generateFile(file) { writer ->
+        writer.println("package $packageName")
+        writer.println()
+        generateClass(writer)
+    }
+}
 
-    writer.flush()
-    writer.close()
+private fun generateFixedPointException(file: File, packageName: String) {
+    generateKotlinClass(file, packageName) { it.println("class FixedPointException(message: String): RuntimeException(message)") }
+}
+
+private fun <T : Enum<*>> generateUnitClass(
+    file: File, packageName: String, entries: List<T>, firstLine: String, getConstructorParameters: (T) -> String) {
+    generateKotlinClass(file, packageName) { writer ->
+        writer.println(firstLine)
+
+        for (unit in entries) {
+            writer.print("\t${unit.name}(${getConstructorParameters(unit)})")
+            if (unit == entries.last()) writer.println(";") else writer.println(",")
+        }
+
+        writer.println("}")
+    }
 }
 
 private fun generateDistanceUnit(file: File, packageName: String) {
-    val writer = PrintWriter(file)
-    writer.println("package $packageName")
-    writer.println()
-    writer.println("enum class DistanceUnit(val abbreviation: String, val isMetric: Boolean, val divisor: Long) {")
-
-    for (unit in DistanceUnit.entries) {
-        writer.print("\t${unit.name}(\"${unit.abbreviation}\", ${unit.isMetric}, ${unit.divisor})")
-        if (unit == DistanceUnit.entries.last()) writer.println(";") else writer.println(",")
-    }
-
-    writer.println("}")
-    writer.flush()
-    writer.close()
+    generateUnitClass(
+        file, packageName, DistanceUnit.entries,
+        "enum class DistanceUnit(val abbreviation: String, val isMetric: Boolean, val divisor: Long) {"
+    ) { unit -> "\"${unit.abbreviation}\", ${unit.isMetric}, ${unit.divisor}"}
 }
 
 private fun generateAreaUnit(file: File, packageName: String) {
-    val writer = PrintWriter(file)
-    writer.println("package $packageName")
-    writer.println()
-    writer.println("enum class AreaUnit(val abbreviation: String, val factor: Double) {")
-
-    for (unit in AreaUnit.entries) {
-        writer.print("\t${unit.name}(\"${unit.abbreviation}\", ${unit.factor})")
-        if (unit == AreaUnit.entries.last()) writer.println(";") else writer.println(",")
-    }
-
-    writer.println("}")
-    writer.flush()
-    writer.close()
+    generateUnitClass(
+        file, packageName, AreaUnit.entries,
+        "enum class AreaUnit(val abbreviation: String, val factor: Double) {"
+    ) { unit -> "\"${unit.abbreviation}\", ${unit.factor}" }
 }
 
 private fun generateSpeedUnit(file: File, packageName: String) {
-    val writer = PrintWriter(file)
-    writer.println("package $packageName")
-    writer.println()
-    writer.println("enum class SpeedUnit(val abbreviation: String, val factor: Double) {")
-
-    for (unit in SpeedUnit.entries) {
-        writer.print("    ${unit.name}(\"${unit.abbreviation}\", ${unit.factor})")
-        if (unit == SpeedUnit.entries.last()) writer.println(";") else writer.println(",")
-    }
-
-    writer.println("}")
-    writer.flush()
-    writer.close()
+    generateUnitClass(
+        file, packageName, SpeedUnit.entries,
+        "enum class SpeedUnit(val abbreviation: String, val factor: Double) {"
+    ) { unit -> "\"${unit.abbreviation}\", ${unit.factor}" }
 }
 
 private fun generateAngleUnit(file: File, packageName: String) {
-    val writer = PrintWriter(file)
-    writer.println("package $packageName")
-    writer.println()
-    writer.println("enum class AngleUnit(val suffix: String, val maxValue: Double) {")
-
-    for (unit in AngleUnit.entries) {
-        writer.print("\t${unit.name}(\"${unit.suffix}\", ${unit.maxValue})")
-        if (unit == AngleUnit.entries.last()) writer.println(";") else writer.println(",")
-    }
-
-    writer.println("}")
-    writer.flush()
-    writer.close()
+    generateUnitClass(
+        file, packageName, AngleUnit.entries,
+        "enum class AngleUnit(val suffix: String, val maxValue: Double) {"
+    ) { unit -> "\"${unit.suffix}\", ${unit.maxValue}" }
 }
 
 private fun generateSpinUnit(file: File, packageName: String) {
-    val writer = PrintWriter(file)
-    writer.println("package $packageName")
-    writer.println()
-    writer.println("import kotlin.math.PI")
-    writer.println()
-    writer.println("enum class SpinUnit(val suffix: String, val abbreviation: String, val angleMax: Double) {")
-    writer.println("\tDEGREES_PER_SECOND(\"°/s\", \"degps\", 360.0),")
-    writer.println("\tRADIANS_PER_SECOND(\"rad/s\", \"radps\", 2 * PI)")
-    writer.println("}")
-    writer.flush()
-    writer.close()
+    generateKotlinClass(file, packageName) { writer ->
+        writer.println("import kotlin.math.PI")
+        writer.println()
+        writer.println("enum class SpinUnit(val suffix: String, val abbreviation: String, val angleMax: Double) {")
+        writer.println("\tDEGREES_PER_SECOND(\"°/s\", \"degps\", 360.0),")
+        writer.println("\tRADIANS_PER_SECOND(\"rad/s\", \"radps\", 2 * PI)")
+        writer.println("}")
+    }
 }

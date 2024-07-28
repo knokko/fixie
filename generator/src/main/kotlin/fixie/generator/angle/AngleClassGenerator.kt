@@ -105,10 +105,10 @@ internal class AngleClassGenerator(
             writer.println()
             writer.println("\toperator fun div(right: ${quantity.className}) = this.raw.toDouble() / right.raw.toDouble()")
 
-            if (quantity.spinClass != null) {
+            quantity.spinClass?.let {spin ->
                 writer.println()
-                val angleUnit = if (quantity.spinClass.oneUnit == SpinUnit.DEGREES_PER_SECOND) AngleUnit.DEGREES else AngleUnit.RADIANS
-                writer.println("\toperator fun div(right: Duration) = ${quantity.spinClass.className}.${quantity.spinClass.oneUnit} * this.toDouble(AngleUnit.$angleUnit) / right.toDouble(DurationUnit.SECONDS)")
+                val angleUnit = if (spin.oneUnit == SpinUnit.DEGREES_PER_SECOND) AngleUnit.DEGREES else AngleUnit.RADIANS
+                writer.println("\toperator fun div(right: Duration) = ${spin.className}.${spin.oneUnit} * this.toDouble(AngleUnit.$angleUnit) / right.toDouble(DurationUnit.SECONDS)")
             }
         }
 

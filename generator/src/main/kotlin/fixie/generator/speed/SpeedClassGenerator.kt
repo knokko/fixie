@@ -36,16 +36,16 @@ internal class SpeedClassGenerator(
     override fun generateArithmetic() {
         super.generateArithmetic()
 
-        if (quantity.displacementClassName != null) {
+        quantity.displacementClass?.let {displacement ->
             writer.println()
-            if (quantity.displacementNumber!!.checkOverflow) writer.println("\t@Throws(FixedPointException::class)")
+            if (displacement.number.checkOverflow) writer.println("\t@Throws(FixedPointException::class)")
             writer.println("\toperator fun times(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * " +
                     "${quantity.displacementClassName}.METER * right.toDouble(DurationUnit.SECONDS)")
         }
-        if (quantity.acceleration != null) {
+        quantity.accelerationClass?.let {acceleration ->
             writer.println()
             writer.println("\toperator fun div(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * " +
-                    "${quantity.acceleration.className}.MPS2 / right.toDouble(DurationUnit.SECONDS)")
+                    "${acceleration.className}.MPS2 / right.toDouble(DurationUnit.SECONDS)")
         }
     }
 
@@ -78,9 +78,9 @@ internal class SpeedClassGenerator(
     override fun generateExtensionFunctions() {
         super.generateExtensionFunctions()
 
-        if (quantity.displacementNumber != null) {
+        quantity.displacementClass?.let { displacement ->
             writer.println()
-            if (quantity.displacementNumber.checkOverflow) writer.println("@Throws(FixedPointException::class)")
+            if (displacement.number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
             writer.println("operator fun Duration.times(right: ${quantity.className}) = right * this")
         }
     }

@@ -40,11 +40,13 @@ internal class DisplacementTestsGenerator(
 
     override fun generateArithmeticBody() {
         super.generateArithmeticBody()
-        if (quantity.speed != null && quantity.number.oneValue * BigInteger.TEN < quantity.number.internalType.getMaxValue()) {
-            var smallestOneValue = quantity.number.oneValue
-            if (quantity.speed.number != null) smallestOneValue = smallestOneValue.min(quantity.speed.number.oneValue)
-            val margin = if (smallestOneValue > BigInteger.TEN) 0.001 else 0.2
-            writer.println("\t\tassertEquals(2.0, (10 * ${quantity.className}.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND), $margin)")
+        if (quantity.number.oneValue * BigInteger.TEN < quantity.number.internalType.getMaxValue()) {
+            quantity.speed?.let { speed ->
+                var smallestOneValue = quantity.number.oneValue
+                if (speed.number != null) smallestOneValue = smallestOneValue.min(speed.number.oneValue)
+                val margin = if (smallestOneValue > BigInteger.TEN) 0.001 else 0.2
+                writer.println("\t\tassertEquals(2.0, (10 * ${quantity.className}.METER / 5.seconds).toDouble(SpeedUnit.METERS_PER_SECOND), $margin)")
+            }
         }
     }
 }

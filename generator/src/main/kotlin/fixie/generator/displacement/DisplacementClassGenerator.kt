@@ -51,15 +51,15 @@ internal class DisplacementClassGenerator(
     override fun generateArithmetic() {
         super.generateArithmetic()
 
-        if (quantity.area != null) {
+        quantity.area?.let { area ->
             writer.println()
-            writer.println("\toperator fun times(right: ${quantity.className}) = ${quantity.area.className}.SQUARE_METER * this.toDouble(DistanceUnit.METER) * right.toDouble(DistanceUnit.METER)")
+            writer.println("\toperator fun times(right: ${quantity.className}) = ${area.className}.SQUARE_METER * this.toDouble(DistanceUnit.METER) * right.toDouble(DistanceUnit.METER)")
         }
-        if (quantity.speed != null) {
-            if (quantity.speed.number != null && quantity.speed.number.checkOverflow) {
+        quantity.speed?.let { speed ->
+            if (speed.number != null && speed.number.checkOverflow) {
                 writer.println("\t@Throws(FixedPointException::class)")
             }
-            writer.println("\toperator fun div(right: Duration) = ${quantity.speed.className}.METERS_PER_SECOND * (this.toDouble(DistanceUnit.METER) / right.toDouble(DurationUnit.SECONDS))")
+            writer.println("\toperator fun div(right: Duration) = ${speed.className}.METERS_PER_SECOND * (this.toDouble(DistanceUnit.METER) / right.toDouble(DurationUnit.SECONDS))")
         }
     }
 

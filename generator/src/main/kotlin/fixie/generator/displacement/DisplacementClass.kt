@@ -10,12 +10,15 @@ import java.math.BigInteger
 class DisplacementClass(
     className: String,
     number: NumberClass,
-    val speed: SpeedClass?,
-    val area: AreaClass?,
+    val speedClassName: String?,
+    val areaClassName: String?,
     val oneUnit: DistanceUnit,
     val displayUnit: DistanceUnit,
     createNumberExtensions: Boolean
 ) : FixedQuantityClass(className, number, createNumberExtensions) {
+
+    var speed: SpeedClass? = null
+    var area: AreaClass? = null
 
     fun computeSupportedUnits(): List<Pair<DistanceUnit, BigInteger>> {
         val supportedUnits = mutableListOf<Pair<DistanceUnit, BigInteger>>()

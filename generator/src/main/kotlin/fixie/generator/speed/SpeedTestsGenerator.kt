@@ -66,7 +66,8 @@ internal class SpeedTestsGenerator(
 
         if (shouldTestSeconds()) {
             val isSpeedAccurate = quantity.number == null || quantity.number.oneValue > BigInteger.TEN
-            val isDisplacementAccurate = quantity.displacementNumber?.oneValue == null || quantity.displacementNumber.oneValue > BigInteger.TEN
+            val displacementNumber = quantity.displacementClass?.number?.oneValue
+            val isDisplacementAccurate = displacementNumber == null || displacementNumber > BigInteger.TEN
             val margin = if (isSpeedAccurate && isDisplacementAccurate) 0.01 else 5.0
 
             if (quantity.displacementClassName != null) {
@@ -75,7 +76,7 @@ internal class SpeedTestsGenerator(
                     writer.println("\t\tassertEquals(20.0, (10 * ${quantity.className}.KILOMETERS_PER_HOUR * 2.hours).toDouble(DistanceUnit.KILOMETER), $margin)")
                 }
             }
-            if (quantity.acceleration != null) {
+            if (quantity.accelerationClass != null) {
                 writer.println("\t\tassertEquals(0.5, (${quantity.className}.METERS_PER_SECOND / 2.seconds).toDouble(), ${margin / 40})")
             }
         }

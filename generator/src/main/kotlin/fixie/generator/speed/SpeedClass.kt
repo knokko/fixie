@@ -1,6 +1,7 @@
 package fixie.generator.speed
 
 import fixie.generator.acceleration.AccelerationClass
+import fixie.generator.displacement.DisplacementClass
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
@@ -16,15 +17,12 @@ class SpeedClass(
         val oneUnit: SpeedUnit,
         val displayUnit: SpeedUnit,
         val displacementClassName: String?,
-        val displacementNumber: NumberClass?,
-        val acceleration: AccelerationClass?,
+        val accelerationClassName: String?,
         createNumberExtensions: Boolean
 ) : HybridQuantityClass(className, number, floatType, createNumberExtensions){
-    init {
-        if ((displacementClassName != null) != (displacementNumber != null)) {
-            throw IllegalArgumentException("Displacement class name must be null if and only if displacement number is null")
-        }
-    }
+
+    var displacementClass: DisplacementClass? = null
+    var accelerationClass: AccelerationClass? = null
 
     fun computeSupportedUnits(): List<Pair<SpeedUnit, BigInteger>> {
         if (number == null) return SpeedUnit.entries.filter { it != oneUnit }.map { Pair(it, BigInteger.ONE) }

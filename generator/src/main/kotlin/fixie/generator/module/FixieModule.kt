@@ -5,49 +5,74 @@ import fixie.generator.angle.AngleClass
 import fixie.generator.area.AreaClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.number.NumberClass
+import fixie.generator.parser.InvalidConfigException
+import fixie.generator.quantity.QuantityClass
 import fixie.generator.speed.SpeedClass
 import fixie.generator.spin.SpinClass
 
 class FixieModule(
-        val packageName: String,
-        val numbers: List<NumberClass>,
-        val displacements: List<DisplacementClass> = emptyList(),
-        val areas: List<AreaClass> = emptyList(),
-        val speed: List<SpeedClass> = emptyList(),
-        val accelerations: List<AccelerationClass> = emptyList(),
-        val angles: List<AngleClass> = emptyList(),
-        val spins: List<SpinClass> = emptyList()
+    val moduleName: String,
+    val packageName: String,
+    val numbers: List<NumberClass>,
+    val accelerations: List<AccelerationClass> = emptyList(),
+    val angles: List<AngleClass> = emptyList(),
+    val areas: List<AreaClass> = emptyList(),
+    val displacements: List<DisplacementClass> = emptyList(),
+    val speed: List<SpeedClass> = emptyList(),
+    val spins: List<SpinClass> = emptyList()
 ) {
+
+    private inline fun <reified S : QuantityClass, reified T : QuantityClass> resolve(
+        sources: List<S>, targets: List<T>, extractTargetName: (S) -> String?, assignTargetValue: (S, T) -> Unit
+    ) {
+        val sourceDescription = S::class.simpleName
+        val targetDescription = T::class.simpleName
+        for (source in sources) {
+            val targetName = extractTargetName(source)
+            if (targetName != null) {
+                val target = targets.find { it.className == targetName }
+                if (target != null) assignTargetValue(source, target)
+                else throw InvalidConfigException("Can't find $targetDescription $targetName for $sourceDescription ${source.className}")
+            }
+        }
+    }
+
+    private inline fun <reified S : QuantityClass, reified T, R> checkPresent(
+        sourceElements: List<S>, targetElements: List<T>, extractSource: (S) -> R?
+    ) {
+        val sourceDescription = S::class.simpleName
+        val targetDescription = T::class.simpleName
+
+        for (element in sourceElements) {
+            val sourceResult = extractSource(element) ?: continue
+
+            val extractTarget = if (QuantityClass::class.java.isAssignableFrom(T::class.java)) {
+                quantity: T -> (quantity as QuantityClass).className
+            } else {
+                target: T -> target
+            }
+
+            if (!targetElements.map(extractTarget).contains(sourceResult)) {
+                throw InvalidConfigException("Missing $targetDescription $sourceResult for $sourceDescription class ${element.className}")
+            }
+        }
+    }
 
     init {
         if (packageName.contains("/")) {
             throw IllegalArgumentException("Packages should be separated by dots instead of slashes")
         }
 
-        fun <S, T, R> checkPresent(
-                sourceDescription: String, targetDescription: String,
-                sourceElements: List<S>, targetElements: List<T>,
-                extractSource: (S) -> R?, extractTarget: (T) -> R,
-                extractSourceName: (S) -> String
-        ) {
-            for (element in sourceElements) {
-                val sourceResult = extractSource(element) ?: continue
-                if (!targetElements.map(extractTarget).contains(sourceResult)) {
-                    throw IllegalArgumentException("Missing $targetDescription class for $sourceDescription class ${extractSourceName(element)}")
-                }
-            }
-        }
-
-        checkPresent("displacement", "number", displacements, numbers, { it.number }, { it }, { it.className })
-        checkPresent("displacement", "area", displacements, areas, { it.area }, { it }, { it.className })
-        checkPresent("displacement", "speed", displacements, speed, { it.speed }, { it }, { it.className })
-        checkPresent("area", "displacement", areas, displacements, { it.displacementClassName }, { it.className }, { it.className })
-        checkPresent("speed", "number", speed, numbers, { it.number }, { it }, { it.className })
-        checkPresent("speed", "displacement", speed, displacements, { it.displacementClassName }, { it.className }, { it.className })
-        checkPresent("speed", "acceleration", speed, accelerations, { it.acceleration }, { it }, { it.className })
-        checkPresent("acceleration", "speed", accelerations, speed, { it.speedClassName }, { it.className }, { it.className })
-        checkPresent("angle", "spin", angles, spins, { it.spinClass }, { it }, { it.className })
-        checkPresent("spin", "angle", spins, angles, { it.angleClassName }, { it.className }, { it.className })
+        checkPresent(accelerations, speed) { it.speedClassName }
+        resolve(angles, spins, { it.spinClassName }) { angle, spin -> angle.spinClass = spin }
+        checkPresent(areas, displacements) { it.displacementClassName }
+        checkPresent(displacements, numbers) { it.number }
+        resolve(displacements, speed, { it.speedClassName }) { displacement, speed -> displacement.speed = speed }
+        checkPresent(displacements, areas) { it.area }
+        checkPresent(speed, numbers) { it.number }
+        resolve(speed, displacements, { it.displacementClassName }) { speed, displacement -> speed.displacementClass = displacement }
+        resolve(speed, accelerations, { it.accelerationClassName }) { speed, acceleration -> speed.accelerationClass = acceleration }
+        checkPresent(spins, angles) { it.angleClassName }
 
         val allClassNames = numbers.map { it.className } +
                 displacements.map { it.className } + areas.map { it.className } +

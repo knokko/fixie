@@ -1,0 +1,34 @@
+{
+	"moduleName": "uint16-fixed-%OVERFLOW%-%ONE%",
+	"packageName": "generated",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "UShort",
+		"oneValue": "%ONE%",
+		"checkOverflow": "%OVERFLOW%"
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Kilometer",
+		"displayUnit": "Yard",
+		"speed": "Speed",
+		"createNumberExtensions": true
+	}],
+	"speed": [{
+		"className": "Speed",
+		"number": "Fixed",
+		"oneUnit": "Miles per hour",
+		"displayUnit": "Kilometers per hour",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
+	}],
+	"variations": [
+		{
+			"%OVERFLOW%": [true, false]
+		},
+		{
+			"%ONE%": [2, 300, 8000, 65000]
+		}
+	]
+}

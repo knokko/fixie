@@ -1,0 +1,48 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+	id "java"
+	id "org.jetbrains.kotlin.jvm" version "2.0.0"
+}
+
+allprojects {
+	apply plugin: "java"
+	apply plugin: "org.jetbrains.kotlin.jvm"
+
+	repositories {
+		mavenCentral()
+	}
+
+	compileKotlin {
+		compilerOptions.jvmTarget = JvmTarget.JVM_17
+	}
+
+	compileTestKotlin {
+		compilerOptions.jvmTarget = JvmTarget.JVM_17
+	}
+
+	java {
+		sourceCompatibility = "17"
+		targetCompatibility = "17"
+	}
+
+	dependencies {
+		testImplementation platform("org.junit:junit-bom:5.10.1")
+		testImplementation "org.junit.jupiter:junit-jupiter:5.10.1"
+		testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	}
+
+	test {
+		useJUnitPlatform()
+	}
+}
+
+repositories {
+	maven { url "https://dogforce-games.com/maven" }
+	maven { url "https://mvnrepository.com/artifact/commons-cli/commons-cli" }
+}
+
+dependencies {
+	implementation "dev.gigaherz.util.gddl:gddl2:2.0.0-alpha.44"
+	implementation "commons-cli:commons-cli:1.8.0"
+}

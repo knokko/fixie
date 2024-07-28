@@ -1,0 +1,34 @@
+{
+	"moduleName": "int8-fixed-%OVERFLOW%-%ONE%",
+	"packageName": "generated",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "Byte",
+		"oneValue": "%ONE%",
+		"checkOverflow": "%OVERFLOW%"
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Inch",
+		"displayUnit": "Yard",
+		"speed": "Speed",
+		"createNumberExtensions": true
+	}],
+	"speed": [{
+		"className": "Speed",
+		"number": "Fixed",
+		"oneUnit": "Kilometers per hour",
+		"displayUnit": "Meters per second",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
+	}],
+	"variations": [
+		{
+			"%OVERFLOW%": [true, false]
+		},
+		{
+			"%ONE%": [2, 30, 127]
+		}
+	]
+}

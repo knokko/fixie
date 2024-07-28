@@ -1,0 +1,48 @@
+{
+	"moduleName": "uint64-%FLOAT_TYPE%-connections-%ONE_VALUE%",
+	"packageName": "connections",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "ULong",
+		"oneValue": "%ONE_VALUE%",
+		"checkOverflow": true
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Kilometer",
+		"displayUnit": "Kilometer",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
+	"speed": [{
+		"className": "Speed",
+		"floatType": "%FLOAT_TYPE%",
+		"oneUnit": "Kilometers per second",
+		"displayUnit": "Kilometers per second",
+		"displacement": "Displacement",
+		"acceleration": "Acceleration",
+		"createNumberExtensions": false
+	}],
+	"accelerations": [{
+		"className": "Acceleration",
+		"floatType": "%FLOAT_TYPE%",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
+	"areas": [{
+		"className": "Area",
+		"floatType": "%FLOAT_TYPE%",
+		"displayUnit": "Hectare",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
+	}],
+	"variations": [
+		{
+			"%ONE_VALUE%": [2, 7e9, 4e13, 1.5e19]
+		},
+		{
+			"%FLOAT_TYPE%": ["Float", "Double"]
+		}
+	]
+}

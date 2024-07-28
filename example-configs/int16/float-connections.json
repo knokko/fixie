@@ -1,0 +1,48 @@
+{
+	"moduleName": "int16-%FLOAT_TYPE%-connections-%ONE_VALUE%",
+	"packageName": "connections",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "Short",
+		"oneValue": "%ONE_VALUE%",
+		"checkOverflow": true
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Kilometer",
+		"displayUnit": "Mile",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
+	"speed": [{
+		"className": "Speed",
+		"floatType": "%FLOAT_TYPE%",
+		"oneUnit": "Miles per hour",
+		"displayUnit": "Miles per hour",
+		"displacement": "Displacement",
+		"acceleration": "Acceleration",
+		"createNumberExtensions": false
+	}],
+	"accelerations": [{
+		"className": "Acceleration",
+		"floatType": "%FLOAT_TYPE%",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
+	"areas": [{
+		"className": "Area",
+		"floatType": "%FLOAT_TYPE%",
+		"displayUnit": "Square meter",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
+	}],
+	"variations": [
+		{
+			"%ONE_VALUE%": [2, 1000, 32000]
+		},
+		{
+			"%FLOAT_TYPE%": ["Float", "Double"]
+		}
+	]
+}

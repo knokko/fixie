@@ -1,0 +1,48 @@
+{
+	"moduleName": "uint8-%FLOAT_TYPE%-connections-%ONE_VALUE%",
+	"packageName": "connections",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "UByte",
+		"oneValue": "%ONE_VALUE%",
+		"checkOverflow": true
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Meter",
+		"displayUnit": "Yard",
+		"speed": "Speed",
+		"createNumberExtensions": true
+	}],
+	"speed": [{
+		"className": "Speed",
+		"floatType": "%FLOAT_TYPE%",
+		"oneUnit": "Kilometers per second",
+		"displayUnit": "Miles per hour",
+		"displacement": "Displacement",
+		"acceleration": "Acceleration",
+		"createNumberExtensions": false
+	}],
+	"accelerations": [{
+		"className": "Acceleration",
+		"floatType": "%FLOAT_TYPE%",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
+	"areas": [{
+		"className": "Area",
+		"floatType": "%FLOAT_TYPE%",
+		"displayUnit": "Square inch",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
+	}],
+	"variations": [
+		{
+			"%ONE_VALUE%": [2, 70, 255]
+		},
+		{
+			"%FLOAT_TYPE%": ["Float", "Double"]
+		}
+	]
+}

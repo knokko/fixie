@@ -1,0 +1,34 @@
+{
+	"moduleName": "int64-fixed-%OVERFLOW%-%ONE%",
+	"packageName": "generated.large",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "Long",
+		"oneValue": "%ONE%",
+		"checkOverflow": "%OVERFLOW%"
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Millimeter",
+		"displayUnit": "Millimeter",
+		"speed": "Speed",
+		"createNumberExtensions": true
+	}],
+	"speed": [{
+		"className": "Speed",
+		"number": "Fixed",
+		"oneUnit": "Meters per second",
+		"displayUnit": "Kilometers per hour",
+		"displacement": "Displacement",
+		"createNumberExtensions": true
+	}],
+	"variations": [
+		{
+			"%OVERFLOW%": [true, false]
+		},
+		{
+			"%ONE%": [2, 3e6, 4e10, 9e18]
+		}
+	]
+}

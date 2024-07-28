@@ -1,0 +1,34 @@
+{
+	"moduleName": "uint8-fixed-%OVERFLOW%-%ONE%",
+	"packageName": "generated",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "UByte",
+		"oneValue": "%ONE%",
+		"checkOverflow": "%OVERFLOW%"
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Kilometer",
+		"displayUnit": "Mile",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
+	"speed": [{
+		"className": "Speed",
+		"number": "Fixed",
+		"oneUnit": "Miles per hour",
+		"displayUnit": "Meters per second",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
+	}],
+	"variations": [
+		{
+			"%OVERFLOW%": [true, false]
+		},
+		{
+			"%ONE%": [2, 50, 255]
+		}
+	]
+}

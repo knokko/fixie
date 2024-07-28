@@ -1,74 +1,50 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '2.0.0'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id "java"
+    id "org.jetbrains.kotlin.jvm" version "2.0.0"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: "java"
+apply plugin: "org.jetbrains.kotlin.jvm"
+apply plugin: "com.github.johnrengelman.shadow"
 
-    repositories {
-        mavenCentral()
-        maven { url 'https://jitpack.io' }
-        maven { url "https://dogforce-games.com/maven" }
-    }
-
-    compileKotlin {
-        compilerOptions.jvmTarget = JvmTarget.JVM_11
-    }
-
-    compileTestKotlin {
-        compilerOptions.jvmTarget = JvmTarget.JVM_11
-    }
-
-    java {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
-    }
-
-    dependencies {
-        testImplementation platform('org.junit:junit-bom:5.10.1')
-        testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    }
-
-    test {
-        useJUnitPlatform()
-    }
+repositories {
+    mavenCentral()
+    maven { url "https://dogforce-games.com/maven" }
+    maven { url "https://mvnrepository.com/artifact/commons-cli/commons-cli" }
 }
 
-project(':generator-tester') {
-    apply plugin: 'com.github.johnrengelman.shadow'
-    dependencies {
-        implementation project(':generator')
-    }
-    shadowJar {
-        minimize()
-        manifest {
-            attributes ('Main-Class': 'fixie.generator.tester.GeneratorTesterKt')
-        }
+compileKotlin {
+    compilerOptions.jvmTarget = JvmTarget.JVM_17
+}
+
+compileTestKotlin {
+    compilerOptions.jvmTarget = JvmTarget.JVM_17
+}
+
+java {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
+}
+
+dependencies {
+    implementation "dev.gigaherz.util.gddl:gddl2:2.0.0-alpha.44"
+    implementation "commons-cli:commons-cli:1.8.0"
+
+    testImplementation platform("org.junit:junit-bom:5.10.1")
+    testImplementation "org.junit.jupiter:junit-jupiter:5.10.1"
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+shadowJar {
+    minimize()
+    manifest {
+        attributes ("Main-Class": "fixie.generator.GeneratorCommandKt")
     }
 }
 
-project(':generator') {
-    dependencies {
-        implementation "dev.gigaherz.util.gddl:gddl2:2.0.0-alpha.44"
-    }
-}
-
-project(':geometry') {
-    dependencies {
-        implementation project(':physics-kit')
-    }
-}
-
-project(':physics') {
-    dependencies {
-        implementation project(':physics-kit')
-        implementation project(':geometry')
-        implementation 'com.github.knokko.update-loop:implementation:v2.0.0'
-    }
+test {
+    useJUnitPlatform()
 }

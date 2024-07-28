@@ -1,0 +1,52 @@
+{
+	"moduleName": "angles-%INT_TYPE%-%FLOAT_TYPE%",
+	"packageName": "generated.angles",
+	"angles": [
+		{
+			"className": "LonelyAngle",
+			"intType": "%INT_TYPE%",
+			"displayUnit": "%ANGLE_UNIT1%",
+			"createNumberExtensions": "%NUMBER_EXTENSIONS1%",
+			"allowDivisionAndFloatMultiplication": "%ALLOW_DIVISION1%",
+			"allowComparisons": "%ALLOW_COMPARISONS1%"
+		},
+		{
+			"className": "ConnectedAngle",
+			"intType": "%INT_TYPE%",
+			"displayUnit": "%ANGLE_UNIT2%",
+			"createNumberExtensions": "%NUMBER_EXTENSIONS2%",
+			"allowDivisionAndFloatMultiplication": "%ALLOW_DIVISION2%",
+			"allowComparisons": "%ALLOW_COMPARISONS2%",
+			"spin": "Spin"
+		}
+	],
+	"spins": [{
+		"className": "Spin",
+		"floatType": "%FLOAT_TYPE%",
+		"oneUnit": "%SPIN_UNIT1%",
+		"displayUnit": "%SPIN_UNIT2%",
+		"angle": "ConnectedAngle",
+		"createNumberExtensions": "%NUMBER_EXTENSIONS1%"
+	}],
+	"variations": [
+		{
+			"%INT_TYPE%": ["Byte", "UByte", "Short", "UShort", "Int", "UInt", "Long", "ULong"],
+			"%ANGLE_UNIT1%": ["Degrees", "Degrees", "Radians", "Degrees", "Radians", "Radians", "Degrees", "Radians"],
+			"%ALLOW_DIVISION2%": [false, true, true, false, false, false, true, false],
+			"%ALLOW_COMPARISONS1%": [false, false, true, true, false, true, true, false],
+			"%SPIN_UNIT2%": [
+				"Degrees per second", "Degrees per second", "Radians per second", "Radians per second",
+				"Radians per second", "Radians per second", "Degrees per second", "Degrees per second"
+			]
+		},
+		{
+			"%FLOAT_TYPE%": ["Float", "Double"],
+			"%ANGLE_UNIT2%": ["Degrees", "Radians"],
+			"%NUMBER_EXTENSIONS1%": [false, true],
+			"%NUMBER_EXTENSIONS2%": [true, false],
+			"%ALLOW_DIVISION1%": [true, false],
+			"%ALLOW_COMPARISONS2%": [false, true],
+			"%SPIN_UNIT1%": ["Degrees per second", "Radians per second"]
+		}
+	]
+}

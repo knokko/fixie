@@ -1,0 +1,30 @@
+name: Runs unit tests on both the generator, and the generated code
+
+on: [push]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jdk: [ 17, 21 ]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK ${{ matrix.jdk }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.jdk }}
+        distribution: "temurin"
+    - name: Setup gradle
+      uses: gradle/actions/setup-gradle@v3
+    - run: "./gradlew test"
+    - run: "./gradlew shadowJar"
+    - run: |
+        shopt -s globstar
+        java -jar build/libs/fixie-all.jar -d ./ -i 1 example-configs/**/*.gddl example-configs/**/*.json
+    - run: "cp .github/build.gradle.test build.gradle"
+    - run: "./gradlew test"
+    - run: "java -jar build/libs/fixie-all.jar -i 2"

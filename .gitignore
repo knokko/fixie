@@ -1,6 +1,6 @@
-/.idea
 /.gradle
+/.idea
+/.kotlin
 /build
 /out
-/grass.png
 /test-kit-fixie**/

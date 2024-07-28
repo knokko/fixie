@@ -1,0 +1,58 @@
+{
+	moduleName = "fixed-point",
+	packageName = "fixie",
+	numbers = [{
+		className = "FixDisplacement",
+		internalType = "Int",
+		oneValue = 1e5,
+		checkOverflow = true
+	}],
+	accelerations = [{
+		className = "Acceleration",
+		floatType = "Float",
+		speed = "Speed",
+		createNumberExtensions = true
+	}],
+	angles = [{
+		className = "Angle",
+		intType = "Int",
+		displayUnit = "Degrees",
+		createNumberExtensions = true,
+		allowDivisionAndFloatMultiplication = false,
+		allowComparisons = false,
+		spin = "Spin"
+	}],
+	areas = [{
+		className = "Area",
+		floatType = "Double",
+		displayUnit = "Square meter",
+		displacement = "Displacement",
+		createNumberExtensions = true
+	}]
+	displacements = [{
+		className = "Displacement",
+		number = "FixDisplacement",
+		oneUnit = "Meter",
+		displayUnit = "Meter",
+		speed = "Speed",
+		area = "Area",
+		createNumberExtensions = true
+	}],
+	speed = [{
+		className = "Speed",
+		floatType = "Float",
+		oneUnit = "Meters per second",
+		displayUnit = "Meters per second",
+		displacement = "Displacement",
+		acceleration = "Acceleration",
+		createNumberExtensions = true
+	}],
+	spins = [{
+		className = "Spin",
+		floatType = "Float",
+		oneUnit = "Degrees per second",
+		displayUnit = "Degrees per second",
+		angle = "Angle",
+		createNumberExtensions = true
+	}]
+}

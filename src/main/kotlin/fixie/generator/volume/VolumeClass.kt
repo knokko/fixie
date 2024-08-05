@@ -1,19 +1,19 @@
-package fixie.generator.area
+package fixie.generator.volume
 
+import fixie.generator.area.AreaClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.number.FloatType
 import fixie.generator.quantity.FloatQuantityClass
-import fixie.generator.volume.VolumeClass
 
-class AreaClass(
+class VolumeClass(
         className: String,
         floatType: FloatType,
-        val displayUnit: AreaUnit,
+        val displayUnit: VolumeUnit,
         val displacementClassName: String?,
-		val volumeClassName: String?,
+        val areaClassName: String?,
         createNumberExtensions: Boolean
 ) : FloatQuantityClass(className, floatType, createNumberExtensions) {
 
-	var displacement: DisplacementClass? = null
-	var volume: VolumeClass? = null
+    var displacement: DisplacementClass? = null
+    var area: AreaClass? = null
 }

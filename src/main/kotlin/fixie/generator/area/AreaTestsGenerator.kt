@@ -55,8 +55,12 @@ internal class AreaTestsGenerator(
                     writer.println("\t\tassertEquals(4.0, ((10 * ${quantity.className}.SQUARE_INCH) / (2.5 * ${quantity.displacementClassName}.INCH)).toDouble(DistanceUnit.INCH), $margin)")
                 }
             }
+
+            val meterPair = displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER }
+            if (quantity.volumeClassName != null && meterPair != null && meterPair.second > BigInteger.valueOf(15)) {
+                writer.println("\t\tassertEquals(234.0, (0.234 * ${quantity.className}.SQUARE_METER * ${displacement.className}.METER).toDouble(VolumeUnit.LITER), 30.0)")
+            }
         }
-        // TODO Volume
     }
 
     override fun generateMathFunctionsBody() {

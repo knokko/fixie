@@ -12,6 +12,8 @@
 		"number": "Fixed",
 		"oneUnit": "Foot",
 		"displayUnit": "Kilometer",
+		"area": "Area",
+		"volume": "Volume",
 		"speed": "Speed",
 		"createNumberExtensions": false
 	}],
@@ -35,7 +37,15 @@
 		"floatType": "%FLOAT_TYPE%",
 		"displayUnit": "Square meter",
 		"displacement": "Displacement",
+		"volume": "Volume",
 		"createNumberExtensions": false
+	}],
+	"volumes": [{
+		"className": "Volume",
+		"floatType": "%FLOAT_TYPE%",
+		"displayUnit": "Cubic meter",
+		"area": "Area",
+		"createNumberExtensions": true
 	}],
 	"variations": [
 		{

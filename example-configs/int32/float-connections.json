@@ -13,6 +13,8 @@
 		"oneUnit": "Foot",
 		"displayUnit": "Meter",
 		"speed": "Speed",
+		"area": "Area",
+		"volume": "Volume",
 		"createNumberExtensions": true
 	}],
 	"speed": [{
@@ -32,10 +34,19 @@
 	}],
 	"areas": [{
 		"className": "Area",
-		"floatType": "%FLOAT_TYPE%",
+		"floatType": "Double",
 		"displayUnit": "Square inch",
 		"displacement": "Displacement",
+		"volume": "Volume",
 		"createNumberExtensions": false
+	}],
+	"volumes": [{
+		"className": "Volume",
+		"floatType": "%FLOAT_TYPE%",
+		"displayUnit": "Cubic meter",
+		"displacement": "Displacement",
+		"area": "Area",
+		"createNumberExtensions": true
 	}],
 	"variations": [
 		{

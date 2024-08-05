@@ -13,6 +13,8 @@
 		"oneUnit": "Kilometer",
 		"displayUnit": "Mile",
 		"speed": "Speed",
+		"area": "Area",
+		"volume": "Volume",
 		"createNumberExtensions": false
 	}],
 	"speed": [{
@@ -35,6 +37,15 @@
 		"floatType": "%FLOAT_TYPE%",
 		"displayUnit": "Square meter",
 		"displacement": "Displacement",
+		"volume": "Volume",
+		"createNumberExtensions": false
+	}],
+	"volumes": [{
+		"className": "Volume",
+		"floatType": "Float",
+		"displayUnit": "Liter",
+		"displacement": "Displacement",
+		"volume": "Volume",
 		"createNumberExtensions": false
 	}],
 	"variations": [

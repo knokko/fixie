@@ -21,6 +21,8 @@ import fixie.generator.speed.SpeedUnit
 import fixie.generator.spin.SpinClass
 import fixie.generator.spin.SpinUnit
 import fixie.generator.uLongToBigInteger
+import fixie.generator.volume.VolumeClass
+import fixie.generator.volume.VolumeUnit
 import java.io.File
 import java.lang.Double.parseDouble
 import java.math.BigInteger
@@ -221,11 +223,21 @@ private class ModuleParser(
         spinClassName = optionalString(properties, "spin", path)
     )
 
+    private fun loadVolume(properties: GddlMap, path: String) = VolumeClass(
+            className = requiredString(properties, "className", path),
+            floatType = requiredFloatType(properties, "floatType", path),
+            displayUnit = requiredUnit(properties, "displayUnit", path, VolumeUnit.entries),
+            displacementClassName = optionalString(properties, "displacement", path),
+            areaClassName = optionalString(properties, "area", path),
+            createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
+    )
+
     private fun loadArea(properties: GddlMap, path: String) = AreaClass(
         className = requiredString(properties, "className", path),
         floatType = requiredFloatType(properties, "floatType", path),
         displayUnit = requiredUnit(properties, "displayUnit", path, AreaUnit.entries),
         displacementClassName = optionalString(properties, "displacement", path),
+        volumeClassName = optionalString(properties, "volume", path),
         createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
     )
 
@@ -233,6 +245,7 @@ private class ModuleParser(
         className = requiredString(properties, "className", path),
         number = requiredNumber(properties, "number", path),
         speedClassName = optionalString(properties, "speed", path),
+        volumeClassName = optionalString(properties, "volume", path),
         areaClassName = optionalString(properties, "area", path),
         oneUnit = requiredUnit(properties, "oneUnit", path, DistanceUnit.entries),
         displayUnit = requiredUnit(properties, "displayUnit", path, DistanceUnit.entries),
@@ -292,6 +305,7 @@ private class ModuleParser(
 
         val accelerations = mapList(root, "accelerations", "(root)", ::loadAcceleration)
         val angles = mapList(root, "angles", "(root)", ::loadAngle)
+        val volumes = mapList(root, "volumes", "(root)", ::loadVolume)
         val areas = mapList(root, "areas", "(root)", ::loadArea)
         val displacements = mapList(root, "displacements", "(root)", ::loadDisplacement)
         val speed = mapList(root, "speed", "(root)", ::loadSpeed)
@@ -303,6 +317,7 @@ private class ModuleParser(
             numbers = numbers,
             accelerations = accelerations,
             angles = angles,
+            volumes = volumes,
             areas = areas,
             displacements = displacements,
             speed = speed,

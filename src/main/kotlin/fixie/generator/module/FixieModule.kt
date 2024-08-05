@@ -9,6 +9,7 @@ import fixie.generator.parser.InvalidConfigException
 import fixie.generator.quantity.QuantityClass
 import fixie.generator.speed.SpeedClass
 import fixie.generator.spin.SpinClass
+import fixie.generator.volume.VolumeClass
 
 class FixieModule(
     val moduleName: String,
@@ -17,6 +18,7 @@ class FixieModule(
     val accelerations: List<AccelerationClass> = emptyList(),
     val angles: List<AngleClass> = emptyList(),
     val areas: List<AreaClass> = emptyList(),
+    val volumes: List<VolumeClass> = emptyList(),
     val displacements: List<DisplacementClass> = emptyList(),
     val speed: List<SpeedClass> = emptyList(),
     val spins: List<SpinClass> = emptyList()
@@ -65,8 +67,12 @@ class FixieModule(
 
         resolve(accelerations, speed, { it.speedClassName }) { acceleration, speed -> acceleration.speed = speed }
         resolve(angles, spins, { it.spinClassName }) { angle, spin -> angle.spinClass = spin }
+        resolve(volumes, areas, { it.areaClassName }) { volume, area -> volume.area = area }
+        resolve(volumes, displacements, { it.displacementClassName }) { volume, displacement -> volume.displacement = displacement }
+        resolve(areas, volumes, { it.volumeClassName }) { area, volume -> area.volume = volume }
         resolve(areas, displacements, { it.displacementClassName }) { area, displacement -> area.displacement = displacement }
         checkPresent(displacements, numbers) { it.number }
+        resolve(displacements, volumes, { it.volumeClassName }) { displacement, volume -> displacement.volume = volume }
         resolve(displacements, areas, { it.areaClassName }) { displacement, area -> displacement.area = area }
         resolve(displacements, speed, { it.speedClassName }) { displacement, speed -> displacement.speed = speed }
         checkPresent(speed, numbers) { it.number }
@@ -75,7 +81,7 @@ class FixieModule(
         resolve(spins, angles, { it.angleClassName }) { spin, angle -> spin.angle = angle }
 
         val allClassNames = numbers.map { it.className } +
-                displacements.map { it.className } + areas.map { it.className } +
+                displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
                 speed.map { it.className } + accelerations.map { it.className } +
                 angles.map { it.className } + spins.map { it.className }
 

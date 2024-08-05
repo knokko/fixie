@@ -21,6 +21,9 @@ import fixie.generator.speed.SpeedTestsGenerator
 import fixie.generator.speed.SpeedUnit
 import fixie.generator.spin.SpinClassGenerator
 import fixie.generator.spin.SpinTestsGenerator
+import fixie.generator.volume.VolumeClassGenerator
+import fixie.generator.volume.VolumeTestsGenerator
+import fixie.generator.volume.VolumeUnit
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
@@ -75,6 +78,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 
     generateQuantityFiles(module.displacements, ::DisplacementClassGenerator, ::DisplacementTestsGenerator)
     generateQuantityFiles(module.areas, ::AreaClassGenerator, ::AreaTestsGenerator)
+    generateQuantityFiles(module.volumes, ::VolumeClassGenerator, ::VolumeTestsGenerator)
     generateQuantityFiles(module.speed, ::SpeedClassGenerator, ::SpeedTestsGenerator)
     generateQuantityFiles(module.accelerations, ::AccelerationClassGenerator, ::AccelerationTestsGenerator)
     generateQuantityFiles(module.angles, ::AngleClassGenerator, ::AngleTestsGenerator)
@@ -92,6 +96,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 
     maybeGenerateUnitEnum(module.displacements, "DistanceUnit", ::generateDistanceUnit)
     maybeGenerateUnitEnum(module.areas, "AreaUnit", ::generateAreaUnit)
+    maybeGenerateUnitEnum(module.volumes, "VolumeUnit", ::generateVolumeUnit)
     maybeGenerateUnitEnum(module.speed, "SpeedUnit", ::generateSpeedUnit)
     maybeGenerateUnitEnum(module.angles, "AngleUnit", ::generateAngleUnit)
     maybeGenerateUnitEnum(module.spins, "SpinUnit", ::generateSpinUnit)
@@ -145,6 +150,13 @@ private fun generateAreaUnit(file: File, packageName: String) {
     generateUnitClass(
         file, packageName, AreaUnit.entries,
         "enum class AreaUnit(val abbreviation: String, val factor: Double) {"
+    ) { unit -> "\"${unit.abbreviation}\", ${unit.factor}" }
+}
+
+private fun generateVolumeUnit(file: File, packageName: String) {
+    generateUnitClass(
+            file, packageName, VolumeUnit.entries,
+            "enum class VolumeUnit(val abbreviation: String, val factor: Double) {"
     ) { unit -> "\"${unit.abbreviation}\", ${unit.factor}" }
 }
 

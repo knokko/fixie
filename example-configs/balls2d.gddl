@@ -22,11 +22,20 @@
 		allowComparisons = false,
 		spin = "Spin"
 	}],
+	volumes = [{
+		className = "Volume",
+		floatType = "Double",
+		displayUnit = "Liter",
+		displacement = "Displacement",
+		area = "Area",
+		createNumberExtensions = true
+	}],
 	areas = [{
 		className = "Area",
 		floatType = "Double",
 		displayUnit = "Square meter",
 		displacement = "Displacement",
+		volume = "Volume",
 		createNumberExtensions = true
 	}]
 	displacements = [{
@@ -36,6 +45,7 @@
 		displayUnit = "Meter",
 		speed = "Speed",
 		area = "Area",
+		volume = "Volume",
 		createNumberExtensions = true
 	}],
 	speed = [{

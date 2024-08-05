@@ -35,6 +35,15 @@
 		"floatType": "%FLOAT_TYPE%",
 		"displayUnit": "Square millimeter",
 		"displacement": "Displacement",
+		"volume": "Volume",
+		"createNumberExtensions": false
+	}],
+	"volumes": [{
+		"className": "Volume",
+		"floatType": "Double",
+		"displayUnit": "Liter",
+		"displacement": "Displacement",
+		"area": "Area",
 		"createNumberExtensions": false
 	}],
 	"variations": [

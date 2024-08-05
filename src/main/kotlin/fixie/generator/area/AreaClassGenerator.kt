@@ -40,7 +40,13 @@ class AreaClassGenerator(
             writer.println("\toperator fun div(right: ${quantity.displacementClassName}) = " +
                     "${quantity.displacementClassName}.METER * value / right.toDouble(DistanceUnit.METER)")
         }
-        // TODO Volume class
+
+        if (quantity.volumeClassName != null && quantity.displacementClassName != null) {
+            writer.println()
+            writer.println("\toperator fun times(right: ${quantity.displacementClassName}) = " +
+                    "${quantity.volumeClassName}.CUBIC_METER * value * right.toDouble(DistanceUnit.METER)")
+        }
+        // TODO Test area * displacement
     }
 
     override fun generateCompanionContent() {

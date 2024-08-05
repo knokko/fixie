@@ -4,6 +4,7 @@ import fixie.generator.area.AreaClass
 import fixie.generator.number.NumberClass
 import fixie.generator.quantity.FixedQuantityClass
 import fixie.generator.speed.SpeedClass
+import fixie.generator.volume.VolumeClass
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -12,6 +13,7 @@ class DisplacementClass(
     number: NumberClass,
     val speedClassName: String?,
     val areaClassName: String?,
+    val volumeClassName: String?,
     val oneUnit: DistanceUnit,
     val displayUnit: DistanceUnit,
     createNumberExtensions: Boolean
@@ -19,6 +21,7 @@ class DisplacementClass(
 
     var speed: SpeedClass? = null
     var area: AreaClass? = null
+    var volume: VolumeClass? = null
 
     fun computeSupportedUnits(): List<Pair<DistanceUnit, BigInteger>> {
         val supportedUnits = mutableListOf(Pair(oneUnit, number.oneValue))

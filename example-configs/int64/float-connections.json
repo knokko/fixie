@@ -46,7 +46,14 @@
 		"displayUnit": "Cubic meter",
 		"displacement": "Displacement",
 		"area": "Area",
+		"density": "Density",
 		"createNumberExtensions": true
+	}],
+	"densities": [{
+		"className": "Density",
+		"floatType": "%FLOAT_TYPE%",
+		"volume": "Volume",
+		"createNumberExtensions": false
 	}],
 	"variations": [
 		{

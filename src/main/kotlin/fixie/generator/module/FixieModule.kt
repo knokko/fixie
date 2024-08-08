@@ -3,6 +3,7 @@ package fixie.generator.module
 import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.angle.AngleClass
 import fixie.generator.area.AreaClass
+import fixie.generator.density.DensityClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.number.NumberClass
 import fixie.generator.parser.InvalidConfigException
@@ -21,7 +22,8 @@ class FixieModule(
     val volumes: List<VolumeClass> = emptyList(),
     val displacements: List<DisplacementClass> = emptyList(),
     val speed: List<SpeedClass> = emptyList(),
-    val spins: List<SpinClass> = emptyList()
+    val spins: List<SpinClass> = emptyList(),
+    val densities: List<DensityClass> = emptyList()
 ) {
 
     private inline fun <reified S : QuantityClass, reified T : QuantityClass> resolve(
@@ -65,8 +67,10 @@ class FixieModule(
             throw IllegalArgumentException("Packages should be separated by dots instead of slashes")
         }
 
+        resolve(densities, volumes, { it.volumeClassName }) { density, volume -> density.volume = volume }
         resolve(accelerations, speed, { it.speedClassName }) { acceleration, speed -> acceleration.speed = speed }
         resolve(angles, spins, { it.spinClassName }) { angle, spin -> angle.spinClass = spin }
+        resolve(volumes, densities, { it.densityClassName }) { volume, density -> volume.density = density }
         resolve(volumes, areas, { it.areaClassName }) { volume, area -> volume.area = area }
         resolve(volumes, displacements, { it.displacementClassName }) { volume, displacement -> volume.displacement = displacement }
         resolve(areas, volumes, { it.volumeClassName }) { area, volume -> area.volume = volume }
@@ -83,7 +87,7 @@ class FixieModule(
         val allClassNames = numbers.map { it.className } +
                 displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
                 speed.map { it.className } + accelerations.map { it.className } +
-                angles.map { it.className } + spins.map { it.className }
+                angles.map { it.className } + spins.map { it.className } + densities.map { it.className }
 
         for (className in allClassNames) {
             if (allClassNames.count { it == className } > 1) {

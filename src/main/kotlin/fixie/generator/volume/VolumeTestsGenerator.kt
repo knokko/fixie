@@ -49,7 +49,7 @@ class VolumeTestsGenerator(
 			}
 		}
 
-		// TODO Test multiply with density
+		// TODO Test multiply with density to get mass
 	}
 
 	override fun generateMathFunctionsBody() {

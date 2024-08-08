@@ -45,8 +45,15 @@
 		"floatType": "Float",
 		"displayUnit": "Liter",
 		"displacement": "Displacement",
-		"volume": "Volume",
+		"area": "Area",
+		"density": "Density",
 		"createNumberExtensions": false
+	}],
+	"densities": [{
+		"className": "Density",
+		"floatType": "%FLOAT_TYPE%",
+		"volume": "Volume",
+		"createNumberExtensions": true
 	}],
 	"variations": [
 		{

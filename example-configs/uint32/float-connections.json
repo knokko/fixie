@@ -46,6 +46,12 @@
 		"area": "Area",
 		"createNumberExtensions": false
 	}],
+	"densities": [{
+		"className": "Density",
+		"floatType": "%FLOAT_TYPE%",
+		"volume": "Volume",
+		"createNumberExtensions": true
+	}],
 	"variations": [
 		{
 			"%ONE_VALUE%": [2, 3000, 3e6, 4e9]

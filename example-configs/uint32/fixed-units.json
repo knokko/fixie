@@ -13,6 +13,7 @@
 		"oneUnit": "Millimeter",
 		"displayUnit": "Mile",
 		"speed": "Speed",
+		"volume": "Volume",
 		"createNumberExtensions": false
 	}],
 	"speed": [{
@@ -21,6 +22,20 @@
 		"oneUnit": "Miles per hour",
 		"displayUnit": "Meters per second",
 		"displacement": "Displacement",
+		"createNumberExtensions": true
+	}],
+	"volumes": [{
+		"className": "Volume",
+		"floatType": "Double",
+		"displayUnit": "Liter",
+		"displacement": "Displacement",
+		"density": "Density",
+		"createNumberExtensions": false
+	}],
+	"densities": [{
+		"className": "Density",
+		"number": "Fixed",
+		"volume": "Volume",
 		"createNumberExtensions": true
 	}],
 	"variations": [

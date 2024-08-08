@@ -1,12 +1,20 @@
 {
 	moduleName = "fixed-point",
 	packageName = "fixie",
-	numbers = [{
-		className = "FixDisplacement",
-		internalType = "Int",
-		oneValue = 1e5,
-		checkOverflow = true
-	}],
+	numbers = [
+		{
+			className = "FixDisplacement",
+			internalType = "Int",
+			oneValue = 1e5,
+			checkOverflow = true
+		},
+		{
+			className = "FixDensity",
+			internalType = "UShort",
+			oneValue = 1000,
+			checkOverflow = true
+		}
+	],
 	accelerations = [{
 		className = "Acceleration",
 		floatType = "Float",
@@ -22,12 +30,19 @@
 		allowComparisons = false,
 		spin = "Spin"
 	}],
+	densities = [{
+		className = "Density",
+		number = "FixDensity",
+		volume = "Volume",
+		createNumberExtensions = true
+	}],
 	volumes = [{
 		className = "Volume",
 		floatType = "Double",
 		displayUnit = "Liter",
 		displacement = "Displacement",
 		area = "Area",
+		density = "Density",
 		createNumberExtensions = true
 	}],
 	areas = [{

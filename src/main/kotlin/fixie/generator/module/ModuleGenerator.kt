@@ -8,6 +8,8 @@ import fixie.generator.angle.AngleUnit
 import fixie.generator.area.AreaClassGenerator
 import fixie.generator.area.AreaTestsGenerator
 import fixie.generator.area.AreaUnit
+import fixie.generator.density.DensityClassGenerator
+import fixie.generator.density.DensityTestsGenerator
 import fixie.generator.displacement.DisplacementClassGenerator
 import fixie.generator.displacement.DisplacementTestsGenerator
 import fixie.generator.displacement.DistanceUnit
@@ -83,6 +85,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
     generateQuantityFiles(module.accelerations, ::AccelerationClassGenerator, ::AccelerationTestsGenerator)
     generateQuantityFiles(module.angles, ::AngleClassGenerator, ::AngleTestsGenerator)
     generateQuantityFiles(module.spins, ::SpinClassGenerator, ::SpinTestsGenerator)
+    generateQuantityFiles(module.densities, ::DensityClassGenerator, ::DensityTestsGenerator)
 
     generateMathFile(module.numbers, module.angles, module.packageName, File("$sourceDirectory/ExtraMath.kt"))
 

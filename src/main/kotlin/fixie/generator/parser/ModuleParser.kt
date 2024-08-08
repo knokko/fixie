@@ -10,6 +10,7 @@ import fixie.generator.angle.AngleClass
 import fixie.generator.angle.AngleUnit
 import fixie.generator.area.AreaClass
 import fixie.generator.area.AreaUnit
+import fixie.generator.density.DensityClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.module.FixieModule
@@ -229,6 +230,7 @@ private class ModuleParser(
             displayUnit = requiredUnit(properties, "displayUnit", path, VolumeUnit.entries),
             displacementClassName = optionalString(properties, "displacement", path),
             areaClassName = optionalString(properties, "area", path),
+            densityClassName = optionalString(properties, "density", path),
             createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
     )
 
@@ -272,6 +274,14 @@ private class ModuleParser(
         createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
     )
 
+    private fun loadDensity(properties: GddlMap, path: String) = DensityClass(
+            className = requiredString(properties, "className", "path"),
+            number = optionalNumber(properties, "number", path),
+            floatType = optionalFloatType(properties, "floatType", path),
+            volumeClassName = optionalString(properties, "volume", path),
+            createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
+    )
+
     private fun loadVariation(properties: GddlMap, path: String): Variation {
         val rawMap = mutableMapOf<String, List<String>>()
         for ((key, value) in properties.entries) {
@@ -310,6 +320,7 @@ private class ModuleParser(
         val displacements = mapList(root, "displacements", "(root)", ::loadDisplacement)
         val speed = mapList(root, "speed", "(root)", ::loadSpeed)
         val spins = mapList(root, "spins", "(root)", ::loadSpin)
+        val densities = mapList(root, "densities", "(root)", ::loadDensity)
 
         return listOf(FixieModule(
             moduleName = moduleName,
@@ -321,7 +332,8 @@ private class ModuleParser(
             areas = areas,
             displacements = displacements,
             speed = speed,
-            spins = spins
+            spins = spins,
+            densities = densities
         ))
     }
 }

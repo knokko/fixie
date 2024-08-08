@@ -23,6 +23,20 @@
 		"displacement": "Displacement",
 		"createNumberExtensions": false
 	}],
+	"volumes": [{
+		"className": "Volume",
+		"floatType": "Double",
+		"displayUnit": "Liter",
+		"displacement": "Displacement",
+		"density": "Density",
+		"createNumberExtensions": false
+	}],
+	"densities": [{
+		"className": "Density",
+		"number": "Fixed",
+		"volume": "Volume",
+		"createNumberExtensions": true
+	}],
 	"variations": [
 		{
 			"%OVERFLOW%": [true, false]

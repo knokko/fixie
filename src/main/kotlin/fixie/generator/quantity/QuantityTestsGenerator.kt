@@ -46,7 +46,8 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
     }
 
     protected fun generateFixedNearlyEquals(number: NumberClass, oneUnitName: String) {
-        val toBaseDouble = ".toDouble(${getUnits()[0].enumName}.$oneUnitName)"
+        val baseToDoubleParameters = if (getUnits()[0].enumName.isNotEmpty()) "${getUnits()[0].enumName}.$oneUnitName" else ""
+        val toBaseDouble = ".toDouble($baseToDoubleParameters)"
         val margin = max(0.001, 1.0 / number.oneValue.toDouble())
 
         writer.println()

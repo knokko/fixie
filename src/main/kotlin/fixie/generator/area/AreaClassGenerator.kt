@@ -46,7 +46,6 @@ class AreaClassGenerator(
             writer.println("\toperator fun times(right: ${quantity.displacementClassName}) = " +
                     "${quantity.volumeClassName}.CUBIC_METER * value * right.toDouble(DistanceUnit.METER)")
         }
-        // TODO Test area * displacement
     }
 
     override fun generateCompanionContent() {

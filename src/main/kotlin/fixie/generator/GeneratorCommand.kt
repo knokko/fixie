@@ -46,7 +46,6 @@ fun main(args: Array<String>) {
     val cmd = parser.parse(options, args)
 
     if (cmd.hasOption("help")) {
-        // TODO Finish this
         println("Usage: java -jar fixie.jar [OPTION]... [CONFIG FILE]...")
         println("Generates the code for fixie config file(s)")
         println()

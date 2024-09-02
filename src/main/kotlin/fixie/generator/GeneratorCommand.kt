@@ -9,7 +9,6 @@ import org.apache.commons.cli.Options
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
-import kotlin.math.min
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {

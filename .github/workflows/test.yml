@@ -21,10 +21,20 @@ jobs:
     - name: Setup gradle
       uses: gradle/actions/setup-gradle@v3
     - run: "./gradlew test"
-    - run: "./gradlew shadowJar"
+    - run: "./gradlew proguard"
     - run: |
         shopt -s globstar
-        java -jar build/libs/fixie-all.jar -d ./ -i 1 example-configs/**/*.gddl example-configs/**/*.json
+        java -jar build/libs/fixie-mini.jar -d ./ -i 1 example-configs/**/*.gddl example-configs/**/*.json
     - run: "cp .github/build.gradle.test build.gradle"
     - run: "./gradlew test"
-    - run: "java -jar build/libs/fixie-all.jar -i 2"
+    - run: "java -jar build/libs/fixie-mini.jar -i 2"
+    - uses: actions/upload-artifact@v4
+      if: ${{ matrix.jdk == 17 }}
+      with:
+        name: fixie-original.jar
+        path: build/libs/fixie-all.jar
+    - uses: actions/upload-artifact@v4
+      if: ${{ matrix.jdk == 17 }}
+      with:
+        name: fixie.jar
+        path: build/libs/fixie-mini.jar

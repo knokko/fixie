@@ -13,6 +13,9 @@ import fixie.generator.density.DensityTestsGenerator
 import fixie.generator.displacement.DisplacementClassGenerator
 import fixie.generator.displacement.DisplacementTestsGenerator
 import fixie.generator.displacement.DistanceUnit
+import fixie.generator.mass.MassClassGenerator
+import fixie.generator.mass.MassTestsGenerator
+import fixie.generator.mass.MassUnit
 import fixie.generator.number.NumberClassGenerator
 import fixie.generator.number.NumberTestsGenerator
 import fixie.generator.quantity.QuantityClass
@@ -81,6 +84,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
     generateQuantityFiles(module.displacements, ::DisplacementClassGenerator, ::DisplacementTestsGenerator)
     generateQuantityFiles(module.areas, ::AreaClassGenerator, ::AreaTestsGenerator)
     generateQuantityFiles(module.volumes, ::VolumeClassGenerator, ::VolumeTestsGenerator)
+    generateQuantityFiles(module.masses, ::MassClassGenerator, ::MassTestsGenerator)
     generateQuantityFiles(module.speed, ::SpeedClassGenerator, ::SpeedTestsGenerator)
     generateQuantityFiles(module.accelerations, ::AccelerationClassGenerator, ::AccelerationTestsGenerator)
     generateQuantityFiles(module.angles, ::AngleClassGenerator, ::AngleTestsGenerator)
@@ -100,6 +104,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
     maybeGenerateUnitEnum(module.displacements, "DistanceUnit", ::generateDistanceUnit)
     maybeGenerateUnitEnum(module.areas, "AreaUnit", ::generateAreaUnit)
     maybeGenerateUnitEnum(module.volumes, "VolumeUnit", ::generateVolumeUnit)
+    maybeGenerateUnitEnum(module.masses, "MassUnit", ::generateMassUnit)
     maybeGenerateUnitEnum(module.speed, "SpeedUnit", ::generateSpeedUnit)
     maybeGenerateUnitEnum(module.angles, "AngleUnit", ::generateAngleUnit)
     maybeGenerateUnitEnum(module.spins, "SpinUnit", ::generateSpinUnit)
@@ -160,6 +165,13 @@ private fun generateVolumeUnit(file: File, packageName: String) {
     generateUnitClass(
             file, packageName, VolumeUnit.entries,
             "enum class VolumeUnit(val abbreviation: String, val factor: Double) {"
+    ) { unit -> "\"${unit.abbreviation}\", ${unit.factor}" }
+}
+
+private fun generateMassUnit(file: File, packageName: String) {
+    generateUnitClass(
+        file, packageName, MassUnit.entries,
+        "enum class MassUnit(val abbreviation: String, val factor: Double) {"
     ) { unit -> "\"${unit.abbreviation}\", ${unit.factor}" }
 }
 

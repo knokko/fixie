@@ -30,12 +30,22 @@
 		"displayUnit": "Cubic meter",
 		"displacement": "Displacement",
 		"density": "Density",
+		"mass": "Mass",
 		"createNumberExtensions": true
+	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "Float",
+		"displayUnit": "Ounce",
+		"volume": "Volume",
+		"density": "Density",
+		"createNumberExtensions": false
 	}],
 	"densities": [{
 		"className": "Density",
 		"number": "Fixed",
 		"volume": "Volume",
+		"mass": "Mass",
 		"createNumberExtensions": false
 	}],
 	"variations": [

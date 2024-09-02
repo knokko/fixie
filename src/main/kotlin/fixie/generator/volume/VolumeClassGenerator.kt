@@ -39,7 +39,11 @@ class VolumeClassGenerator(
                 }
             }
         }
-        // TODO Multiply with density to get mass
+
+        if (quantity.mass != null && quantity.density != null) {
+            writer.println()
+            writer.println("\toperator fun times(right: ${quantity.densityClassName}) = ${quantity.massClassName}.KILOGRAM * toDouble(VolumeUnit.LITER) * right.toDouble()")
+        }
     }
 
     override fun generateCompanionContent() {

@@ -4,6 +4,7 @@ import fixie.generator.quantity.HybridQuantityTestsGenerator
 import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 import java.math.BigInteger
+import kotlin.math.max
 
 class DensityTestsGenerator(
 		writer: PrintWriter,
@@ -36,8 +37,9 @@ class DensityTestsGenerator(
 	override fun generateArithmeticBody() {
 		super.generateArithmeticBody()
 
-		if (quantity.volumeClassName != null) {
-			// TODO Test multiply with volume to get mass
+		if (quantity.volumeClassName != null && quantity.massClassName != null) {
+			val margin = if (quantity.number == null) 0.001 else max(0.001, 5.0 / quantity.number.oneValue.toDouble())
+			writer.println("\t\tassertEquals(2.5, (0.5 * ${quantity.className}.KGPL * (5 * ${quantity.volumeClassName}.LITER)).toDouble(MassUnit.KILOGRAM), $margin)")
 		}
 	}
 }

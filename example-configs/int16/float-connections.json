@@ -47,12 +47,22 @@
 		"displacement": "Displacement",
 		"area": "Area",
 		"density": "Density",
+		"mass": "Mass",
+		"createNumberExtensions": false
+	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "Double",
+		"displayUnit": "Pound",
+		"volume": "Volume",
+		"density": "Density",
 		"createNumberExtensions": false
 	}],
 	"densities": [{
 		"className": "Density",
 		"floatType": "%FLOAT_TYPE%",
 		"volume": "Volume",
+		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
 	"variations": [

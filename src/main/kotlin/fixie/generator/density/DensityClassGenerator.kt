@@ -25,8 +25,9 @@ class DensityClassGenerator(
 	override fun generateArithmetic() {
 		super.generateArithmetic()
 
-		if (quantity.volumeClassName != null) {
-			// TODO Multiply with volume to get mass
+		if (quantity.volumeClassName != null && quantity.massClassName != null) {
+			writer.println()
+			writer.println("\toperator fun times(right: ${quantity.volumeClassName}) = ${quantity.massClassName}.KILOGRAM * toDouble() * right.toDouble(VolumeUnit.LITER)")
 		}
 	}
 

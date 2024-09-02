@@ -46,12 +46,22 @@
 		"displayUnit": "Cubic meter",
 		"area": "Area",
 		"density": "Density",
+		"mass": "Mass",
 		"createNumberExtensions": true
+	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "%FLOAT_TYPE%",
+		"displayUnit": "Kilogram",
+		"volume": "Volume",
+		"density": "Density",
+		"createNumberExtensions": false
 	}],
 	"densities": [{
 		"className": "Density",
 		"floatType": "%FLOAT_TYPE%",
 		"volume": "Volume",
+		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
 	"variations": [

@@ -34,7 +34,16 @@
 		className = "Density",
 		number = "FixDensity",
 		volume = "Volume",
+		mass = "Mass",
 		createNumberExtensions = true
+	}],
+	masses = [{
+	    className = "Mass",
+	    floatType = "Double",
+	    displayUnit = "Kilogram",
+	    volume = "Volume",
+	    density = "Density",
+	    createNumberExtensions = true
 	}],
 	volumes = [{
 		className = "Volume",
@@ -43,6 +52,7 @@
 		displacement = "Displacement",
 		area = "Area",
 		density = "Density",
+		mass = "Mass",
 		createNumberExtensions = true
 	}],
 	areas = [{

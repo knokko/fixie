@@ -29,12 +29,22 @@
 		"floatType": "Float",
 		"displayUnit": "Liter",
 		"density": "Density",
+		"mass": "Mass",
 		"createNumberExtensions": false
+	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "Float",
+		"displayUnit": "Gram",
+		"density": "Density",
+		"volume": "Volume",
+		"createNumberExtensions": true
 	}],
 	"densities": [{
 		"className": "Density",
 		"number": "Fixed",
 		"volume": "Volume",
+		"mass": "Mass",
 		"createNumberExtensions": false
 	}],
 	"variations": [

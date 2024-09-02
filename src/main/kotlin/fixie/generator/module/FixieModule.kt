@@ -5,6 +5,7 @@ import fixie.generator.angle.AngleClass
 import fixie.generator.area.AreaClass
 import fixie.generator.density.DensityClass
 import fixie.generator.displacement.DisplacementClass
+import fixie.generator.mass.MassClass
 import fixie.generator.number.NumberClass
 import fixie.generator.parser.InvalidConfigException
 import fixie.generator.quantity.QuantityClass
@@ -20,6 +21,7 @@ class FixieModule(
     val angles: List<AngleClass> = emptyList(),
     val areas: List<AreaClass> = emptyList(),
     val volumes: List<VolumeClass> = emptyList(),
+    val masses: List<MassClass> = emptyList(),
     val displacements: List<DisplacementClass> = emptyList(),
     val speed: List<SpeedClass> = emptyList(),
     val spins: List<SpinClass> = emptyList(),
@@ -67,9 +69,13 @@ class FixieModule(
             throw IllegalArgumentException("Packages should be separated by dots instead of slashes")
         }
 
+        resolve(densities, masses, { it.massClassName }) { density, mass -> density.mass = mass }
         resolve(densities, volumes, { it.volumeClassName }) { density, volume -> density.volume = volume }
         resolve(accelerations, speed, { it.speedClassName }) { acceleration, speed -> acceleration.speed = speed }
         resolve(angles, spins, { it.spinClassName }) { angle, spin -> angle.spinClass = spin }
+        resolve(masses, densities, { it.densityClassName }) { mass, density -> mass.density = density }
+        resolve(masses, volumes, { it.volumeClassName }) { mass, volume -> mass.volume = volume }
+        resolve(volumes, masses, { it.massClassName }) { volume, mass -> volume.mass = mass }
         resolve(volumes, densities, { it.densityClassName }) { volume, density -> volume.density = density }
         resolve(volumes, areas, { it.areaClassName }) { volume, area -> volume.area = area }
         resolve(volumes, displacements, { it.displacementClassName }) { volume, displacement -> volume.displacement = displacement }
@@ -86,7 +92,7 @@ class FixieModule(
 
         val allClassNames = numbers.map { it.className } +
                 displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
-                speed.map { it.className } + accelerations.map { it.className } +
+                speed.map { it.className } + accelerations.map { it.className } + masses.map { it.className } +
                 angles.map { it.className } + spins.map { it.className } + densities.map { it.className }
 
         for (className in allClassNames) {

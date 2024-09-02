@@ -49,6 +49,14 @@
 		"density": "Density",
 		"createNumberExtensions": true
 	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "Float",
+		"displayUnit": "Ton",
+		"volume": "Volume",
+		"density": "Density",
+		"createNumberExtensions": true
+	}],
 	"densities": [{
 		"className": "Density",
 		"floatType": "%FLOAT_TYPE%",

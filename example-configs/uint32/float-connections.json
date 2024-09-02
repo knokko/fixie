@@ -46,10 +46,19 @@
 		"area": "Area",
 		"createNumberExtensions": false
 	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "Double",
+		"displayUnit": "Milligram",
+		"volume": "Volume",
+		"density": "Density",
+		"createNumberExtensions": true
+	}],
 	"densities": [{
 		"className": "Density",
 		"floatType": "%FLOAT_TYPE%",
 		"volume": "Volume",
+		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
 	"variations": [

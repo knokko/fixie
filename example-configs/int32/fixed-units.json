@@ -30,12 +30,20 @@
 		"displayUnit": "Liter",
 		"density": "Density",
 		"displacement": "Displacement",
+		"mass": "Mass",
+		"createNumberExtensions": true
+	}],
+	"masses": [{
+		"className": "Mass",
+		"floatType": "Float",
+		"displayUnit": "GRAM",
 		"createNumberExtensions": true
 	}],
 	"densities": [{
 		"className": "Density",
 		"number": "Fixed",
 		"volume": "Volume",
+		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
 	"variations": [

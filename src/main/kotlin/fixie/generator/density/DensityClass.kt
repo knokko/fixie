@@ -1,5 +1,6 @@
 package fixie.generator.density
 
+import fixie.generator.mass.MassClass
 import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
 import fixie.generator.quantity.HybridQuantityClass
@@ -10,9 +11,10 @@ class DensityClass(
 		number: NumberClass?,
 		floatType: FloatType?,
 		val volumeClassName: String?,
-		// TODO mass class
+		val massClassName: String?,
 		createNumberExtensions: Boolean
 ) : HybridQuantityClass(className, number, floatType, createNumberExtensions) {
 
 	var volume: VolumeClass? = null
+	var mass: MassClass? = null
 }

@@ -49,7 +49,12 @@ class VolumeTestsGenerator(
 			}
 		}
 
-		// TODO Test multiply with density to get mass
+		quantity.density?.let { density ->
+			val canRepresent10 = density.number == null || density.number.internalType.getMaxValue() / density.number.oneValue > BigInteger.TEN
+			if (quantity.mass != null && canRepresent10) {
+				writer.println("\t\tassertEquals(17.0, (2 * ${quantity.className}.CUBIC_METER * (8.5 * ${density.className}.KGPL)).toDouble(MassUnit.TON))")
+			}
+		}
 	}
 
 	override fun generateMathFunctionsBody() {

@@ -62,7 +62,6 @@ internal class DisplacementClassGenerator(
                 writer.println("\toperator fun times(right: ${area.className}) = " +
                         "${volume.className}.CUBIC_METER * this.toDouble(DistanceUnit.METER) * right.toDouble(AreaUnit.SQUARE_METER)")
             }
-            // TODO Test displacement * area
         }
         quantity.speed?.let { speed ->
             if (speed.computeSupportedUnits().find { it.first == SpeedUnit.METERS_PER_SECOND } != null) {

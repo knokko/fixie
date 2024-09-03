@@ -62,6 +62,9 @@ internal class DisplacementTestsGenerator(
 
         if (quantity.areaClassName != null && meterPair != null && meterPair.second > BigInteger.valueOf(50)) {
             writer.println("\t\tassertEquals(0.8, (0.8 * ${quantity.className}.METER * ${quantity.className}.METER).toDouble(AreaUnit.SQUARE_METER), 0.1)")
+            if (quantity.volumeClassName != null) {
+                writer.println("\t\tassertEquals(2.4, (0.8 * ${quantity.className}.METER * (3 * ${quantity.areaClassName}.SQUARE_METER)).toDouble(VolumeUnit.CUBIC_METER), 0.1)")
+            }
         }
     }
 }

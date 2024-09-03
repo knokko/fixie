@@ -144,11 +144,17 @@ value class FixedNumber private constructor(val raw: Int) : Comparable<FixedNumb
 
 	override operator fun compareTo(other: FixedNumber) = this.raw.compareTo(other.raw)
 
-	operator fun compareTo(other: Int) = if (other < -65536) 1 else if (other > 65535) -1 else this.compareTo(from(other))
+	operator fun compareTo(other: Int) =
+		if (other < -65536) 1 else if (other > 65535) -1 else this.compareTo(from(other))
 
-	operator fun compareTo(other: Long) = if (other < -65536) 1 else if (other > 65535) -1 else this.compareTo(from(other))
-	operator fun compareTo(other: Float) = if (other < -65536.0f) 1 else if (other > 65536.0f) -1 else this.compareTo(from(other))
-	operator fun compareTo(other: Double) = if (other < -65536.0) 1 else if (other > 65535.99996948242) -1 else this.compareTo(from(other))
+	operator fun compareTo(other: Long) =
+		if (other < -65536) 1 else if (other > 65535) -1 else this.compareTo(from(other))
+
+	operator fun compareTo(other: Float) =
+		if (other < -65536.0f) 1 else if (other > 65536.0f) -1 else this.compareTo(from(other))
+
+	operator fun compareTo(other: Double) =
+		if (other < -65536.0) 1 else if (other > 65535.99996948242) -1 else this.compareTo(from(other))
 
 	companion object {
 
@@ -192,7 +198,10 @@ value class FixedNumber private constructor(val raw: Int) : Comparable<FixedNumb
 
 		constructor(size: Int) : this(IntArray(size))
 
-		constructor(size: Int, initializer: (Int) -> FixedNumber) : this(IntArray(size) { index -> initializer(index).raw })
+		constructor(
+			size: Int,
+			initializer: (Int) -> FixedNumber
+		) : this(IntArray(size) { index -> initializer(index).raw })
 
 		val size: Int
 			get() = raw.size
@@ -267,7 +276,7 @@ operator fun Double.compareTo(right: FixedNumber) = FixedNumber.from(this).compa
 
 @Throws(FixedPointException::class)
 fun abs(value: FixedNumber) = if (value.raw != Int.MIN_VALUE) FixedNumber.raw(kotlin.math.abs(value.raw))
-		else throw FixedPointException("Can't represent abs of min value")
+else throw FixedPointException("Can't represent abs of min value")
 
 fun min(a: FixedNumber, b: FixedNumber) = FixedNumber.raw(kotlin.math.min(a.raw, b.raw))
 

@@ -1,7 +1,7 @@
 package fixie.generator.parser
 
 internal class SpecificVariation(
-		val map: Map<String, String>
+	val map: Map<String, String>
 ) {
 
 	init {

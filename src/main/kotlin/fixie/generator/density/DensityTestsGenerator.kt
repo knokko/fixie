@@ -6,14 +6,15 @@ import java.math.BigInteger
 import kotlin.math.max
 
 class DensityTestsGenerator(
-		writer: PrintWriter,
-		quantity: DensityClass,
-		packageName: String
+	writer: PrintWriter,
+	quantity: DensityClass,
+	packageName: String
 ) : HybridQuantityTestsGenerator<DensityClass>(writer, quantity, packageName) {
 
 	override fun generateToStringBody() {
 		if (quantity.number == null || (quantity.number.oneValue > BigInteger.TEN &&
-					quantity.number.oneValue < quantity.number.internalType.getMaxValue() / BigInteger.valueOf(3))) {
+					quantity.number.oneValue < quantity.number.internalType.getMaxValue() / BigInteger.valueOf(3))
+		) {
 			writer.println("\t\tassertEquals(\"2.3kg/l\", (${quantity.className}.KGPL * 2.3).toString())")
 		} else {
 			writer.println("\t\tval string = (${quantity.className}.KGPL / 2).toString()")

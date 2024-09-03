@@ -1,8 +1,8 @@
 package fixie.generator.parser
 
 internal class Variation(
-		path: String,
-		val map: Map<String, List<String>>
+	path: String,
+	val map: Map<String, List<String>>
 ) {
 	init {
 		var length = -1

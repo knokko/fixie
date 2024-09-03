@@ -4,9 +4,9 @@ import fixie.generator.quantity.HybridQuantityClassGenerator
 import java.io.PrintWriter
 
 class DensityClassGenerator(
-		writer: PrintWriter,
-		quantity: DensityClass,
-		packageName: String
+	writer: PrintWriter,
+	quantity: DensityClass,
+	packageName: String
 ) : HybridQuantityClassGenerator<DensityClass>(writer, quantity, packageName) {
 
 	override fun generateToDoubleComment() {

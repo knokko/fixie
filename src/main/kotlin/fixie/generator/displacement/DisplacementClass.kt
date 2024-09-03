@@ -10,59 +10,62 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 class DisplacementClass(
-    className: String,
-    number: NumberClass,
-    val speedClassName: String?,
-    val areaClassName: String?,
-    val volumeClassName: String?,
-    val oneUnit: DistanceUnit,
-    val displayUnit: DistanceUnit,
-    createNumberExtensions: Boolean
+	className: String,
+	number: NumberClass,
+	val speedClassName: String?,
+	val areaClassName: String?,
+	val volumeClassName: String?,
+	val oneUnit: DistanceUnit,
+	val displayUnit: DistanceUnit,
+	createNumberExtensions: Boolean
 ) : FixedQuantityClass(className, number, createNumberExtensions) {
 
-    var speed: SpeedClass? = null
-    var area: AreaClass? = null
-    var volume: VolumeClass? = null
+	var speed: SpeedClass? = null
+	var area: AreaClass? = null
+	var volume: VolumeClass? = null
 
-    fun computeSupportedUnits(): List<Pair<DistanceUnit, BigInteger>> {
-        val supportedUnits = mutableListOf(Pair(oneUnit, number.oneValue))
-        for (unit in DistanceUnit.entries.reversed()) {
-            if (unit != this.oneUnit) {
-                val conversionFactor = if (this.oneUnit.isMetric == unit.isMetric) 1.0
-                else if (unit.isMetric) 1.609344 else 1.0 / 1.609344
+	fun computeSupportedUnits(): List<Pair<DistanceUnit, BigInteger>> {
+		val supportedUnits = mutableListOf(Pair(oneUnit, number.oneValue))
+		for (unit in DistanceUnit.entries.reversed()) {
+			if (unit != this.oneUnit) {
+				val conversionFactor = if (this.oneUnit.isMetric == unit.isMetric) 1.0
+				else if (unit.isMetric) 1.609344 else 1.0 / 1.609344
 
-                val precision = 100
-                val divisor = BigDecimal.valueOf(conversionFactor).setScale(precision) *
-                        BigDecimal.valueOf(unit.divisor, precision) / BigDecimal.valueOf(this.oneUnit.divisor, precision)
-                val rawValue = determineRawValue(divisor)
-                if (rawValue != null) supportedUnits.add(Pair(unit, rawValue))
-            }
-        }
+				val precision = 100
+				val divisor = BigDecimal.valueOf(conversionFactor).setScale(precision) *
+						BigDecimal.valueOf(unit.divisor, precision) / BigDecimal.valueOf(
+					this.oneUnit.divisor,
+					precision
+				)
+				val rawValue = determineRawValue(divisor)
+				if (rawValue != null) supportedUnits.add(Pair(unit, rawValue))
+			}
+		}
 
-        supportedUnits.removeIf { (own, ownValue) ->
-            if (own == oneUnit || own == displayUnit) return@removeIf false
+		supportedUnits.removeIf { (own, ownValue) ->
+			if (own == oneUnit || own == displayUnit) return@removeIf false
 
-            for ((other, otherValue) in supportedUnits) {
-                if (own != other && ownValue.subtract(otherValue) == BigInteger.ZERO) return@removeIf true
-            }
+			for ((other, otherValue) in supportedUnits) {
+				if (own != other && ownValue.subtract(otherValue) == BigInteger.ZERO) return@removeIf true
+			}
 
-            return@removeIf false
-        }
+			return@removeIf false
+		}
 
-        return supportedUnits
-    }
+		return supportedUnits
+	}
 
-    override fun getNumberOfUnits() = DistanceUnit.entries.size
+	override fun getNumberOfUnits() = DistanceUnit.entries.size
 
-    override fun getFixedUnits() = computeSupportedUnits().map { (unit, rawValue) ->
-        QuantityUnit(
-            name = unit.name,
-            enumName = "DistanceUnit",
-            suffix = unit.abbreviation,
-            extensionName = unit.abbreviation,
-            minDelta = determineFixedUnitMinDelta(rawValue, number),
-            maxAmount = determineFixedUnitMaxAmount(rawValue, number),
-            relativeSize = rawValue.toDouble() / number.oneValue.toDouble()
-        )
-    }
+	override fun getFixedUnits() = computeSupportedUnits().map { (unit, rawValue) ->
+		QuantityUnit(
+			name = unit.name,
+			enumName = "DistanceUnit",
+			suffix = unit.abbreviation,
+			extensionName = unit.abbreviation,
+			minDelta = determineFixedUnitMinDelta(rawValue, number),
+			maxAmount = determineFixedUnitMaxAmount(rawValue, number),
+			relativeSize = rawValue.toDouble() / number.oneValue.toDouble()
+		)
+	}
 }

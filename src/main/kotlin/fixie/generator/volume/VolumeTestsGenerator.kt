@@ -6,9 +6,9 @@ import java.io.PrintWriter
 import java.math.BigInteger
 
 class VolumeTestsGenerator(
-		writer: PrintWriter,
-		quantity: VolumeClass,
-		packageName: String
+	writer: PrintWriter,
+	quantity: VolumeClass,
+	packageName: String
 ) : FloatQuantityTestsGenerator<VolumeClass>(writer, quantity, packageName) {
 
 	override fun generateToDoubleBody() {
@@ -45,7 +45,8 @@ class VolumeTestsGenerator(
 		}
 
 		quantity.density?.let { density ->
-			val canRepresent10 = density.number == null || density.number.internalType.getMaxValue() / density.number.oneValue > BigInteger.TEN
+			val canRepresent10 =
+				density.number == null || density.number.internalType.getMaxValue() / density.number.oneValue > BigInteger.TEN
 			if (quantity.mass != null && canRepresent10) {
 				writer.println("\t\tassertEquals(17.0, (2 * ${quantity.className}.CUBIC_METER * (8.5 * ${density.className}.KGPL)).toDouble(MassUnit.TON))")
 			}

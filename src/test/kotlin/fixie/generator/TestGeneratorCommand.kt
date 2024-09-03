@@ -32,7 +32,7 @@ class TestGeneratorCommand {
 		scanner.close()
 
 		assertNotNull(remainingLines.find { line -> line.contains(" -d, --directory=path/to/directory ") })
-		assertNotNull(remainingLines.find { line -> line.contains( "When a directory with the same as ") })
+		assertNotNull(remainingLines.find { line -> line.contains("When a directory with the same as ") })
 	}
 
 	@Test

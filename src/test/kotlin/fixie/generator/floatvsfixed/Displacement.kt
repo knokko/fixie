@@ -4,7 +4,7 @@ package fixie.generator.floatvsfixed
 @JvmInline
 value class Displacement internal constructor(val value: FixedNumber) : Comparable<Displacement> {
 
-	fun toDouble(unit: DistanceUnit) = when(unit) {
+	fun toDouble(unit: DistanceUnit) = when (unit) {
 		DistanceUnit.PICOMETER -> value.toDouble() * 1.0E12
 		DistanceUnit.NANOMETER -> value.toDouble() * 1.0E9
 		DistanceUnit.MICROMETER -> value.toDouble() * 1000000.0

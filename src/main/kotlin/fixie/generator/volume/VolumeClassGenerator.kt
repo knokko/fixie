@@ -5,53 +5,57 @@ import fixie.generator.quantity.FloatQuantityClassGenerator
 import java.io.PrintWriter
 
 class VolumeClassGenerator(
-        writer: PrintWriter,
-        volume: VolumeClass,
-        packageName: String
+	writer: PrintWriter,
+	volume: VolumeClass,
+	packageName: String
 ) : FloatQuantityClassGenerator<VolumeClass>(writer, volume, packageName) {
 
-    override fun generateToString() {
-        writer.println()
-        writer.println("\tfun toString(unit: VolumeUnit) = String.format(\"%.3f%s\", toDouble(unit), unit.abbreviation)")
-        writer.println()
-        writer.println("\toverride fun toString() = toString(VolumeUnit.${quantity.displayUnit})")
-    }
+	override fun generateToString() {
+		writer.println()
+		writer.println("\tfun toString(unit: VolumeUnit) = String.format(\"%.3f%s\", toDouble(unit), unit.abbreviation)")
+		writer.println()
+		writer.println("\toverride fun toString() = toString(VolumeUnit.${quantity.displayUnit})")
+	}
 
-    override fun generateArithmetic() {
-        super.generateArithmetic()
+	override fun generateArithmetic() {
+		super.generateArithmetic()
 
-        quantity.displacement?.let {displacement ->
-            quantity.area?.let { area ->
-                writer.println()
-                writer.println("\toperator fun div(right: ${displacement.className}) = " +
-                        "${area.className}.SQUARE_METER * value / right.toDouble(DistanceUnit.METER)")
+		quantity.displacement?.let { displacement ->
+			quantity.area?.let { area ->
+				writer.println()
+				writer.println(
+					"\toperator fun div(right: ${displacement.className}) = " +
+							"${area.className}.SQUARE_METER * value / right.toDouble(DistanceUnit.METER)"
+				)
 
-                if (displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER } != null) {
-                    writer.println()
-                    writer.println("\toperator fun div(right: ${area.className}) = " +
-                            "${displacement.className}.METER * (value / right.toDouble(AreaUnit.SQUARE_METER))")
-                }
-            }
-        }
+				if (displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER } != null) {
+					writer.println()
+					writer.println(
+						"\toperator fun div(right: ${area.className}) = " +
+								"${displacement.className}.METER * (value / right.toDouble(AreaUnit.SQUARE_METER))"
+					)
+				}
+			}
+		}
 
-        if (quantity.mass != null && quantity.density != null) {
-            writer.println()
-            writer.println("\toperator fun times(right: ${quantity.densityClassName}) = ${quantity.massClassName}.KILOGRAM * toDouble(VolumeUnit.LITER) * right.toDouble()")
-        }
-    }
+		if (quantity.mass != null && quantity.density != null) {
+			writer.println()
+			writer.println("\toperator fun times(right: ${quantity.densityClassName}) = ${quantity.massClassName}.KILOGRAM * toDouble(VolumeUnit.LITER) * right.toDouble()")
+		}
+	}
 
-    override fun generateCompanionContent() {
-        val suffix = if (quantity.floatType.numBytes == 4) "f" else ""
-        for (unit in VolumeUnit.entries) {
-            writer.println("\t\tval ${unit.name} = ${quantity.className}(${unit.factor}$suffix)")
-        }
-    }
+	override fun generateCompanionContent() {
+		val suffix = if (quantity.floatType.numBytes == 4) "f" else ""
+		for (unit in VolumeUnit.entries) {
+			writer.println("\t\tval ${unit.name} = ${quantity.className}(${unit.factor}$suffix)")
+		}
+	}
 
-    override fun generateNumberUnitExtensionFunctions(typeName: String) {
-        writer.println()
-        for (unit in VolumeUnit.entries) {
-            writer.println("val $typeName.${unit.abbreviation.replace("^", "")}")
-            writer.println("\tget() = ${quantity.className}.${unit.name} * this")
-        }
-    }
+	override fun generateNumberUnitExtensionFunctions(typeName: String) {
+		writer.println()
+		for (unit in VolumeUnit.entries) {
+			writer.println("val $typeName.${unit.abbreviation.replace("^", "")}")
+			writer.println("\tget() = ${quantity.className}.${unit.name} * this")
+		}
+	}
 }

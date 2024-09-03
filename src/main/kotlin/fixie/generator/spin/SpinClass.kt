@@ -16,8 +16,10 @@ class SpinClass(
 
 	var angle: AngleClass? = null
 
-	override fun getSupportedUnits() = SpinUnit.entries.map { QuantityUnit(
+	override fun getSupportedUnits() = SpinUnit.entries.map {
+		QuantityUnit(
 			it.name, "SpinUnit", it.suffix, it.extensionName,
-		0.001, 1e6,  oneUnit.angleMax / it.angleMax
-	) }
+			0.001, 1e6, oneUnit.angleMax / it.angleMax
+		)
+	}
 }

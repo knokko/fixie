@@ -14,7 +14,7 @@ internal class SpeedTestsGenerator(
 ) {
 
 	private fun shouldTest(requiredMaxMeter: Long, requiredMaxSpeed: Long): Boolean {
-		quantity.displacementClass?.let { displacement ->
+		quantity.displacement?.let { displacement ->
 			val meterPair = displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER }
 			if (meterPair != null) {
 				val maxMeterValue = displacement.number.internalType.getMaxValue() / meterPair.second
@@ -70,7 +70,7 @@ internal class SpeedTestsGenerator(
 			val isSpeedAccurate = quantity.number == null || quantity.number.oneValue > BigInteger.TEN
 			val speedMargin = if (isSpeedAccurate) 0.01 else 5.0
 
-			quantity.displacementClass?.let { displacement ->
+			quantity.displacement?.let { displacement ->
 				val meterPair = displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER }!!
 				val isDisplacementAccurate = meterPair.second > BigInteger.valueOf(100)
 				var margin = speedMargin
@@ -81,7 +81,7 @@ internal class SpeedTestsGenerator(
 					writer.println("\t\tassertEquals(20.0, (10 * ${quantity.className}.KILOMETERS_PER_HOUR * 2.hours).toDouble(DistanceUnit.KILOMETER), $margin)")
 				}
 			}
-			if (quantity.accelerationClass != null) {
+			if (quantity.acceleration != null) {
 				writer.println("\t\tassertEquals(0.5, (${quantity.className}.METERS_PER_SECOND / 2.seconds).toDouble(), ${speedMargin / 40})")
 			}
 		}

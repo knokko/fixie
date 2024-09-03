@@ -25,8 +25,8 @@ class SpeedClass(
 	createNumberExtensions: Boolean
 ) : HybridQuantityClass(className, number, floatType, createNumberExtensions) {
 
-	var displacementClass: DisplacementClass? = null // TODO Rename to displacement and acceleration
-	var accelerationClass: AccelerationClass? = null
+	var displacement: DisplacementClass? = null
+	var acceleration: AccelerationClass? = null
 	var mass: MassClass? = null
 	var momentum: MomentumClass? = null
 

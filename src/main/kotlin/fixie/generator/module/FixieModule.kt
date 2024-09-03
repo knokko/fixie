@@ -99,10 +99,10 @@ class FixieModule(
 		resolve(speed, momenta, { it.momentumClassName }) { speed, momentum -> speed.momentum = momentum}
 		resolve(speed, masses, { it.massClassName }) { speed, mass -> speed.mass = mass }
 		resolve(speed, displacements, { it.displacementClassName }) { speed, displacement ->
-			speed.displacementClass = displacement
+			speed.displacement = displacement
 		}
 		resolve(speed, accelerations, { it.accelerationClassName }) { speed, acceleration ->
-			speed.accelerationClass = acceleration
+			speed.acceleration = acceleration
 		}
 		resolve(spins, angles, { it.angleClassName }) { spin, angle -> spin.angle = angle }
 

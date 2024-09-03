@@ -11,7 +11,7 @@ internal class SpeedClassGenerator(
 	packageName: String
 ) : HybridQuantityClassGenerator<SpeedClass>(writer, speed, packageName) {
 
-	override fun getImports() = super.getImports() + if (generateTimesDuration() || quantity.accelerationClass != null) {
+	override fun getImports() = super.getImports() + if (generateTimesDuration() || quantity.acceleration != null) {
 		arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
 	} else emptyArray()
 
@@ -25,7 +25,7 @@ internal class SpeedClassGenerator(
 	}
 
 	private fun generateTimesDuration(): Boolean {
-		quantity.displacementClass?.let { displacement ->
+		quantity.displacement?.let { displacement ->
 			return displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER } != null
 		}
 		return false
@@ -36,14 +36,14 @@ internal class SpeedClassGenerator(
 
 		if (generateTimesDuration()) {
 			writer.println()
-			if (quantity.displacementClass!!.number.checkOverflow) writer.println("\t@Throws(FixedPointException::class)")
+			if (quantity.displacement!!.number.checkOverflow) writer.println("\t@Throws(FixedPointException::class)")
 			writer.println(
 				"\toperator fun times(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * " +
 						"${quantity.displacementClassName}.METER * right.toDouble(DurationUnit.SECONDS)"
 			)
 		}
 
-		quantity.accelerationClass?.let { acceleration ->
+		quantity.acceleration?.let { acceleration ->
 			writer.println()
 			writer.println(
 				"\toperator fun div(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * " +
@@ -93,7 +93,7 @@ internal class SpeedClassGenerator(
 
 		if (generateTimesDuration()) {
 			writer.println()
-			if (quantity.displacementClass!!.number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
+			if (quantity.displacement!!.number.checkOverflow) writer.println("@Throws(FixedPointException::class)")
 			writer.println("operator fun Duration.times(right: ${quantity.className}) = right * this")
 		}
 	}

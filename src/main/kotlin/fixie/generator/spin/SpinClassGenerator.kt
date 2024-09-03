@@ -70,7 +70,7 @@ class SpinClassGenerator(
     override fun generateNumberUnitExtensionFunctions(typeName: String) {
         for (unit in SpinUnit.entries) {
             writer.println()
-            writer.println("val $typeName.${unit.abbreviation.replace('/', 'p')}")
+            writer.println("val $typeName.${unit.extensionName}")
             writer.println("\tget() = ${quantity.className}.$unit * this")
         }
     }

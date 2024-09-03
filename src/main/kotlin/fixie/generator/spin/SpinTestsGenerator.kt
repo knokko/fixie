@@ -18,7 +18,7 @@ class SpinTestsGenerator(
     } else emptyArray()
 
     override fun getUnits() = SpinUnit.entries.map { QuantityUnit(
-            it.name, "SpinUnit", it.suffix, it.abbreviation, 0.001, 1e6
+            it.name, "SpinUnit", it.suffix, it.extensionName, 0.001, 1e6
     ) }
 
     override fun generateToDoubleBody() {

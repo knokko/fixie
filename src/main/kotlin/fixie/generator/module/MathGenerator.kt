@@ -19,9 +19,9 @@ private fun subtractExactUnsigned(type: IntType) = listOf(
 private fun exactSigned(type: IntType, functionName: String, operator: Char) = listOf(
         "@Throws(ArithmeticException::class)",
         "fun ${functionName}Exact(left: $type, right: $type): $type {",
-        "    val intResult = left.toInt() $operator right.toInt()",
-        "    if (intResult < $type.MIN_VALUE || intResult > $type.MAX_VALUE) throw ArithmeticException()",
-        "    return intResult.to$type()",
+        "\tval intResult = left.toInt() $operator right.toInt()",
+        "\tif (intResult < $type.MIN_VALUE || intResult > $type.MAX_VALUE) throw ArithmeticException()",
+        "\treturn intResult.to$type()",
         "}"
 )
 
@@ -54,11 +54,11 @@ private fun multiplyExactSignedWithULong(numBytes: Int): List<String> {
     return listOf(
             "@Throws(ArithmeticException::class)",
             "fun multiplyExact(left: $signedType, right: ULong): ULong {",
-            "    if (left < $leftZero) throw ArithmeticException()",
-            "    if (left == $leftZero || right == 0uL) return 0uL",
-            "    val result = left.toU$signedType() * right",
-            "    if (result / left.toU$signedType() != right) throw ArithmeticException()",
-            "    return result",
+            "\tif (left < $leftZero) throw ArithmeticException()",
+            "\tif (left == $leftZero || right == 0uL) return 0uL",
+            "\tval result = left.toU$signedType() * right",
+            "\tif (result / left.toU$signedType() != right) throw ArithmeticException()",
+            "\treturn result",
             "}"
     )
 }
@@ -66,33 +66,33 @@ private fun multiplyExactSignedWithULong(numBytes: Int): List<String> {
 private fun multiplyExactULongWithULong() = listOf(
         "@Throws(ArithmeticException::class)",
         "fun multiplyExact(left: ULong, right: ULong): ULong {",
-        "    if (left == 0uL || right == 0uL) return 0uL",
-        "    val result = left * right",
-        "    if (result / left != right) throw ArithmeticException()",
-        "    return result",
+        "\tif (left == 0uL || right == 0uL) return 0uL",
+        "\tval result = left * right",
+        "\tif (result / left != right) throw ArithmeticException()",
+        "\treturn result",
         "}"
 )
 
 private fun multiplyHigh() = listOf(
         "fun multiplyHigh(x: ULong, y: ULong): ULong {",
-        "    // Ripped from Math.multiplyHigh",
-        "    val x1 = x shr 32",
-        "    val y1 = y shr 32",
-        "    val x2 = x and 0xFFFFFFFFuL",
-        "    val y2 = y and 0xFFFFFFFFuL",
-        "    val a = x1 * y1",
-        "    val b = x2 * y2",
-        "    val c = (x1 + x2) * (y1 + y2)",
-        "    val k = c - a - b",
-        "    return ((b shr 32) + k shr 32) + a",
+        "\t// Ripped from Math.multiplyHigh",
+        "\tval x1 = x shr 32",
+        "\tval y1 = y shr 32",
+        "\tval x2 = x and 0xFFFFFFFFuL",
+        "\tval y2 = y and 0xFFFFFFFFuL",
+        "\tval a = x1 * y1",
+        "\tval b = x2 * y2",
+        "\tval c = (x1 + x2) * (y1 + y2)",
+        "\tval k = c - a - b",
+        "\treturn ((b shr 32) + k shr 32) + a",
         "}"
 )
 
 private fun toExact(type: IntType, otherType: String, minCondition: String) = listOf(
         "@Throws(ArithmeticException::class)",
         "fun to${type}Exact(value: $otherType): $type {",
-        "    if (${minCondition}value > $type.MAX_VALUE.to$otherType()) throw ArithmeticException(\"Can't convert \$value to $type\")",
-        "    return value.to$type()",
+        "\tif (${minCondition}value > $type.MAX_VALUE.to$otherType()) throw ArithmeticException(\"Can't convert \$value to $type\")",
+        "\treturn value.to$type()",
         "}"
 )
 
@@ -100,21 +100,24 @@ private fun toSignedExact(type: IntType, otherType: String) = toExact(type, othe
 
 private fun uLongToBigInteger() = listOf(
         "fun uLongToBigInteger(value: ULong): BigInteger {",
-        "    val longValue = value.toLong()",
-        "    return if (longValue >= 0) BigInteger.valueOf(longValue)",
-        "    else BigInteger.valueOf(longValue).add(-BigInteger.valueOf(Long.MIN_VALUE).multiply(BigInteger.TWO))",
+        "\tval longValue = value.toLong()",
+        "\treturn if (longValue >= 0) BigInteger.valueOf(longValue)",
+        "\telse BigInteger.valueOf(longValue).add(-BigInteger.valueOf(Long.MIN_VALUE).multiply(BigInteger.TWO))",
         "}"
 )
 
 private fun bigIntegerToULong() = listOf(
         "@Throws(ArithmeticException::class)",
         "fun bigIntegerToULong(value: BigInteger, checkOverflow: Boolean): ULong {",
-        "    if (checkOverflow && (value.signum() == -1 || value >= BigInteger.TWO.pow(64))) throw ArithmeticException()",
-        "    return value.toLong().toULong()",
+        "\tif (checkOverflow && (value.signum() == -1 || value >= BigInteger.TWO.pow(64))) throw ArithmeticException()",
+        "\treturn value.toLong().toULong()",
         "}"
 )
 
-internal fun generateMathFile(numbers: List<NumberClass>, angles: List<AngleClass>, packageName: String, file: File) {
+internal fun generateMathFile(
+    numbers: List<NumberClass>, angles: List<AngleClass>, packageName: String,
+    file: File, createPrintWriter: (File) -> PrintWriter
+) {
     val functions = mutableSetOf<List<String>>()
     for (number in numbers) {
         if (number.checkOverflow) {
@@ -167,7 +170,7 @@ internal fun generateMathFile(numbers: List<NumberClass>, angles: List<AngleClas
     }
 
     if (functions.isNotEmpty()) {
-        val writer = PrintWriter(file)
+        val writer = createPrintWriter(file)
         writer.println("package $packageName")
         if (numbers.find {
             !it.internalType.signed && it.internalType.numBytes == 8

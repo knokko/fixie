@@ -9,6 +9,7 @@ import org.apache.commons.cli.Options
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
+import java.lang.Integer.parseInt
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -19,6 +20,12 @@ fun main(args: Array<String>) {
             .desc("The directory where the module(s) should be generated, defaults to the parent directory of the config file")
             .hasArg()
             .type(File::class.java)
+            .build()
+    val spacesOption = Option.builder("s")
+            .longOpt("spaces")
+            .desc("Use N spaces for indentation")
+            .hasArg()
+            .type(Int::class.java)
             .build()
     val internalOption = Option.builder("i")
             .longOpt("internal")
@@ -35,11 +42,10 @@ fun main(args: Array<String>) {
             .desc("When a directory with the same as the module already exists, it will be deleted")
             .build()
     options.addOption(directoryOption)
+    options.addOption(spacesOption)
     options.addOption(internalOption)
     options.addOption(helpOption)
     options.addOption(clearExistingOption)
-
-    // TODO Spaces option
 
     val parser = DefaultParser()
     val cmd = parser.parse(options, args)
@@ -64,7 +70,7 @@ fun main(args: Array<String>) {
                 if (nextOffset >= option.description.length) {
                     nextOffset = option.description.length
                 } else {
-                    while (option.description[nextOffset] != ' ') nextOffset -= 1;
+                    while (option.description[nextOffset] != ' ') nextOffset -= 1
                     nextOffset += 1
                 }
                 description.add(option.description.substring(descriptionOffset until nextOffset))
@@ -79,6 +85,7 @@ fun main(args: Array<String>) {
         }
 
         printOption(directoryOption, "=path/to/directory")
+        printOption(spacesOption, "=4")
         printOption(internalOption, "=2")
         printOption(helpOption, "")
         printOption(clearExistingOption, "")
@@ -123,13 +130,24 @@ fun main(args: Array<String>) {
         }
     }
 
+    val spaces = if (cmd.hasOption(spacesOption)) {
+        try {
+            parseInt(cmd.getOptionValue(spacesOption))
+        } catch (invalid: NumberFormatException) {
+            println("Expected the --spaces option value to be an integer, but got ${cmd.getOptionValue(spacesOption)}")
+            return
+        }
+    } else null
+
     for ((parent, fileModules) in modules) {
         for (module in fileModules) {
             val actualParent = if (targetDirectory == null) parent else File(targetDirectory)
             val moduleDirectory = File("$actualParent/${module.moduleName}")
 
             try {
-                generateModule(module, moduleDirectory, cmd.hasOption("clear-existing-files"))
+                generateModule(
+                    module, moduleDirectory, cmd.hasOption("clear-existing-files"), spaces
+                )
             } catch (ioFailure: IOException) {
                 println("Failed to generate module ${module.moduleName}: ${ioFailure.message}")
                 exitProcess(4)

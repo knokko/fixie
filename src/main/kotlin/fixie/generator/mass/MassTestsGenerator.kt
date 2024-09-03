@@ -1,6 +1,7 @@
 package fixie.generator.mass
 
 import fixie.generator.quantity.FloatQuantityTestsGenerator
+import fixie.generator.speed.SpeedUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 import kotlin.math.max
@@ -10,7 +11,6 @@ class MassTestsGenerator(
 	quantity: MassClass,
 	packageName: String
 ) : FloatQuantityTestsGenerator<MassClass>(writer, quantity, packageName) {
-
 
 	override fun generateToDoubleBody() {
 		super.generateToDoubleBody()
@@ -43,6 +43,13 @@ class MassTestsGenerator(
 				val margin = if (density.number == null) 0.001 else max(0.001, 5.0 / density.number.oneValue.toDouble())
 				writer.println("\t\tassertEquals(4.0, (8000 * ${quantity.className}.GRAM / (2 * ${quantity.volumeClassName}.LITER)).toDouble(), $margin)")
 				writer.println("\t\tassertEquals(2.5, (25 * ${quantity.className}.KILOGRAM / (10 * ${density.className}.KGPL)).toDouble(VolumeUnit.LITER), $margin)")
+			}
+		}
+
+		quantity.speed?.let { speed ->
+			val mpsPair = speed.computeSupportedUnits().find { it.first == SpeedUnit.METERS_PER_SECOND }
+			if (mpsPair != null && (speed.number == null || mpsPair.second > BigInteger.TEN) && quantity.momentum != null) {
+				writer.println("\t\tassertEquals(3.5, (7000 * ${quantity.className}.GRAM * (0.5 * ${quantity.speedClassName}.METERS_PER_SECOND)).toDouble(), 0.1)")
 			}
 		}
 	}

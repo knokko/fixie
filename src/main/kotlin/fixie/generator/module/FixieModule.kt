@@ -6,6 +6,7 @@ import fixie.generator.area.AreaClass
 import fixie.generator.density.DensityClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.mass.MassClass
+import fixie.generator.momentum.MomentumClass
 import fixie.generator.number.NumberClass
 import fixie.generator.parser.InvalidConfigException
 import fixie.generator.quantity.QuantityClass
@@ -22,6 +23,7 @@ class FixieModule(
 	val areas: List<AreaClass> = emptyList(),
 	val volumes: List<VolumeClass> = emptyList(),
 	val masses: List<MassClass> = emptyList(),
+	val momenta: List<MomentumClass> = emptyList(),
 	val displacements: List<DisplacementClass> = emptyList(),
 	val speed: List<SpeedClass> = emptyList(),
 	val spins: List<SpinClass> = emptyList(),
@@ -69,10 +71,14 @@ class FixieModule(
 			throw IllegalArgumentException("Packages should be separated by dots instead of slashes")
 		}
 
+		resolve(momenta, masses, { it.massClassName }) { momentum, mass -> momentum.mass = mass }
+		resolve(momenta, speed, { it.speedClassName }) { momentum, speed -> momentum.speed = speed }
 		resolve(densities, masses, { it.massClassName }) { density, mass -> density.mass = mass }
 		resolve(densities, volumes, { it.volumeClassName }) { density, volume -> density.volume = volume }
 		resolve(accelerations, speed, { it.speedClassName }) { acceleration, speed -> acceleration.speed = speed }
 		resolve(angles, spins, { it.spinClassName }) { angle, spin -> angle.spinClass = spin }
+		resolve(masses, momenta, { it.momentumClassName }) { mass, momentum -> mass.momentum = momentum }
+		resolve(masses, speed, { it.speedClassName }) { mass, speed -> mass.speed = speed }
 		resolve(masses, densities, { it.densityClassName }) { mass, density -> mass.density = density }
 		resolve(masses, volumes, { it.volumeClassName }) { mass, volume -> mass.volume = volume }
 		resolve(volumes, masses, { it.massClassName }) { volume, mass -> volume.mass = mass }
@@ -90,6 +96,8 @@ class FixieModule(
 		resolve(displacements, areas, { it.areaClassName }) { displacement, area -> displacement.area = area }
 		resolve(displacements, speed, { it.speedClassName }) { displacement, speed -> displacement.speed = speed }
 		checkPresent(speed, numbers) { it.number }
+		resolve(speed, momenta, { it.momentumClassName }) { speed, momentum -> speed.momentum = momentum}
+		resolve(speed, masses, { it.massClassName }) { speed, mass -> speed.mass = mass }
 		resolve(speed, displacements, { it.displacementClassName }) { speed, displacement ->
 			speed.displacementClass = displacement
 		}
@@ -101,6 +109,7 @@ class FixieModule(
 		val allClassNames = numbers.map { it.className } +
 				displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
 				speed.map { it.className } + accelerations.map { it.className } + masses.map { it.className } +
+				momenta.map { it.className } +
 				angles.map { it.className } + spins.map { it.className } + densities.map { it.className }
 
 		for (className in allClassNames) {

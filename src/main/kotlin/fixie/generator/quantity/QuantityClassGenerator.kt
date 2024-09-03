@@ -75,7 +75,7 @@ abstract class QuantityClassGenerator<T : QuantityClass>(
 				writer.println("\t\t${unit.enumName}.${unit.name} -> value$doubleConversion$conversion")
 			}
 			if (quantity.getNumberOfUnits() > units.size) {
-				writer.println("\t\telse -> throw IllegalArgumentException(\"Unsupported unit \" + unit)")
+				writer.println("\t\telse -> throw IllegalArgumentException(\"Unsupported unit \$unit\")")
 			}
 			writer.println("\t}")
 		}

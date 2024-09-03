@@ -16,6 +16,7 @@ import fixie.generator.displacement.DistanceUnit
 import fixie.generator.mass.MassClass
 import fixie.generator.mass.MassUnit
 import fixie.generator.module.FixieModule
+import fixie.generator.momentum.MomentumClass
 import fixie.generator.number.FloatType
 import fixie.generator.number.IntType
 import fixie.generator.number.NumberClass
@@ -268,6 +269,8 @@ private class ModuleParser(
 		displayUnit = requiredUnit(properties, "displayUnit", path, SpeedUnit.entries),
 		displacementClassName = optionalString(properties, "displacement", path),
 		accelerationClassName = optionalString(properties, "acceleration", path),
+		massClassName = optionalString(properties, "mass", path),
+		momentumClassName = optionalString(properties, "momentum", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
 	)
 
@@ -295,6 +298,16 @@ private class ModuleParser(
 		displayUnit = requiredUnit(properties, "displayUnit", path, MassUnit.entries),
 		densityClassName = optionalString(properties, "density", path),
 		volumeClassName = optionalString(properties, "volume", path),
+		speedClassName = optionalString(properties, "speed", path),
+		momentumClassName = optionalString(properties, "momentum", path),
+		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
+	)
+
+	private fun loadMomentum(properties: GddlMap, path: String) = MomentumClass(
+		className = requiredString(properties, "className", path),
+		floatType = requiredFloatType(properties, "floatType", path),
+		speedClassName = optionalString(properties, "speed", path),
+		massClassName = optionalString(properties, "mass", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
 	)
 
@@ -338,6 +351,7 @@ private class ModuleParser(
 		val spins = mapList(root, "spins", "(root)", ::loadSpin)
 		val densities = mapList(root, "densities", "(root)", ::loadDensity)
 		val masses = mapList(root, "masses", "(root)", ::loadMass)
+		val momenta = mapList(root, "momenta", "(root)", ::loadMomentum)
 
 		return listOf(
 			FixieModule(
@@ -352,7 +366,8 @@ private class ModuleParser(
 				speed = speed,
 				spins = spins,
 				densities = densities,
-				masses = masses
+				masses = masses,
+				momenta = momenta
 			)
 		)
 	}

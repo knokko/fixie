@@ -58,6 +58,13 @@
 		"density": "Density",
 		"createNumberExtensions": false
 	}],
+	"momenta": [{
+		"className": "Momentum",
+		"floatType": "%FLOAT_TYPE%",
+		"mass": "Mass",
+		"speed": "Speed",
+		"createNumberExtensions": true
+	}],
 	"densities": [{
 		"className": "Density",
 		"floatType": "%FLOAT_TYPE%",

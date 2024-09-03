@@ -52,7 +52,16 @@
 		"displayUnit": "Milligram",
 		"volume": "Volume",
 		"density": "Density",
+		"speed": "Speed",
+		"momentum": "Momentum",
 		"createNumberExtensions": true
+	}],
+	"momenta": [{
+		"className": "Momentum",
+		"floatType": "%FLOAT_TYPE%",
+		"speed": "Speed",
+		"mass": "Mass",
+		"createNumberExtensions": false
 	}],
 	"densities": [{
 		"className": "Density",

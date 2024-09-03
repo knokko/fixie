@@ -11,7 +11,9 @@ internal class SpeedClassGenerator(
 	packageName: String
 ) : HybridQuantityClassGenerator<SpeedClass>(writer, speed, packageName) {
 
-	override fun getImports() = super.getImports() + arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
+	override fun getImports() = super.getImports() + if (generateTimesDuration() || quantity.accelerationClass != null) {
+		arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
+	} else emptyArray()
 
 	override fun generateToString() {
 		writer.println()
@@ -47,6 +49,12 @@ internal class SpeedClassGenerator(
 				"\toperator fun div(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * " +
 						"${acceleration.className}.MPS2 / right.toDouble(DurationUnit.SECONDS)"
 			)
+		}
+
+		if (quantity.mass != null && quantity.momentum != null) {
+			writer.println()
+			writer.println("\toperator fun times(right: ${quantity.massClassName}) = " +
+					"${quantity.momentumClassName}.NEWTON_SECOND * toDouble(SpeedUnit.METERS_PER_SECOND) * right.toDouble(MassUnit.KILOGRAM)")
 		}
 	}
 

@@ -28,6 +28,12 @@ class MassClassGenerator(
 			writer.println()
 			writer.println("\toperator fun div(right: ${quantity.volumeClassName}) = ${quantity.densityClassName}.KGPL * value / right.toDouble(VolumeUnit.LITER)")
 		}
+
+		if (quantity.speed != null && quantity.momentum != null) {
+			writer.println()
+			writer.println("\toperator fun times(right: ${quantity.speedClassName}) = " +
+					"${quantity.momentumClassName}.NEWTON_SECOND * value * right.toDouble(SpeedUnit.METERS_PER_SECOND)")
+		}
 	}
 
 	override fun generateCompanionContent() {

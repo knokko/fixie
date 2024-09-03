@@ -22,6 +22,8 @@
 		"oneUnit": "Miles per hour",
 		"displayUnit": "Meters per second",
 		"displacement": "Displacement",
+		"mass": "Mass",
+		"momentum": "Momentum",
 		"createNumberExtensions": true
 	}],
 	"volumes": [{
@@ -37,6 +39,15 @@
 		"className": "Mass",
 		"floatType": "Double",
 		"displayUnit": "Ton",
+		"speed": "Speed",
+		"momentum": "Momentum",
+		"createNumberExtensions": true
+	}],
+	"momenta": [{
+		"className": "Momentum",
+		"floatType": "Double",
+		"speed": "Speed",
+		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
 	"densities": [{

@@ -2,6 +2,8 @@ package fixie.generator.speed
 
 import fixie.generator.acceleration.AccelerationClass
 import fixie.generator.displacement.DisplacementClass
+import fixie.generator.mass.MassClass
+import fixie.generator.momentum.MomentumClass
 import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
 import fixie.generator.quantity.FixedQuantityClass.Companion.determineRawValue
@@ -18,11 +20,15 @@ class SpeedClass(
 	val displayUnit: SpeedUnit,
 	val displacementClassName: String?,
 	val accelerationClassName: String?,
+	val massClassName: String?,
+	val momentumClassName: String?,
 	createNumberExtensions: Boolean
 ) : HybridQuantityClass(className, number, floatType, createNumberExtensions) {
 
-	var displacementClass: DisplacementClass? = null
+	var displacementClass: DisplacementClass? = null // TODO Rename to displacement and acceleration
 	var accelerationClass: AccelerationClass? = null
+	var mass: MassClass? = null
+	var momentum: MomentumClass? = null
 
 	fun computeSupportedUnits(): List<Pair<SpeedUnit, BigInteger>> {
 		if (number == null) return SpeedUnit.entries.map { Pair(it, BigInteger.ONE) }

@@ -22,6 +22,7 @@
 		"oneUnit": "Miles per hour",
 		"displayUnit": "Kilometers per hour",
 		"displacement": "Displacement",
+		"mass": "Mass",
 		"createNumberExtensions": false
 	}],
 	"volumes": [{
@@ -39,6 +40,7 @@
 		"displayUnit": "Ounce",
 		"volume": "Volume",
 		"density": "Density",
+		"speed": "Speed",
 		"createNumberExtensions": false
 	}],
 	"densities": [{

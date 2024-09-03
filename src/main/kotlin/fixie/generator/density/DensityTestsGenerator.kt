@@ -1,7 +1,6 @@
 package fixie.generator.density
 
 import fixie.generator.quantity.HybridQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 import kotlin.math.max
@@ -11,14 +10,6 @@ class DensityTestsGenerator(
 		quantity: DensityClass,
 		packageName: String
 ) : HybridQuantityTestsGenerator<DensityClass>(writer, quantity, packageName) {
-
-	override fun getUnits() = listOf(QuantityUnit(
-			"KGPL", "", "kg/l", "kgpl",
-		if (quantity.number == null) 0.0001 else 1.0 / quantity.number.oneValue.toDouble(),
-		if (quantity.number == null) 1e6 else quantity.number.internalType.getMaxValue().toDouble() / quantity.number.oneValue.toDouble()
-	))
-
-	override fun canSupportMultipleUnits() = false
 
 	override fun generateToStringBody() {
 		if (quantity.number == null || (quantity.number.oneValue > BigInteger.TEN &&

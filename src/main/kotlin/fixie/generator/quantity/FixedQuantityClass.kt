@@ -12,6 +12,10 @@ abstract class FixedQuantityClass(
         createNumberExtensions: Boolean
 ) : QuantityClass(className, createNumberExtensions) {
 
+    abstract fun getFixedUnits(): Collection<QuantityUnit>
+
+    final override fun getSupportedUnits() = getFixedUnits().sortedBy { -it.maxAmount }
+
     override fun toString() = "$className($number)"
 
     protected fun determineRawValue(divisor: BigDecimal) = determineRawValue(divisor, number)

@@ -6,6 +6,7 @@ import fixie.generator.displacement.DisplacementClass
 import fixie.generator.mass.MassClass
 import fixie.generator.number.FloatType
 import fixie.generator.quantity.FloatQuantityClass
+import fixie.generator.quantity.QuantityUnit
 
 class VolumeClass(
         className: String,
@@ -22,4 +23,9 @@ class VolumeClass(
     var area: AreaClass? = null
     var density: DensityClass? = null
     var mass: MassClass? = null
+
+    override fun getSupportedUnits() = VolumeUnit.entries.map { QuantityUnit(
+        it.name, "VolumeUnit", it.abbreviation, it.abbreviation.replace("^", ""),
+        0.001, 1e6, it.factor
+    ) }
 }

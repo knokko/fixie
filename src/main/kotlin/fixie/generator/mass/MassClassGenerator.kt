@@ -9,11 +9,6 @@ class MassClassGenerator(
     packageName: String
 ) : FloatQuantityClassGenerator<MassClass>(writer, mass, packageName) {
 
-    override fun generateToDouble() {
-        writer.println()
-        writer.println("\tfun toDouble(unit: MassUnit) = value / unit.factor")
-    }
-
     override fun generateToString() {
         writer.println()
         writer.println("\tfun toString(unit: MassUnit) = String.format(\"%.3f%s\", toDouble(unit), unit.abbreviation)")

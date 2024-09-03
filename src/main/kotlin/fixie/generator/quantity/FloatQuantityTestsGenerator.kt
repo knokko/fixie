@@ -10,8 +10,6 @@ abstract class FloatQuantityTestsGenerator<T : FloatQuantityClass>(
 
     override fun canBeNegative() = true
 
-    override fun canSupportMultipleUnits() = getUnits().size > 1
-
     override fun generateNearlyEquals() {
         generateFloatNearlyEquals(quantity.floatType)
     }

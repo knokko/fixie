@@ -2,7 +2,6 @@ package fixie.generator.area
 
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.quantity.FloatQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 
@@ -13,9 +12,6 @@ internal class AreaTestsGenerator(
 ) : FloatQuantityTestsGenerator<AreaClass>(
     writer, area, packageName
 ) {
-    override fun getUnits() = AreaUnit.entries.map { QuantityUnit(
-        it.name, "AreaUnit", it.abbreviation, it.abbreviation.replace("^", ""), 0.001, 1e6
-    ) }
 
     override fun generateToDoubleBody() {
         super.generateToDoubleBody()

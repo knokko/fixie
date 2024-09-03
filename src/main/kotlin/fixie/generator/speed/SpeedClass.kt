@@ -6,6 +6,7 @@ import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
 import fixie.generator.quantity.FixedQuantityClass.Companion.determineRawValue
 import fixie.generator.quantity.HybridQuantityClass
+import fixie.generator.quantity.QuantityUnit
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -37,4 +38,30 @@ class SpeedClass(
 
         return supportedUnits
     }
+
+    override fun getSupportedUnits(): List<QuantityUnit> {
+        if (number == null) return SpeedUnit.entries.map { QuantityUnit(
+            name = it.name,
+            enumName = "SpeedUnit",
+            suffix = it.abbreviation,
+            extensionName = it.abbreviation.replace('/', 'p'),
+            minDelta = 0.001,
+            maxAmount = 1e6,
+            relativeSize = oneUnit.factor / it.factor
+        ) }
+
+        return computeSupportedUnits().map { (unit, rawValue) ->
+            QuantityUnit(
+                name = unit.name,
+                enumName = "SpeedUnit",
+                suffix = unit.abbreviation,
+                extensionName = unit.abbreviation.replace('/', 'p'),
+                minDelta = determineFixedUnitMinDelta(rawValue, number),
+                maxAmount = determineFixedUnitMaxAmount(rawValue, number),
+                relativeSize = oneUnit.factor / unit.factor
+            )
+        }.sortedBy { -it.maxAmount }
+    }
+
+    override fun getNumberOfUnits() = SpeedUnit.entries.size
 }

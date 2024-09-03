@@ -2,7 +2,6 @@ package fixie.generator.speed
 
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.quantity.HybridQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 
@@ -44,30 +43,6 @@ internal class SpeedTestsGenerator(
     } else { emptyArray<String>() } + if (shouldTestHours()) {
         arrayOf("kotlin.time.Duration.Companion.hours")
     } else { emptyArray<String>() }
-
-    override fun getUnits(): List<QuantityUnit> {
-        if (quantity.number == null) return SpeedUnit.entries.map { QuantityUnit(
-            name = it.name,
-            enumName = "SpeedUnit",
-            suffix = it.abbreviation,
-            extensionName = it.abbreviation.replace('/', 'p'),
-            minDelta = 0.001,
-            maxAmount = 1e6
-        ) }
-
-        return quantity.computeSupportedUnits().map { (unit, rawValue) ->
-            QuantityUnit(
-                name = unit.name,
-                enumName = "SpeedUnit",
-                suffix = unit.abbreviation,
-                extensionName = unit.abbreviation.replace('/', 'p'),
-                minDelta = determineFixedUnitMinDelta(rawValue, quantity.number),
-                maxAmount = determineFixedUnitMaxAmount(rawValue, quantity.number)
-            )
-        }.sortedBy { -it.maxAmount }
-    }
-
-    override fun canSupportMultipleUnits() = true
 
     override fun generateToStringBody() {
         for ((unit, oneValue) in quantity.computeSupportedUnits()) {

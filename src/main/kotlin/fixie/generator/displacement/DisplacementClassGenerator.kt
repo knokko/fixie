@@ -14,22 +14,6 @@ internal class DisplacementClassGenerator(
         arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
     } else emptyArray()
 
-    override fun generateToDouble() {
-        writer.println()
-        writer.println("\tfun toDouble(unit: DistanceUnit) = when(unit) {")
-        for (unit in DistanceUnit.entries) {
-            var factor = unit.divisor.toDouble()
-            if (unit.isMetric != quantity.oneUnit.isMetric) {
-                if (unit.isMetric) factor *= 1.609344
-                else factor /= 1.609344
-            }
-            factor /= quantity.oneUnit.divisor.toDouble()
-            val conversion = if (factor == 1.0) "" else " * $factor"
-            writer.println("\t\tDistanceUnit.$unit -> value.toDouble()$conversion")
-        }
-        writer.println("\t}")
-    }
-
     override fun generateToString() {
         writer.println()
         writer.println("\toverride fun toString() = toString(DistanceUnit.${quantity.displayUnit})")

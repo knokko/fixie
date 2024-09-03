@@ -10,12 +10,6 @@ class VolumeClassGenerator(
         packageName: String
 ) : FloatQuantityClassGenerator<VolumeClass>(writer, volume, packageName) {
 
-    override fun generateToDouble() {
-        writer.println()
-        val conversion = if (quantity.floatType.numBytes == 4) ".toDouble()" else ""
-        writer.println("\tfun toDouble(unit: VolumeUnit) = value$conversion / unit.factor")
-    }
-
     override fun generateToString() {
         writer.println()
         writer.println("\tfun toString(unit: VolumeUnit) = String.format(\"%.3f%s\", toDouble(unit), unit.abbreviation)")

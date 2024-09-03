@@ -2,7 +2,6 @@ package fixie.generator.volume
 
 import fixie.generator.displacement.DistanceUnit
 import fixie.generator.quantity.FloatQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 
@@ -11,10 +10,6 @@ class VolumeTestsGenerator(
 		quantity: VolumeClass,
 		packageName: String
 ) : FloatQuantityTestsGenerator<VolumeClass>(writer, quantity, packageName) {
-
-	override fun getUnits() = VolumeUnit.entries.map { QuantityUnit(
-			it.name, "VolumeUnit", it.abbreviation, it.abbreviation.replace("^", ""), 0.001, 1e6
-	) }
 
 	override fun generateToDoubleBody() {
 		super.generateToDoubleBody()

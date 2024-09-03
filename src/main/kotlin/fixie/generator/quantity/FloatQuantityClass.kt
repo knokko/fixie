@@ -8,5 +8,7 @@ abstract class FloatQuantityClass(
         createNumberExtensions: Boolean
 ) : QuantityClass(className, createNumberExtensions) {
 
+    override fun getNumberOfUnits() = getSupportedUnits().size
+
     override fun toString() = "$className($floatType)"
 }

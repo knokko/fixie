@@ -6,7 +6,8 @@ class QuantityUnit(
         val suffix: String,
         val extensionName: String,
         val minDelta: Double,
-        val maxAmount: Double
+        val maxAmount: Double,
+        val relativeSize: Double
 ) {
     override fun toString() = "$name($minDelta, $maxAmount)"
 }

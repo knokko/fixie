@@ -1,9 +1,7 @@
 package fixie.generator.angle
 
 import fixie.generator.quantity.QuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
-import java.util.*
 
 internal class AngleTestsGenerator(
         writer: PrintWriter,
@@ -46,17 +44,6 @@ internal class AngleTestsGenerator(
         writer.println("\t\tassertThrows<AssertionError> { assertEquals(${quantity.className}.degrees(355), ${quantity.className}.degrees(359)) }")
         writer.println("\t}")
     }
-
-    override fun getUnits() = AngleUnit.entries.map { QuantityUnit(
-        name = it.name,
-        enumName = "AngleUnit",
-        suffix = it.suffix,
-        extensionName = it.name.lowercase(Locale.ROOT),
-        minDelta = quantity.internalType.getMaxValue().toDouble() / it.maxValue,
-        maxAmount = 1e6
-    ) }
-
-    override fun canSupportMultipleUnits() = true
 
     override fun generateToDoubleBody() {
         if (quantity.allowDivisionAndFloatMultiplication) super.generateToDoubleBody()

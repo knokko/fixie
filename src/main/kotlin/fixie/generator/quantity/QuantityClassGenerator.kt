@@ -44,7 +44,40 @@ abstract class QuantityClassGenerator<T: QuantityClass>(
         generateClassHeader()
     }
 
-    protected abstract fun generateToDouble()
+    protected open fun generateToDoubleComment() {
+        throw UnsupportedOperationException("Subclasses with exactly 1 unit must override this method")
+    }
+
+    protected open fun generateToDouble() {
+        writer.println()
+        val units = quantity.getSupportedUnits()
+
+        if (units.isEmpty()) throw IllegalArgumentException("There are no units")
+
+        val floatType = when (quantity) {
+            is FloatQuantityClass -> quantity.floatType
+            is HybridQuantityClass -> quantity.floatType
+            else -> null
+        }
+        val doubleConversion = if (floatType?.numBytes == 8) "" else ".toDouble()"
+
+        writer.println()
+        if (quantity.getNumberOfUnits() == 1) {
+            generateToDoubleComment()
+
+            writer.println("\tfun toDouble() = value$doubleConversion")
+        } else {
+            writer.println("\tfun toDouble(unit: ${units[0].enumName}) = when (unit) {")
+            for (unit in units) {
+                val conversion = if (unit.relativeSize == 1.0) "" else " * ${1.0 / unit.relativeSize}"
+                writer.println("\t\t${unit.enumName}.${unit.name} -> value$doubleConversion$conversion")
+            }
+            if (quantity.getNumberOfUnits() > units.size) {
+                writer.println("\t\telse -> throw IllegalArgumentException(\"Unsupported unit \" + unit)")
+            }
+            writer.println("\t}")
+        }
+    }
 
     protected abstract fun generateToString()
 

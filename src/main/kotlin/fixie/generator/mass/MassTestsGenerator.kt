@@ -1,8 +1,6 @@
 package fixie.generator.mass
 
-import fixie.generator.displacement.DistanceUnit
 import fixie.generator.quantity.FloatQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 import java.math.BigInteger
 import kotlin.math.max
@@ -13,9 +11,7 @@ class MassTestsGenerator(
 	packageName: String
 ) : FloatQuantityTestsGenerator<MassClass>(writer, quantity, packageName) {
 
-    override fun getUnits() = MassUnit.entries.map { QuantityUnit(
-        it.name, "MassUnit", it.abbreviation, it.abbreviation, 0.001, 1e6
-    ) }
+
 
     override fun generateToDoubleBody() {
         super.generateToDoubleBody()

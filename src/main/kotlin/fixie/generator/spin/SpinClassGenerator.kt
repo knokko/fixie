@@ -14,18 +14,6 @@ class SpinClassGenerator(
         arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
     } else emptyArray()
 
-    override fun generateToDouble() {
-        writer.println()
-        writer.println("\tfun toDouble(unit: SpinUnit) = when(unit) {")
-        for (unit in SpinUnit.entries) {
-            val factor = unit.angleMax / quantity.oneUnit.angleMax
-            val conversion = if (factor == 1.0) "" else " * $factor"
-            val toDouble = if (quantity.floatType == FloatType.DoublePrecision) "" else ".toDouble()"
-            writer.println("\t\tSpinUnit.$unit -> value$toDouble$conversion")
-        }
-        writer.println("\t}")
-    }
-
     override fun generateToString() {
         writer.println()
         writer.println("\toverride fun toString() = toString(SpinUnit.${quantity.displayUnit})")

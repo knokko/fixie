@@ -12,12 +12,6 @@ class AreaClassGenerator(
 
     override fun getImports() = super.getImports() + if (quantity.displacementClassName != null) arrayOf("kotlin.math.sqrt") else emptyArray()
 
-    override fun generateToDouble() {
-        writer.println()
-        val conversion = if (quantity.floatType.numBytes == 4) ".toDouble()" else ""
-        writer.println("\tfun toDouble(unit: AreaUnit) = value$conversion / unit.factor")
-    }
-
     override fun generateToString() {
         writer.println()
         writer.println("\tfun toString(unit: AreaUnit) = String.format(\"%.2f%s\", toDouble(unit), unit.abbreviation)")
@@ -62,7 +56,6 @@ class AreaClassGenerator(
             writer.println("\tget() = ${quantity.className}.${unit.name} * this")
         }
     }
-
 
     override fun generateMathFunctions() {
         super.generateMathFunctions()

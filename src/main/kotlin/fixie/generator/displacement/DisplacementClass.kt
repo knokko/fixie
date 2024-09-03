@@ -3,6 +3,7 @@ package fixie.generator.displacement
 import fixie.generator.area.AreaClass
 import fixie.generator.number.NumberClass
 import fixie.generator.quantity.FixedQuantityClass
+import fixie.generator.quantity.QuantityUnit
 import fixie.generator.speed.SpeedClass
 import fixie.generator.volume.VolumeClass
 import java.math.BigDecimal
@@ -49,5 +50,19 @@ class DisplacementClass(
         }
 
         return supportedUnits
+    }
+
+    override fun getNumberOfUnits() = DistanceUnit.entries.size
+
+    override fun getFixedUnits() = computeSupportedUnits().map { (unit, rawValue) ->
+        QuantityUnit(
+            name = unit.name,
+            enumName = "DistanceUnit",
+            suffix = unit.abbreviation,
+            extensionName = unit.abbreviation,
+            minDelta = determineFixedUnitMinDelta(rawValue, number),
+            maxAmount = determineFixedUnitMaxAmount(rawValue, number),
+            relativeSize = rawValue.toDouble() / number.oneValue.toDouble()
+        )
     }
 }

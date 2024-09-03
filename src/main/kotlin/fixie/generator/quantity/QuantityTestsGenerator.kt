@@ -1,13 +1,10 @@
 package fixie.generator.quantity
 
-import fixie.generator.displacement.DisplacementTestsGenerator
-import fixie.generator.displacement.DistanceUnit
 import fixie.generator.number.FloatType
 import fixie.generator.number.NumberClass
 import java.io.PrintWriter
 import java.math.BigInteger
 import kotlin.math.max
-import kotlin.math.min
 
 abstract class QuantityTestsGenerator<T: QuantityClass>(
     protected val writer: PrintWriter,
@@ -46,7 +43,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
     }
 
     protected fun generateFixedNearlyEquals(number: NumberClass, oneUnitName: String) {
-        val baseToDoubleParameters = if (getUnits()[0].enumName.isNotEmpty()) "${getUnits()[0].enumName}.$oneUnitName" else ""
+        val baseToDoubleParameters = if (quantity.getSupportedUnits()[0].enumName.isNotEmpty()) "${quantity.getSupportedUnits()[0].enumName}.$oneUnitName" else ""
         val toBaseDouble = ".toDouble($baseToDoubleParameters)"
         val margin = max(0.001, 1.0 / number.oneValue.toDouble())
 
@@ -128,28 +125,15 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
 
     protected abstract fun generateNearlyEquals()
 
-    protected fun determineFixedUnitMinDelta(
-        rawValue: BigInteger, number: NumberClass
-    ) = max(1.0 / min(rawValue.toDouble(), number.oneValue.toDouble()), 1e-8)
-
-    protected fun determineFixedUnitMaxAmount(
-        rawValue: BigInteger, number: NumberClass
-    ) = (number.internalType.getMaxValue().toBigDecimal(10) / rawValue.toBigDecimal(10)).toDouble()
-
-    protected abstract fun getUnits(): List<QuantityUnit>
-
-    protected abstract fun canSupportMultipleUnits(): Boolean
-
     protected open fun generateToDoubleBody() {
-        val units = getUnits()
+        val units = quantity.getSupportedUnits()
 
-        // TODO Automate code generation of toDouble()
         if (units.isEmpty()) throw IllegalArgumentException("There are no units")
-        if (!canSupportMultipleUnits()) {
+        if (quantity.getNumberOfUnits() == 1) {
             val unit = units.first()
             writer.println("\t\tassertEquals(0.234, (0.234 * ${quantity.className}.${unit.name}).toDouble(), ${2 * unit.minDelta})")
         } else {
-            for ((index, unit) in units.withIndex()) {
+            for (unit in units) {
                 writer.println("\t\tassertEquals(1.0, ${quantity.className}.${unit.name}.toDouble(${unit.enumName}.${unit.name}), ${2 * unit.minDelta})")
                 writer.println("\t\tassertEquals(0.234, (0.234 * ${quantity.className}.${unit.name}).toDouble(${unit.enumName}.${unit.name}), ${2 * unit.minDelta})")
             }
@@ -175,7 +159,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
     }
 
     protected open fun generateCompareToBody() {
-        for (unit in getUnits()) {
+        for (unit in quantity.getSupportedUnits()) {
             val unitConstant = "${quantity.className}.${unit.name}"
             writer.println("\t\tassertTrue($unitConstant >= $unitConstant)")
             writer.println("\t\tassertTrue($unitConstant <= $unitConstant)")
@@ -192,7 +176,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
             }
         }
 
-        val units = getUnits()
+        val units = quantity.getSupportedUnits()
         for ((index, unit) in units.withIndex()) {
             if (index != 0) {
                 val previousUnit = units[index - 1]
@@ -230,7 +214,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
     }
 
     protected open fun generateArithmeticBody() {
-        for (unit in getUnits()) {
+        for (unit in quantity.getSupportedUnits()) {
             val margin = max(0.001, 5 * unit.minDelta)
             val unitConstant = "${quantity.className}.${unit.name}"
 
@@ -259,7 +243,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
 
     protected open fun generateExtensionFunctionsBody() {
         if (quantity.createNumberExtensions) {
-            for (unit in getUnits()) {
+            for (unit in quantity.getSupportedUnits()) {
                 writer.println("\t\tassertEquals(0.8 * ${quantity.className}.${unit.name}, 0.8.${unit.extensionName})")
                 writer.println("\t\tassertEquals(0.6f * ${quantity.className}.${unit.name}, 0.6f.${unit.extensionName})")
                 writer.println("\t\tassertEquals(${quantity.className}.${unit.name}, 1.${unit.extensionName})")
@@ -267,7 +251,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
             }
         }
 
-        for (unit in getUnits()) {
+        for (unit in quantity.getSupportedUnits()) {
             val unitConstant = "${quantity.className}.${unit.name}"
             writer.println("\t\tassertEquals(0.8 * $unitConstant, $unitConstant * 0.8)")
             writer.println("\t\tassertEquals(0.3f * $unitConstant, $unitConstant * 0.3f)")
@@ -285,7 +269,7 @@ abstract class QuantityTestsGenerator<T: QuantityClass>(
     }
 
     protected open fun generateMathFunctionsBody() {
-        val unit = getUnits()[getUnits().size / 2]
+        val unit = quantity.getSupportedUnits()[quantity.getSupportedUnits().size / 2]
         val unitConstant = "${quantity.className}.${unit.name}"
 
         if (canBeNegative()) {

@@ -12,10 +12,6 @@ abstract class FixedQuantityTestsGenerator<T : FixedQuantityClass>(
 
     protected abstract fun oneUnitName(): String
 
-    abstract fun getFixedUnits(): Collection<QuantityUnit>
-
-    final override fun getUnits() = getFixedUnits().sortedBy { -it.maxAmount }
-
     override fun generateNearlyEquals() {
         generateFixedNearlyEquals(quantity.number, oneUnitName())
     }

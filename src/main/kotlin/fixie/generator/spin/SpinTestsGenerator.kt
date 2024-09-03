@@ -1,7 +1,6 @@
 package fixie.generator.spin
 
 import fixie.generator.quantity.FloatQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import java.io.PrintWriter
 
 class SpinTestsGenerator(
@@ -16,10 +15,6 @@ class SpinTestsGenerator(
     override fun getImports() = super.getImports() + arrayOf("kotlin.math.PI") + if (quantity.angleClassName != null) {
         arrayOf("kotlin.time.Duration.Companion.seconds")
     } else emptyArray()
-
-    override fun getUnits() = SpinUnit.entries.map { QuantityUnit(
-            it.name, "SpinUnit", it.suffix, it.extensionName, 0.001, 1e6
-    ) }
 
     override fun generateToDoubleBody() {
         super.generateToDoubleBody()

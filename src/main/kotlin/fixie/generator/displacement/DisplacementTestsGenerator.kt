@@ -1,7 +1,6 @@
 package fixie.generator.displacement
 
 import fixie.generator.quantity.FixedQuantityTestsGenerator
-import fixie.generator.quantity.QuantityUnit
 import fixie.generator.speed.SpeedUnit
 import java.io.PrintWriter
 import java.math.BigInteger
@@ -17,19 +16,6 @@ internal class DisplacementTestsGenerator(
     override fun getImports() = super.getImports() + if (quantity.speed != null) {
         arrayOf("kotlin.time.Duration.Companion.seconds")
     } else emptyArray()
-
-    override fun canSupportMultipleUnits() = true
-
-    override fun getFixedUnits() = quantity.computeSupportedUnits().map { (unit, rawValue) ->
-        QuantityUnit(
-            name = unit.name,
-            enumName = "DistanceUnit",
-            suffix = unit.abbreviation,
-            extensionName = unit.abbreviation,
-            minDelta = determineFixedUnitMinDelta(rawValue, quantity.number),
-            maxAmount = determineFixedUnitMaxAmount(rawValue, quantity.number)
-        )
-    }
 
     override fun generateToStringBody() {
         writer.println("\t\tval displacementString = (0.5 * ${quantity.className}.${quantity.oneUnit}).toString(DistanceUnit.${quantity.oneUnit})")

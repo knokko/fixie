@@ -9,11 +9,8 @@ class DensityClassGenerator(
 		packageName: String
 ) : HybridQuantityClassGenerator<DensityClass>(writer, quantity, packageName) {
 
-	override fun generateToDouble() {
-		writer.println()
+	override fun generateToDoubleComment() {
 		writer.println("\t/** Gets the density value, in kg/l */")
-		val conversion = if (quantity.floatType?.numBytes == 8) "" else ".toDouble()"
-		writer.println("\tfun toDouble() = value$conversion")
 	}
 
 	override fun generateToString() {

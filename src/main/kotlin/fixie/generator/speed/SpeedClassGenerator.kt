@@ -13,18 +13,6 @@ internal class SpeedClassGenerator(
 
     override fun getImports() = super.getImports() + arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
 
-    override fun generateToDouble() {
-        writer.println()
-        writer.println("\tfun toDouble(unit: SpeedUnit) = when(unit) {")
-        for (unit in SpeedUnit.entries) {
-            val factor = unit.factor / quantity.oneUnit.factor
-            val conversion = if (factor == 1.0) "" else " * $factor"
-            val toDouble = if (quantity.floatType == FloatType.DoublePrecision) "" else ".toDouble()"
-            writer.println("\t\tSpeedUnit.$unit -> value$toDouble$conversion")
-        }
-        writer.println("\t}")
-    }
-
     override fun generateToString() {
         writer.println()
         writer.println("\toverride fun toString() = toString(SpeedUnit.${quantity.displayUnit})")

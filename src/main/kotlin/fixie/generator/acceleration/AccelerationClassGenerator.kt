@@ -12,11 +12,8 @@ internal class AccelerationClassGenerator(
 
     override fun getImports() = super.getImports() + arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
 
-    override fun generateToDouble() {
-        writer.println()
+    override fun generateToDoubleComment() {
         writer.println("\t/** Gets the acceleration value, in m/s^2 */")
-        val conversion = if (quantity.floatType.numBytes == 4) ".toDouble()" else ""
-        writer.println("\tfun toDouble() = value$conversion")
     }
 
     override fun generateToString() {

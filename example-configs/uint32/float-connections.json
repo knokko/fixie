@@ -20,9 +20,15 @@
 		"floatType": "%FLOAT_TYPE%",
 		"oneUnit": "Kilometers per hour",
 		"displayUnit": "Miles per hour",
+		"square": "SquareSpeed",
 		"displacement": "Displacement",
 		"acceleration": "Acceleration",
 		"createNumberExtensions": false
+	}],
+	"squareSpeed": [{
+		"className": "SquareSpeed",
+		"floatType": "%FLOAT_TYPE%",
+		"createNumberExtensions": true
 	}],
 	"accelerations": [{
 		"className": "Acceleration",

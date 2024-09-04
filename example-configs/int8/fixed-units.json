@@ -20,9 +20,16 @@
 		"number": "Fixed",
 		"oneUnit": "Kilometers per hour",
 		"displayUnit": "Meters per second",
+		"square": "SquareSpeed",
 		"displacement": "Displacement",
 		"mass": "Mass",
 		"momentum": "Momentum",
+		"createNumberExtensions": false
+	}],
+	"squareSpeed": [{
+		"className": "SquareSpeed",
+		"floatType": "Float",
+		"speed": "Speed",
 		"createNumberExtensions": false
 	}],
 	"volumes": [{

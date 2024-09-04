@@ -94,10 +94,17 @@
 		floatType = "Float",
 		oneUnit = "Meters per second",
 		displayUnit = "Meters per second",
+		square = "SquareSpeed",
 		displacement = "Displacement",
 		acceleration = "Acceleration",
 		mass = "Mass",
 		momentum = "Momentum",
+		createNumberExtensions = true
+	}],
+	squareSpeed = [{
+		className = "SquareSpeed",
+		floatType = "Double",
+		speed = "Speed",
 		createNumberExtensions = true
 	}],
 	spins = [{

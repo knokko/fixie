@@ -25,9 +25,9 @@ import fixie.generator.number.NumberTestsGenerator
 import fixie.generator.quantity.QuantityClass
 import fixie.generator.quantity.QuantityClassGenerator
 import fixie.generator.quantity.QuantityTestsGenerator
+import fixie.generator.speed.*
 import fixie.generator.speed.SpeedClassGenerator
 import fixie.generator.speed.SpeedTestsGenerator
-import fixie.generator.speed.SpeedUnit
 import fixie.generator.spin.SpinClassGenerator
 import fixie.generator.spin.SpinTestsGenerator
 import fixie.generator.volume.VolumeClassGenerator
@@ -105,6 +105,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 	generateQuantityFiles(module.volumes, ::VolumeClassGenerator, ::VolumeTestsGenerator)
 	generateQuantityFiles(module.masses, ::MassClassGenerator, ::MassTestsGenerator)
 	generateQuantityFiles(module.speed, ::SpeedClassGenerator, ::SpeedTestsGenerator)
+	generateQuantityFiles(module.squareSpeed, ::SquareSpeedClassGenerator, ::SquareSpeedTestsGenerator)
 	generateQuantityFiles(module.accelerations, ::AccelerationClassGenerator, ::AccelerationTestsGenerator)
 	generateQuantityFiles(module.angles, ::AngleClassGenerator, ::AngleTestsGenerator)
 	generateQuantityFiles(module.spins, ::SpinClassGenerator, ::SpinTestsGenerator)

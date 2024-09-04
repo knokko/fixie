@@ -18,6 +18,7 @@ class SpeedClass(
 	floatType: FloatType?,
 	val oneUnit: SpeedUnit,
 	val displayUnit: SpeedUnit,
+	val squareClassName: String?,
 	val displacementClassName: String?,
 	val accelerationClassName: String?,
 	val massClassName: String?,
@@ -25,6 +26,7 @@ class SpeedClass(
 	createNumberExtensions: Boolean
 ) : HybridQuantityClass(className, number, floatType, createNumberExtensions) {
 
+	var square: SquareSpeedClass? = null
 	var displacement: DisplacementClass? = null
 	var acceleration: AccelerationClass? = null
 	var mass: MassClass? = null

@@ -12,6 +12,7 @@ import fixie.generator.number.NumberClass
 import fixie.generator.parser.InvalidConfigException
 import fixie.generator.quantity.QuantityClass
 import fixie.generator.speed.SpeedClass
+import fixie.generator.speed.SquareSpeedClass
 import fixie.generator.spin.SpinClass
 import fixie.generator.volume.VolumeClass
 
@@ -28,6 +29,7 @@ class FixieModule(
 	val squareMomenta: List<SquareMomentumClass> = emptyList(),
 	val displacements: List<DisplacementClass> = emptyList(),
 	val speed: List<SpeedClass> = emptyList(),
+	val squareSpeed: List<SquareSpeedClass> = emptyList(),
 	val spins: List<SpinClass> = emptyList(),
 	val densities: List<DensityClass> = emptyList()
 ) {
@@ -99,6 +101,7 @@ class FixieModule(
 		resolve(displacements, volumes, { it.volumeClassName }) { displacement, volume -> displacement.volume = volume }
 		resolve(displacements, areas, { it.areaClassName }) { displacement, area -> displacement.area = area }
 		resolve(displacements, speed, { it.speedClassName }) { displacement, speed -> displacement.speed = speed }
+		resolve(squareSpeed, speed, { it.speedClassName }) { square, speed -> square.speed = speed }
 		checkPresent(speed, numbers) { it.number }
 		resolve(speed, momenta, { it.momentumClassName }) { speed, momentum -> speed.momentum = momentum}
 		resolve(speed, masses, { it.massClassName }) { speed, mass -> speed.mass = mass }
@@ -108,12 +111,13 @@ class FixieModule(
 		resolve(speed, accelerations, { it.accelerationClassName }) { speed, acceleration ->
 			speed.acceleration = acceleration
 		}
+		resolve(speed, squareSpeed, { it.squareClassName }) { speed, square -> speed.square = square }
 		resolve(spins, angles, { it.angleClassName }) { spin, angle -> spin.angle = angle }
 
 		val allClassNames = numbers.map { it.className } +
 				displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
-				speed.map { it.className } + accelerations.map { it.className } + masses.map { it.className } +
-				momenta.map { it.className } + squareMomenta.map { it.className } +
+				speed.map { it.className } + squareSpeed.map { it.className } + accelerations.map { it.className } +
+				masses.map { it.className } + momenta.map { it.className } + squareMomenta.map { it.className } +
 				angles.map { it.className } + spins.map { it.className } + densities.map { it.className }
 
 		for (className in allClassNames) {

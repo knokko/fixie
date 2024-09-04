@@ -56,6 +56,12 @@ internal class SpeedClassGenerator(
 			writer.println("\toperator fun times(right: ${quantity.massClassName}) = " +
 					"${quantity.momentumClassName}.NEWTON_SECOND * toDouble(SpeedUnit.METERS_PER_SECOND) * right.toDouble(MassUnit.KILOGRAM)")
 		}
+
+		if (quantity.square != null) {
+			writer.println()
+			writer.println("\toperator fun times(right: ${quantity.className}) = ${quantity.squareClassName}.SQUARE_METERS_PER_SECOND " +
+					"* toDouble(SpeedUnit.METERS_PER_SECOND) * right.toDouble(SpeedUnit.METERS_PER_SECOND)")
+		}
 	}
 
 	override fun generateCompanionContent() {

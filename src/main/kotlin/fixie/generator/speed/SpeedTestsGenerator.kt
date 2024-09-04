@@ -92,5 +92,13 @@ internal class SpeedTestsGenerator(
 				writer.println("\t\tassertEquals(3.5, (0.5 * ${quantity.className}.METERS_PER_SECOND * (7000 * ${quantity.massClassName}.GRAM)).toDouble(), 0.1)")
 			}
 		}
+
+		if (quantity.square != null) {
+			val mpsPair = quantity.computeSupportedUnits().find { it.first == SpeedUnit.METERS_PER_SECOND }
+			if (mpsPair != null && (mpsPair.second > BigInteger.TEN || quantity.number == null)) {
+				writer.println("\t\tassertEquals(0.35, ((0.5 * ${quantity.className}.METERS_PER_SECOND) " +
+						"* (0.7 * ${quantity.className}.METERS_PER_SECOND)).toDouble(), 0.01)")
+			}
+		}
 	}
 }

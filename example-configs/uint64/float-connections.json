@@ -22,11 +22,18 @@
 		"floatType": "%FLOAT_TYPE%",
 		"oneUnit": "Kilometers per second",
 		"displayUnit": "Kilometers per second",
+		"square": "SquareSpeed",
 		"displacement": "Displacement",
 		"acceleration": "Acceleration",
 		"mass": "Mass",
 		"momentum": "Momentum",
 		"createNumberExtensions": false
+	}],
+	"squareSpeed": [{
+		"className": "SquareSpeed",
+		"floatType": "%FLOAT_TYPE%",
+		"speed": "Speed",
+		"createNumberExtensions": true
 	}],
 	"accelerations": [{
 		"className": "Acceleration",

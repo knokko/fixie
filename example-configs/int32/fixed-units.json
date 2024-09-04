@@ -26,6 +26,12 @@
 		"momentum": "Momentum",
 		"createNumberExtensions": false
 	}],
+	"squareSpeed": [{
+		"className": "SquareSpeed",
+		"floatType": "Float",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
 	"volumes": [{
 		"className": "Volume",
 		"floatType": "Float",

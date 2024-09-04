@@ -27,6 +27,11 @@
 		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
+	"squareSpeed": [{
+		"className": "SquareSpeed",
+		"floatType": "%FLOAT_TYPE%",
+		"createNumberExtensions": false
+	}],
 	"accelerations": [{
 		"className": "Acceleration",
 		"floatType": "%FLOAT_TYPE%",

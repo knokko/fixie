@@ -23,6 +23,7 @@ import fixie.generator.number.IntType
 import fixie.generator.number.NumberClass
 import fixie.generator.speed.SpeedClass
 import fixie.generator.speed.SpeedUnit
+import fixie.generator.speed.SquareSpeedClass
 import fixie.generator.spin.SpinClass
 import fixie.generator.spin.SpinUnit
 import fixie.generator.uLongToBigInteger
@@ -268,10 +269,18 @@ private class ModuleParser(
 		floatType = optionalFloatType(properties, "floatType", path),
 		oneUnit = requiredUnit(properties, "oneUnit", path, SpeedUnit.entries),
 		displayUnit = requiredUnit(properties, "displayUnit", path, SpeedUnit.entries),
+		squareClassName = optionalString(properties, "square", path),
 		displacementClassName = optionalString(properties, "displacement", path),
 		accelerationClassName = optionalString(properties, "acceleration", path),
 		massClassName = optionalString(properties, "mass", path),
 		momentumClassName = optionalString(properties, "momentum", path),
+		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
+	)
+
+	private fun loadSquareSpeed(properties: GddlMap, path: String) = SquareSpeedClass(
+		className = requiredString(properties, "className", path),
+		floatType = requiredFloatType(properties, "floatType", path),
+		speedClassName = optionalString(properties, "speed", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
 	)
 
@@ -357,6 +366,7 @@ private class ModuleParser(
 		val areas = mapList(root, "areas", "(root)", ::loadArea)
 		val displacements = mapList(root, "displacements", "(root)", ::loadDisplacement)
 		val speed = mapList(root, "speed", "(root)", ::loadSpeed)
+		val squareSpeed = mapList(root, "squareSpeed", "(root)", ::loadSquareSpeed)
 		val spins = mapList(root, "spins", "(root)", ::loadSpin)
 		val densities = mapList(root, "densities", "(root)", ::loadDensity)
 		val masses = mapList(root, "masses", "(root)", ::loadMass)
@@ -374,6 +384,7 @@ private class ModuleParser(
 				areas = areas,
 				displacements = displacements,
 				speed = speed,
+				squareSpeed = squareSpeed,
 				spins = spins,
 				densities = densities,
 				masses = masses,

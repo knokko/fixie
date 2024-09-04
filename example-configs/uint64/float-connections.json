@@ -65,8 +65,15 @@
 	"momenta": [{
 		"className": "Momentum",
 		"floatType": "%FLOAT_TYPE%",
+		"square": "SquareMomentum",
 		"speed": "Speed",
 		"mass": "Mass",
+		"createNumberExtensions": true
+	}],
+	"squareMomenta": [{
+		"className": "SquareMomentum",
+		"floatType": "%FLOAT_TYPE%",
+		"momentum": "Momentum",
 		"createNumberExtensions": true
 	}],
 	"densities": [{

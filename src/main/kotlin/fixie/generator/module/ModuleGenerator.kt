@@ -18,6 +18,8 @@ import fixie.generator.mass.MassTestsGenerator
 import fixie.generator.mass.MassUnit
 import fixie.generator.momentum.MomentumClassGenerator
 import fixie.generator.momentum.MomentumTestsGenerator
+import fixie.generator.momentum.SquareMomentumClassGenerator
+import fixie.generator.momentum.SquareMomentumTestsGenerator
 import fixie.generator.number.NumberClassGenerator
 import fixie.generator.number.NumberTestsGenerator
 import fixie.generator.quantity.QuantityClass
@@ -108,6 +110,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 	generateQuantityFiles(module.spins, ::SpinClassGenerator, ::SpinTestsGenerator)
 	generateQuantityFiles(module.densities, ::DensityClassGenerator, ::DensityTestsGenerator)
 	generateQuantityFiles(module.momenta, ::MomentumClassGenerator, ::MomentumTestsGenerator)
+	generateQuantityFiles(module.squareMomenta, ::SquareMomentumClassGenerator, ::SquareMomentumTestsGenerator)
 
 	generateMathFile(
 		module.numbers,

@@ -65,6 +65,12 @@
 		"speed": "Speed",
 		"createNumberExtensions": true
 	}],
+	"squareMomenta": [{
+		"className": "SquareMomentum",
+		"floatType": "Float",
+		"momentum": "Momentum",
+		"createNumberExtensions": false
+	}],
 	"densities": [{
 		"className": "Density",
 		"floatType": "%FLOAT_TYPE%",

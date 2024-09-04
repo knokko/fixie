@@ -7,6 +7,7 @@ import fixie.generator.density.DensityClass
 import fixie.generator.displacement.DisplacementClass
 import fixie.generator.mass.MassClass
 import fixie.generator.momentum.MomentumClass
+import fixie.generator.momentum.SquareMomentumClass
 import fixie.generator.number.NumberClass
 import fixie.generator.parser.InvalidConfigException
 import fixie.generator.quantity.QuantityClass
@@ -24,6 +25,7 @@ class FixieModule(
 	val volumes: List<VolumeClass> = emptyList(),
 	val masses: List<MassClass> = emptyList(),
 	val momenta: List<MomentumClass> = emptyList(),
+	val squareMomenta: List<SquareMomentumClass> = emptyList(),
 	val displacements: List<DisplacementClass> = emptyList(),
 	val speed: List<SpeedClass> = emptyList(),
 	val spins: List<SpinClass> = emptyList(),
@@ -71,6 +73,8 @@ class FixieModule(
 			throw IllegalArgumentException("Packages should be separated by dots instead of slashes")
 		}
 
+		resolve(squareMomenta, momenta, { it.momentumClassName }) { square, momentum -> square.momentum = momentum }
+		resolve(momenta, squareMomenta, { it.squareClassName }) { momentum, square -> momentum.square = square }
 		resolve(momenta, masses, { it.massClassName }) { momentum, mass -> momentum.mass = mass }
 		resolve(momenta, speed, { it.speedClassName }) { momentum, speed -> momentum.speed = speed }
 		resolve(densities, masses, { it.massClassName }) { density, mass -> density.mass = mass }
@@ -109,7 +113,7 @@ class FixieModule(
 		val allClassNames = numbers.map { it.className } +
 				displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
 				speed.map { it.className } + accelerations.map { it.className } + masses.map { it.className } +
-				momenta.map { it.className } +
+				momenta.map { it.className } + squareMomenta.map { it.className } +
 				angles.map { it.className } + spins.map { it.className } + densities.map { it.className }
 
 		for (className in allClassNames) {

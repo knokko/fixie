@@ -50,8 +50,15 @@
 	momenta = [{
 		className = "Momentum",
 		floatType = "Double",
+		square = "SquareMomentum",
 		mass = "Mass",
 		speed = "Speed",
+		createNumberExtensions = true
+	}],
+	squareMomenta = [{
+		className = "SquareMomentum",
+		floatType = "Double",
+		momentum = "Momentum",
 		createNumberExtensions = true
 	}],
 	volumes = [{

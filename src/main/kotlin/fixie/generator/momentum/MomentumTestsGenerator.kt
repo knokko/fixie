@@ -29,5 +29,10 @@ class MomentumTestsGenerator(
 			writer.println("\t\tassertEquals(1.5, (0.75 * ${quantity.className}.NEWTON_SECOND / (0.5 * " +
 					"${quantity.speedClassName}.METERS_PER_SECOND)).toDouble(MassUnit.KILOGRAM), $margin)")
 		}
+
+		if (quantity.square != null) {
+			writer.println("\t\tassertEquals(2.4, ((${quantity.className}.NEWTON_SECOND * 1.2) * " +
+					"(${quantity.className}.NEWTON_SECOND * 2)).toDouble(), 0.001)")
+		}
 	}
 }

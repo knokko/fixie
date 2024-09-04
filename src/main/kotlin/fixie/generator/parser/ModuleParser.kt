@@ -17,6 +17,7 @@ import fixie.generator.mass.MassClass
 import fixie.generator.mass.MassUnit
 import fixie.generator.module.FixieModule
 import fixie.generator.momentum.MomentumClass
+import fixie.generator.momentum.SquareMomentumClass
 import fixie.generator.number.FloatType
 import fixie.generator.number.IntType
 import fixie.generator.number.NumberClass
@@ -306,8 +307,16 @@ private class ModuleParser(
 	private fun loadMomentum(properties: GddlMap, path: String) = MomentumClass(
 		className = requiredString(properties, "className", path),
 		floatType = requiredFloatType(properties, "floatType", path),
+		squareClassName = optionalString(properties, "square", path),
 		speedClassName = optionalString(properties, "speed", path),
 		massClassName = optionalString(properties, "mass", path),
+		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
+	)
+
+	private fun loadSquareMomentum(properties: GddlMap, path: String) = SquareMomentumClass(
+		className = requiredString(properties, "className", path),
+		floatType = requiredFloatType(properties, "floatType", path),
+		momentumClassName = optionalString(properties, "momentum", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
 	)
 
@@ -352,6 +361,7 @@ private class ModuleParser(
 		val densities = mapList(root, "densities", "(root)", ::loadDensity)
 		val masses = mapList(root, "masses", "(root)", ::loadMass)
 		val momenta = mapList(root, "momenta", "(root)", ::loadMomentum)
+		val squareMomenta = mapList(root, "squareMomenta", "(root)", ::loadSquareMomentum)
 
 		return listOf(
 			FixieModule(
@@ -367,7 +377,8 @@ private class ModuleParser(
 				spins = spins,
 				densities = densities,
 				masses = masses,
-				momenta = momenta
+				momenta = momenta,
+				squareMomenta = squareMomenta
 			)
 		)
 	}

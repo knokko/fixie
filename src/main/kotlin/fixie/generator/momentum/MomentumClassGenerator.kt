@@ -38,6 +38,12 @@ class MomentumClassGenerator(
 			writer.println("\toperator fun div(right: ${quantity.massClassName}) = " +
 					"${quantity.speedClassName}.METERS_PER_SECOND * (toDouble() / right.toDouble(MassUnit.KILOGRAM))")
 		}
+
+		if (quantity.square != null) {
+			writer.println()
+			writer.println("\toperator fun times(right: ${quantity.className}) = " +
+					"${quantity.squareClassName}.SQUARE_NEWTON_SECOND * toDouble() * right.toDouble()")
+		}
 	}
 
 	override fun generateCompanionContent() {

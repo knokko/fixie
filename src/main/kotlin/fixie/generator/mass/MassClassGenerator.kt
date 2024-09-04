@@ -35,19 +35,4 @@ class MassClassGenerator(
 					"${quantity.momentumClassName}.NEWTON_SECOND * value * right.toDouble(SpeedUnit.METERS_PER_SECOND)")
 		}
 	}
-
-	override fun generateCompanionContent() {
-		val suffix = if (quantity.floatType.numBytes == 4) "f" else ""
-		for (unit in MassUnit.entries) {
-			writer.println("\t\tval ${unit.name} = ${quantity.className}(${unit.factor}$suffix)")
-		}
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		writer.println()
-		for (unit in MassUnit.entries) {
-			writer.println("val $typeName.${unit.abbreviation}")
-			writer.println("\tget() = ${quantity.className}.${unit.name} * this")
-		}
-	}
 }

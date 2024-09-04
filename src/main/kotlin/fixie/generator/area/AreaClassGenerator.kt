@@ -47,21 +47,6 @@ class AreaClassGenerator(
 		}
 	}
 
-	override fun generateCompanionContent() {
-		val suffix = if (quantity.floatType.numBytes == 4) "f" else ""
-		for (unit in AreaUnit.entries) {
-			writer.println("\t\tval ${unit.name} = ${quantity.className}(${unit.factor}$suffix)")
-		}
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		writer.println()
-		for (unit in AreaUnit.entries) {
-			writer.println("val $typeName.${unit.abbreviation.replace("^", "")}")
-			writer.println("\tget() = ${quantity.className}.${unit.name} * this")
-		}
-	}
-
 	override fun generateMathFunctions() {
 		super.generateMathFunctions()
 

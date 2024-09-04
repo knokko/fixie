@@ -45,15 +45,4 @@ class MomentumClassGenerator(
 					"${quantity.squareClassName}.SQUARE_NEWTON_SECOND * toDouble() * right.toDouble()")
 		}
 	}
-
-	override fun generateCompanionContent() {
-		val suffix = if (quantity.floatType.numBytes == 4) "f" else ".0"
-		writer.println("\t\tval NEWTON_SECOND = ${quantity.className}(1$suffix)")
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		writer.println()
-		writer.println("val $typeName.newSec")
-		writer.println("\tget() = ${quantity.className}.NEWTON_SECOND * this")
-	}
 }

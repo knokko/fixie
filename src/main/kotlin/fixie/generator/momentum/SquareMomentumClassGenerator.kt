@@ -16,22 +16,9 @@ class SquareMomentumClassGenerator(
 		writer.println("\t/** Gets the square momentum value, in (Ns)^2 */")
 	}
 
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		// TODO Why is this not done automatically?
-		writer.println()
-		writer.println("val $typeName.squareNs")
-		writer.println("\tget() = ${quantity.className}.SQUARE_NEWTON_SECOND * this")
-	}
-
 	override fun generateToString() {
 		writer.println()
 		writer.println("\toverride fun toString() = String.format(\"%.2f%s\", value, \"(Ns)^2\")")
-	}
-
-	override fun generateCompanionContent() {
-		// TODO Maybe do this automatically
-		val suffix = if (quantity.floatType.numBytes == 4) "f" else ".0"
-		writer.println("\t\tval SQUARE_NEWTON_SECOND = ${quantity.className}(1$suffix)")
 	}
 
 	override fun generateArithmetic() {

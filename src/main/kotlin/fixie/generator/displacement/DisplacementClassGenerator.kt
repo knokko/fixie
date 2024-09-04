@@ -70,12 +70,4 @@ internal class DisplacementClassGenerator(
 			writer.println("\t\tval $unit = raw($rawValue${if (quantity.number.internalType.signed) "" else "u"})")
 		}
 	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		for (unit in quantity.computeSupportedUnits().map { it.first }) {
-			writer.println()
-			writer.println("val $typeName.${unit.abbreviation}")
-			writer.println("\tget() = ${quantity.className}.$unit * this")
-		}
-	}
 }

@@ -37,17 +37,6 @@ internal class AccelerationClassGenerator(
 		}
 	}
 
-	override fun generateCompanionContent() {
-		val suffix = if (quantity.floatType.numBytes == 4) "f" else ".0"
-		writer.println("\t\tval MPS2 = ${quantity.className}(1$suffix)")
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		writer.println()
-		writer.println("val $typeName.mps2")
-		writer.println("\tget() = ${quantity.className}.MPS2 * this")
-	}
-
 	override fun generateExtensionFunctions() {
 		super.generateExtensionFunctions()
 

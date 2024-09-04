@@ -31,17 +31,7 @@ class DensityClassGenerator(
 	override fun generateCompanionContent() {
 		super.generateCompanionContent()
 
-		if (quantity.floatType != null) {
-			val suffix = if (quantity.floatType.numBytes == 4) "f" else ".0"
-			writer.println("\t\tval KGPL = ${quantity.className}(1$suffix)")
-		} else {
-			writer.println("\t\tval KGPL = ${quantity.className}(${quantity.number!!.className}.ONE)")
-		}
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		writer.println()
-		writer.println("val $typeName.kgpl")
-		writer.println("\tget() = ${quantity.className}.KGPL * this")
+		if (quantity.floatType != null) generateFloatCompanionContent(quantity.floatType)
+		else writer.println("\t\tval KGPL = ${quantity.className}(${quantity.number!!.className}.ONE)")
 	}
 }

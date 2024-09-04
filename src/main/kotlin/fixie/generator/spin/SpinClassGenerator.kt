@@ -40,29 +40,6 @@ class SpinClassGenerator(
 //        }
 	}
 
-	override fun generateCompanionContent() {
-		writer.println("\t\tfun raw(value: ${quantity.floatType.typeName}) = ${quantity.className}(value)")
-		writer.println()
-		val oneValue = if (quantity.floatType == FloatType.SinglePrecision) "1f" else "1.0"
-		writer.println("\t\tval ${quantity.oneUnit} = ${quantity.className}($oneValue)")
-
-		for (unit in SpinUnit.entries) {
-			if (unit != quantity.oneUnit) {
-				val factor = quantity.oneUnit.angleMax / unit.angleMax
-				writer.println()
-				writer.println("\t\tval $unit = ${quantity.oneUnit} * $factor")
-			}
-		}
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		for (unit in SpinUnit.entries) {
-			writer.println()
-			writer.println("val $typeName.${unit.extensionName}")
-			writer.println("\tget() = ${quantity.className}.$unit * this")
-		}
-	}
-
 	override fun generateExtensionFunctions() {
 		super.generateExtensionFunctions()
 

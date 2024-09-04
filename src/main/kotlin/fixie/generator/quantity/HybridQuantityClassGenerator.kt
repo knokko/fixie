@@ -55,12 +55,8 @@ abstract class HybridQuantityClassGenerator<T : HybridQuantityClass>(
 		writer.println()
 		if (quantity.number != null) {
 			writer.println("\t\tfun raw(value: ${quantity.number.internalType}) = ${quantity.className}(${quantity.number.className}.raw(value))")
-		} else {
-			writer.println("\t\tfun raw(value: ${quantity.floatType!!.typeName}) = ${quantity.className}(value)")
 		}
 	}
-
-	protected abstract fun generateNumberUnitExtensionFunctions(typeName: String)
 
 	override fun generateExtensionFunctions() {
 		for (typeName in getMultiplicationTypes()) {

@@ -43,19 +43,4 @@ class VolumeClassGenerator(
 			writer.println("\toperator fun times(right: ${quantity.densityClassName}) = ${quantity.massClassName}.KILOGRAM * toDouble(VolumeUnit.LITER) * right.toDouble()")
 		}
 	}
-
-	override fun generateCompanionContent() {
-		val suffix = if (quantity.floatType.numBytes == 4) "f" else ""
-		for (unit in VolumeUnit.entries) {
-			writer.println("\t\tval ${unit.name} = ${quantity.className}(${unit.factor}$suffix)")
-		}
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		writer.println()
-		for (unit in VolumeUnit.entries) {
-			writer.println("val $typeName.${unit.abbreviation.replace("^", "")}")
-			writer.println("\tget() = ${quantity.className}.${unit.name} * this")
-		}
-	}
 }

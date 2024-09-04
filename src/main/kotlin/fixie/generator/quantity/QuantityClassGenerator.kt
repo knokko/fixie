@@ -1,5 +1,6 @@
 package fixie.generator.quantity
 
+import fixie.generator.number.FloatType
 import java.io.PrintWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -96,5 +97,22 @@ abstract class QuantityClassGenerator<T : QuantityClass>(
 
 	protected abstract fun generateExtensionFunctions()
 
+	protected fun generateNumberUnitExtensionFunctions(typeName: String) {
+		for (unit in quantity.getSupportedUnits()) {
+			writer.println()
+			writer.println("val $typeName.${unit.extensionName}")
+			writer.println("\tget() = ${quantity.className}.${unit.name} * this")
+		}
+	}
+
 	abstract fun generateMathFunctions()
+
+	fun generateFloatCompanionContent(floatType: FloatType) {
+		val suffix = if (floatType.numBytes == 4) "f" else ""
+		writer.println("\t\tfun raw(value: ${floatType.typeName}) = ${quantity.className}(value)")
+		writer.println()
+		for (unit in quantity.getSupportedUnits()) {
+			writer.println("\t\tval ${unit.name} = ${quantity.className}(${unit.relativeSize}$suffix)")
+		}
+	}
 }

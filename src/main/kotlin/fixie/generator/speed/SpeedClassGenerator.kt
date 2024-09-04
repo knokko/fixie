@@ -62,29 +62,13 @@ internal class SpeedClassGenerator(
 		super.generateCompanionContent()
 
 		if (quantity.number == null) {
-			writer.println()
-			writer.println("\t\tval ${quantity.oneUnit} = ${quantity.className}(1${if (quantity.floatType == FloatType.SinglePrecision) "f" else ".0"})")
+			generateFloatCompanionContent(quantity.floatType!!)
+			return
 		}
 
 		for ((unit, rawValue) in quantity.computeSupportedUnits()) {
-			if (quantity.number != null) {
-				writer.println()
-				writer.println("\t\tval $unit = raw($rawValue${if (quantity.number.internalType.signed) "" else "u"})")
-			} else {
-				val factor = quantity.oneUnit.factor / unit.factor
-				if (unit != quantity.oneUnit) {
-					writer.println()
-					writer.println("\t\tval $unit = ${quantity.oneUnit} * $factor")
-				}
-			}
-		}
-	}
-
-	override fun generateNumberUnitExtensionFunctions(typeName: String) {
-		for (unit in quantity.computeSupportedUnits().map { it.first }) {
 			writer.println()
-			writer.println("val $typeName.${unit.abbreviation.replace('/', 'p')}")
-			writer.println("\tget() = ${quantity.className}.$unit * this")
+			writer.println("\t\tval $unit = raw($rawValue${if (quantity.number.internalType.signed) "" else "u"})")
 		}
 	}
 

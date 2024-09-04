@@ -1,5 +1,6 @@
 package fixie.generator.quantity
 
+import fixie.generator.mass.MassUnit
 import fixie.generator.number.FloatType
 import java.io.PrintWriter
 
@@ -39,8 +40,6 @@ abstract class FloatQuantityClassGenerator<T : FloatQuantityClass>(
 		}
 	}
 
-	protected abstract fun generateNumberUnitExtensionFunctions(typeName: String)
-
 	override fun generateExtensionFunctions() {
 		for (typeName in arrayOf("Int", "Long", "Float", "Double")) {
 			writer.println()
@@ -58,4 +57,6 @@ abstract class FloatQuantityClassGenerator<T : FloatQuantityClass>(
 		writer.println()
 		writer.println("fun max(a: ${quantity.className}, b: ${quantity.className}) = ${quantity.className}(max(a.value, b.value))")
 	}
+
+	override fun generateCompanionContent() = generateFloatCompanionContent(quantity.floatType)
 }

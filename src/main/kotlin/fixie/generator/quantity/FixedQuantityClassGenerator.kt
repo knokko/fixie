@@ -53,8 +53,6 @@ abstract class FixedQuantityClassGenerator<T : FixedQuantityClass>(
 		writer.println("\t\tfun raw(value: ${quantity.number.internalType}) = ${quantity.className}(${quantity.number.className}.raw(value))")
 	}
 
-	protected abstract fun generateNumberUnitExtensionFunctions(typeName: String)
-
 	override fun generateExtensionFunctions() {
 		for (typeName in arrayOf("Int", "Long", "Float", "Double", quantity.number.className)) {
 			writer.println()

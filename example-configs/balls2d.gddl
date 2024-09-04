@@ -38,21 +38,21 @@
 		createNumberExtensions = true
 	}],
 	masses = [{
-	    className = "Mass",
-	    floatType = "Double",
-	    displayUnit = "Kilogram",
-	    volume = "Volume",
-	    density = "Density",
-	    speed = "Speed",
-	    momentum = "Momentum",
-	    createNumberExtensions = true
+		className = "Mass",
+		floatType = "Double",
+		displayUnit = "Kilogram",
+		volume = "Volume",
+		density = "Density",
+		speed = "Speed",
+		momentum = "Momentum",
+		createNumberExtensions = true
 	}],
 	momenta = [{
-	    className = "Momentum",
-	    floatType = "Double",
-	    mass = "Mass",
-	    speed = "Speed",
-	    createNumberExtensions = true
+		className = "Momentum",
+		floatType = "Double",
+		mass = "Mass",
+		speed = "Speed",
+		createNumberExtensions = true
 	}],
 	volumes = [{
 		className = "Volume",

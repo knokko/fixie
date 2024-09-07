@@ -1,6 +1,63 @@
 # Fixie
 ## Kotlin code generator for fixed-point numbers and a system of units
 
+### Representing (physics) quantities
+In physics 'engines', there are many quantities that need to be tracked
+(e.g. distances, speed, and mass). They are typically represented by 'raw'
+(floating-point) numbers. While this approach is simple, it is not always
+clear what the *units* of the quantities are (kg or pounds? m/s or km/h or mi/h?).
+
+Furthermore, there won't be any type safety since e.g. speed typically has the same
+type as coordinates and accelerations. I believe the situation can be improved
+by creating nice wrapper classes for quantities, which is exactly what fixie does.
+With the right configuration, the following code would be type-safe, and actually
+compile:
+```kotlin
+var positionX = 10.m // Start at x = 10 meters
+positionX += 5.ft // move 5 feet to the right
+
+val speed = 20.km / 4.hours // = 5 kilometers per hour = 5.kmph
+positionX -= 30.seconds * speed // move left at a speed of 5 km/h, for 30 seconds long
+```
+Due to the type safety, the following lines would **not** compile:
+```kotlin
+positionX += 5.seconds
+positionX -= 5.kmph
+```
+The possibilities and precision will depend on a configuration file.
+For instance, the configuration file below should allow you to compile
+the code above.
+```json
+{
+	"moduleName": "example-displacement",
+	"packageName": "example.displacement",
+	"numbers": [{
+		"className": "Fixed",
+		"internalType": "Int",
+		"oneValue": 1e5,
+		"checkOverflow": true
+	}],
+	"displacements": [{
+		"className": "Displacement",
+		"number": "Fixed",
+		"oneUnit": "Meter",
+		"displayUnit": "Yard",
+		"speed": "Speed",
+		"createNumberExtensions": true
+	}],
+	"speed": [{
+		"className": "Speed",
+		"number": "Fixed",
+		"oneUnit": "Kilometers per hour",
+		"displayUnit": "Kilometers per hour",
+		"displacement": "Displacement",
+		"createNumberExtensions": true
+	}]
+}
+```
+A more advanced config that I use for my 2d physics engine can be found
+[here](./example-configs/balls2d.gddl).
+
 ### Floating-point numbers vs fixed-point numbers
 Floating-point numbers are almost always used to represent real numbers on a computer.
 Their floating behavior allows them to represent both very small numbers and very large numbers,
@@ -20,16 +77,6 @@ when objects move further away from the origin. When fixed-point coordinates are
 of the system is the same at every location (until the point where it overflows, which would be the boundary).
 This example is explained in more detail [here](docs/floating-point-positions.md). It was in fact my
 motivation to start this project!
-
-### Representing (physics) quantities
-In physics 'engines', there are many quantities that need to be tracked
-(e.g. distances, speed, and mass). They are typically represented by 'raw'
-(floating-point) numbers. While this approach is simple, it is not always
-clear what the *units* of the quantities are (kg or pounds? m/s or km/h or mi/h?).
-
-Furthermore, there won't be any type safety since e.g. speed typically has the same
-type as coordinates and accelerations. I believe the situation can be improved
-by creating nice wrapper classes for quantities, which is exactly what fixie does.
 
 ### The fixie generator
 This project is a code generator for quantity classes and fixed-point

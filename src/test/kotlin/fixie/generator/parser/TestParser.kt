@@ -230,7 +230,7 @@ class TestParser {
 		val modules = parseModule(
 			"""{
             packageName = 'kit.%TYPE%.%OVERFLOW%',
-            moduleName = 'module.kit.%TYPE%.%OVERFLOW%',
+            moduleName = 'module-kit-%TYPE%-%OVERFLOW%',
             numbers = [{
                 className = 'Hello',
                 internalType = '%TYPE%',
@@ -316,6 +316,136 @@ class TestParser {
 		assertTrue(
 			error.contains("you must use all variations in the moduleName to avoid this"),
 			"Expected $error to contain 'you must use all variations in the moduleName to avoid this'"
+		)
+	}
+
+	@Test
+	fun testDuplicateClassName() {
+		assertEquals(
+			"Duplicate class name Hello",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = 'hello',
+            moduleName = 'hello',
+            numbers = [{
+                className = 'Hello',
+                internalType = 'Short',
+                oneValue = 50,
+                checkOverflow = false
+            }],
+            displacements = [{
+				className = 'Hello',
+				number = 'Hello',
+				oneUnit = 'Meter',
+				displayUnit = 'Meter',
+				createNumberExtensions = false
+			}]
+        }"""
+				)
+			}.message
+		)
+	}
+
+	@Test
+	fun testInvalidModuleName() {
+		assertEquals(
+			"Invalid module name hel lo",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = 'hello',
+            moduleName = 'hel lo'
+        }"""
+				)
+			}.message
+		)
+	}
+
+	@Test
+	fun testInvalidPackageName() {
+		assertEquals(
+			"Invalid package name hel lo",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = 'hel lo',
+            moduleName = 'hello'
+        }"""
+				)
+			}.message
+		)
+	}
+
+	@Test
+	fun testInvalidClassName() {
+		assertEquals(
+			"Invalid class name Hel lo",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = 'hello',
+            moduleName = 'hello',
+			numbers = [{
+                className = 'Hel lo',
+                internalType = 'Short',
+                oneValue = 50,
+                checkOverflow = false
+            }],
+        }"""
+				)
+			}.message
+		)
+	}
+
+	@Test
+	fun testEmptyModuleName() {
+		assertEquals(
+			"Invalid module name ",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = 'hello',
+            moduleName = ''
+        }"""
+				)
+			}.message
+		)
+	}
+
+	@Test
+	fun testEmptyPackageName() {
+		assertEquals(
+			"Invalid package name ",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = '',
+            moduleName = 'hello'
+        }"""
+				)
+			}.message
+		)
+	}
+
+	@Test
+	fun testEmptyClassName() {
+		assertEquals(
+			"Invalid class name ",
+			assertThrows<InvalidConfigException> {
+				parseModule(
+					"""{
+            packageName = 'hello',
+            moduleName = 'hello',
+			numbers = [{
+                className = '',
+                internalType = 'Short',
+                oneValue = 50,
+                checkOverflow = false
+            }],
+        }"""
+				)
+			}.message
 		)
 	}
 }

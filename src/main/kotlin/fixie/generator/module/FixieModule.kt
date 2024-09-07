@@ -122,8 +122,19 @@ class FixieModule(
 
 		for (className in allClassNames) {
 			if (allClassNames.count { it == className } > 1) {
-				throw IllegalArgumentException("Duplicate class name $className")
+				throw InvalidConfigException("Duplicate class name $className")
 			}
+			if (!className.matches(Regex("[A-Z_](\$[A-Z_]|[\\w_])*"))) {
+				throw InvalidConfigException("Invalid class name $className")
+			}
+		}
+
+		if (!packageName.matches(Regex("^[a-z][a-z0-9_]*(\\.[a-z0-9A-Z_]+)*[a-z0-9A-Z_]*\$"))) {
+			throw InvalidConfigException("Invalid package name $packageName")
+		}
+
+		if (!moduleName.matches(Regex("[a-z0-9A-Z_.-]+"))) {
+			throw InvalidConfigException("Invalid module name $moduleName")
 		}
 	}
 }

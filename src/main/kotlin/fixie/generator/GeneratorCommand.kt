@@ -9,6 +9,7 @@ import org.apache.commons.cli.Options
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
+import kotlin.math.min
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -20,13 +21,24 @@ fun main(args: Array<String>) {
             .hasArg()
             .type(File::class.java)
             .build()
-    options.addOption("i", "internal", true, "Internal option used for Github Actions")
-    options.addOption("h", "help", false, "Print help information")
-    options.addOption(
-            "c", "clear-existing-files", false,
-            "When a directory with the same as the module already exists, it will be deleted"
-    )
+    val internalOption = Option.builder("i")
+            .longOpt("internal")
+            .desc("Internal option used for GitHub Actions")
+            .hasArg()
+            .type(Int::class.java)
+            .build()
+    val helpOption = Option.builder("h")
+            .longOpt("help")
+            .desc("Prints the help page")
+            .build()
+    val clearExistingOption = Option.builder("c")
+            .longOpt("clear-existing-files")
+            .desc("When a directory with the same as the module already exists, it will be deleted")
+            .build()
     options.addOption(directoryOption)
+    options.addOption(internalOption)
+    options.addOption(helpOption)
+    options.addOption(clearExistingOption)
 
     // TODO Spaces option
 
@@ -35,7 +47,44 @@ fun main(args: Array<String>) {
 
     if (cmd.hasOption("help")) {
         // TODO Finish this
-        println("Usage: java -jar fixie.jar [OPTION...] [FILE...]")
+        println("Usage: java -jar fixie.jar [OPTION]... [CONFIG FILE]...")
+        println("Generates the code for fixie config file(s)")
+        println()
+        println("OPTIONS:")
+
+        fun printOption(option: Option, value: String) {
+            val headerLength = 40
+            var header = "  -${option.opt}, --${option.longOpt}$value"
+            while (header.length < headerLength) header += " "
+
+            val descriptionLength = 50
+            val description = mutableListOf<String>()
+
+            var descriptionOffset = 0
+            while (descriptionOffset < option.description.length) {
+                var nextOffset = descriptionOffset + descriptionLength
+                if (nextOffset >= option.description.length) {
+                    nextOffset = option.description.length
+                } else {
+                    while (option.description[nextOffset] != ' ') nextOffset -= 1;
+                    nextOffset += 1
+                }
+                description.add(option.description.substring(descriptionOffset until nextOffset))
+                descriptionOffset = nextOffset
+            }
+
+            println(header + description[0])
+            for (index in 1 until description.size) {
+                for (x in 0 until headerLength) print(' ')
+                println(description[index])
+            }
+        }
+
+        printOption(directoryOption, "=path/to/directory")
+        printOption(internalOption, "=2")
+        printOption(helpOption, "")
+        printOption(clearExistingOption, "")
+
         return
     }
 

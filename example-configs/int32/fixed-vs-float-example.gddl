@@ -1,0 +1,17 @@
+{
+	moduleName = "fixed-vs-float",
+	packageName = "fixie.generator.floatvsfixed",
+	numbers = [{
+		className = "FixedNumber",
+		internalType = "Int",
+		oneValue = 32768,
+		checkOverflow = true
+	}],
+	displacements = [{
+		className = "Displacement",
+		number = "FixedNumber",
+		oneUnit = "Meter",
+		displayUnit = "Meter",
+		createNumberExtensions = false
+	}]
+}

@@ -15,6 +15,14 @@
 		"speed": "Speed",
 		"createNumberExtensions": false
 	}],
+	"spins": [{
+		"className": "Spin",
+		"floatType": "Double",
+		"oneUnit": "Degrees per second",
+		"displayUnit": "Radians per second",
+		"displacement": "Displacement",
+		"createNumberExtensions": true
+	}],
 	"speed": [{
 		"className": "Speed",
 		"floatType": "%FLOAT_TYPE%",
@@ -22,6 +30,7 @@
 		"displayUnit": "Miles per hour",
 		"square": "SquareSpeed",
 		"displacement": "Displacement",
+		"spin": "Spin",
 		"acceleration": "Acceleration",
 		"createNumberExtensions": false
 	}],

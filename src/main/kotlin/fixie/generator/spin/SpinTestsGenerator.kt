@@ -1,7 +1,11 @@
 package fixie.generator.spin
 
+import fixie.generator.displacement.DistanceUnit
 import fixie.generator.quantity.FloatQuantityTestsGenerator
+import fixie.generator.speed.SpeedUnit
 import java.io.PrintWriter
+import java.math.BigInteger
+import kotlin.math.max
 
 class SpinTestsGenerator(
 	writer: PrintWriter,
@@ -61,6 +65,19 @@ class SpinTestsGenerator(
 		}
 		if (quantity.acceleration != null) {
 			writer.println("\t\tassertEquals(2.5, ((15 * $rps) / 6.seconds).toDouble(), 0.001)")
+		}
+
+		quantity.speed?.let { speed ->
+			val mpsPair = speed.computeSupportedUnits().find { it.first == SpeedUnit.METERS_PER_SECOND }
+			if (mpsPair != null && (mpsPair.second > BigInteger.TEN || speed.number == null)) {
+				quantity.displacement?.let { displacement ->
+					val meterPair = displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER }
+					if (meterPair != null && meterPair.second > BigInteger.valueOf(100L)) {
+						val margin = max(0.001, max(5.0 / mpsPair.second.toDouble(), 5.0 / meterPair.second.toDouble()))
+						writer.println("\t\tassertEquals(0.1 * PI, (720 * $dps).toSpeed(0.025 * ${quantity.displacementClassName}.METER).toDouble(SpeedUnit.METERS_PER_SECOND), $margin)")
+					}
+				}
+			}
 		}
 	}
 

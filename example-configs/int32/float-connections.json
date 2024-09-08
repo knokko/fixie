@@ -29,6 +29,15 @@
 		"momentum": "Momentum",
 		"createNumberExtensions": true
 	}],
+	"spins": [{
+		"className": "Spin",
+		"floatType": "Float",
+		"oneUnit": "Degrees per second",
+		"displayUnit": "Degrees per second",
+		"speed": "Speed",
+		"displacement": "Displacement",
+		"createNumberExtensions": true
+	}],
 	"squareSpeed": [{
 		"className": "SquareSpeed",
 		"floatType": "Double",

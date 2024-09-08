@@ -41,6 +41,13 @@ internal class SpeedClassGenerator(
 				"\toperator fun times(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * " +
 						"${quantity.displacementClassName}.METER * right.toDouble(DurationUnit.SECONDS)"
 			)
+
+			if (quantity.spin != null) {
+				writer.println()
+				writer.println("\tfun toSpin(radius: ${quantity.displacementClassName}) = " +
+						"${quantity.spinClassName}.RADIANS_PER_SECOND * toDouble(SpeedUnit.METERS_PER_SECOND) / " +
+						"radius.toDouble(DistanceUnit.METER)")
+			}
 		}
 
 		quantity.acceleration?.let { acceleration ->

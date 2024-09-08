@@ -759,6 +759,19 @@ this speed class. When specified, you can divide
 instances of this class by a *duration* to obtain an
 instance of the acceleration class.
 
+### spin
+The optional spin class that should be linked to this
+speed class. When both a *displacement* and *spin* are
+specified, the speed class will get a `toSpin(radius)`
+method that will convert the speed to a *spin* of a
+ball with the given `radius`.
+
+Consider an example speed of 10m/s and an example
+circle with a circumference of 5 meters (and thus
+a radius of 2.5/PI meters). Executing
+`10.mps.toSpin((2.5 / PI).m)` would yield a spin of
+2 turns per second = 720 degrees per second.
+
 ### mass
 The optional mass class that should be linked to this
 speed class.
@@ -794,6 +807,7 @@ you can e.g. use 2.mps to obtain 2.5 meters per second.
 		"square": "SquareSpeed",
 		"displacement": "DisplacementClass",
 		"acceleration": "AccelerationClass",
+		"spin": "SpinClass",
 		"mass": "MassClass",
 		"momentum": "MomentumClass",
 		"createNumberExtensions": true
@@ -810,6 +824,10 @@ you can e.g. use 2.mps to obtain 2.5 meters per second.
 	}],
 	"accelerations": [{
 		"className": "AccelerationClass",
+		...
+	}],
+	"spins": [{
+		"className": "SpinClass",
 		...
 	}],
 	"masses": [{
@@ -870,6 +888,23 @@ to which this spin class should be linked. When linked, you
 can divide instances of this spin class by a *duration*
 to obtain an instance of the angular acceleration class.
 
+### displacement
+The optional displacement class that should be linked to
+this spin class.
+
+### speed
+The optional speed class that should be linked to this
+spin class. When both a *displacement* and *speed* are
+specified, the spin class will get a `toSpeed(radius)`
+method that will convert the spin for a ball with the
+given `radius` to a *speed*.
+
+Consider an example spin of 90 degrees per second and 
+an example circle with a circumference of 5 meters (and thus
+a radius of 2.5/PI meters). Executing
+`90.degps.toSpeed((2.5 / PI).m)` would yield a speed of
+1.25 meters per second.
+
 ### createNumberExtensions
 Whether extension functions should be generated on primitive
 integer types and floating-point types. If you enable this,
@@ -889,6 +924,8 @@ can enable this.
 		"displayUnit": "Degrees per second",
 		"angle": "AngleClass",
 		"acceleration": "AngularAccelerationClass",
+		"displacement": "DisplacementClass",
+		"speed": "SpeedClass",
 		"createNumberExtensions": true
 	}],
 	"angles": [{
@@ -898,6 +935,13 @@ can enable this.
 	"angularAccelerations": [{
 		"className": "AngularAccelerationClass",
 		...
+	}],
+	"displacements": [{
+		"className": "DisplacementClass",
+		...
+	}],
+	"speed": [{
+		"className": "SpeedClass"
 	}]
 }
 ```

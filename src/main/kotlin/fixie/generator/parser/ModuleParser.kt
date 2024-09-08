@@ -280,6 +280,7 @@ private class ModuleParser(
 		squareClassName = optionalString(properties, "square", path),
 		displacementClassName = optionalString(properties, "displacement", path),
 		accelerationClassName = optionalString(properties, "acceleration", path),
+		spinClassName = optionalString(properties, "spin", path),
 		massClassName = optionalString(properties, "mass", path),
 		momentumClassName = optionalString(properties, "momentum", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
@@ -299,6 +300,8 @@ private class ModuleParser(
 		displayUnit = requiredUnit(properties, "displayUnit", path, SpinUnit.entries),
 		angleClassName = optionalString(properties, "angle", path),
 		accelerationClassName = optionalString(properties, "acceleration", path),
+		speedClassName = optionalString(properties, "speed", path),
+		displacementClassName = optionalString(properties, "displacement", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
 	)
 

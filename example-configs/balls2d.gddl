@@ -103,6 +103,7 @@
 		square = "SquareSpeed",
 		displacement = "Displacement",
 		acceleration = "Acceleration",
+		spin = "Spin",
 		mass = "Mass",
 		momentum = "Momentum",
 		createNumberExtensions = true
@@ -119,6 +120,8 @@
 		oneUnit = "Degrees per second",
 		displayUnit = "Degrees per second",
 		angle = "Angle",
+		speed = "Speed",
+		displacement = "Displacement",
 		acceleration = "AngularAcceleration",
 		createNumberExtensions = true
 	}]

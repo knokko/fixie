@@ -25,9 +25,19 @@
 		"square": "SquareSpeed",
 		"displacement": "Displacement",
 		"acceleration": "Acceleration",
+		"spin": "Spin",
 		"mass": "Mass",
 		"momentum": "Momentum",
 		"createNumberExtensions": false
+	}],
+	"spins": [{
+		"className": "Spin",
+		"floatType": "Float",
+		"oneUnit": "Radians per second",
+		"displayUnit": "Radians per second",
+		"speed": "Speed",
+		"displacement": "Displacement",
+		"createNumberExtensions": true
 	}],
 	"squareSpeed": [{
 		"className": "SquareSpeed",

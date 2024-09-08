@@ -23,8 +23,18 @@
 		"displayUnit": "Kilometers per second",
 		"square": "SquareSpeed",
 		"displacement": "Displacement",
+		"spin": "Spin",
 		"momentum": "Momentum",
 		"createNumberExtensions": true
+	}],
+	"spins": [{
+		"className": "Spin",
+		"floatType": "Double",
+		"oneUnit": "Radians per second",
+		"displayUnit": "Radians per second",
+		"speed": "Speed",
+		"displacement": "Displacement",
+		"createNumberExtensions": false
 	}],
 	"squareSpeed": [{
 		"className": "SquareSpeed",

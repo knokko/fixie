@@ -9,6 +9,7 @@ import fixie.generator.number.NumberClass
 import fixie.generator.quantity.FixedQuantityClass.Companion.determineRawValue
 import fixie.generator.quantity.HybridQuantityClass
 import fixie.generator.quantity.QuantityUnit
+import fixie.generator.spin.SpinClass
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -21,6 +22,7 @@ class SpeedClass(
 	val squareClassName: String?,
 	val displacementClassName: String?,
 	val accelerationClassName: String?,
+	val spinClassName: String?,
 	val massClassName: String?,
 	val momentumClassName: String?,
 	createNumberExtensions: Boolean
@@ -29,6 +31,7 @@ class SpeedClass(
 	var square: SquareSpeedClass? = null
 	var displacement: DisplacementClass? = null
 	var acceleration: AccelerationClass? = null
+	var spin: SpinClass? = null
 	var mass: MassClass? = null
 	var momentum: MomentumClass? = null
 

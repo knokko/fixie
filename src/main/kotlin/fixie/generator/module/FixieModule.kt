@@ -107,6 +107,7 @@ class FixieModule(
 		checkPresent(speed, numbers) { it.number }
 		resolve(speed, momenta, { it.momentumClassName }) { speed, momentum -> speed.momentum = momentum}
 		resolve(speed, masses, { it.massClassName }) { speed, mass -> speed.mass = mass }
+		resolve(speed, spins, { it.spinClassName }) { speed, spin -> speed.spin = spin }
 		resolve(speed, displacements, { it.displacementClassName }) { speed, displacement ->
 			speed.displacement = displacement
 		}
@@ -114,6 +115,8 @@ class FixieModule(
 			speed.acceleration = acceleration
 		}
 		resolve(speed, squareSpeed, { it.squareClassName }) { speed, square -> speed.square = square }
+		resolve(spins, displacements, { it.displacementClassName }) { spin, displacement -> spin.displacement = displacement }
+		resolve(spins, speed, { it.speedClassName }) { spin, speed -> spin.speed = speed }
 		resolve(spins, angularAccelerations, { it.accelerationClassName }) { spin, acceleration -> spin.acceleration = acceleration }
 		resolve(spins, angles, { it.angleClassName }) { spin, angle -> spin.angle = angle }
 		resolve(angularAccelerations, spins, { it.spinClassName }) { acceleration, spin -> acceleration.spin = spin }

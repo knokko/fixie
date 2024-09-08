@@ -27,6 +27,14 @@
 		"mass": "Mass",
 		"createNumberExtensions": true
 	}],
+	"spins": [{
+		"className": "Spin",
+		"floatType": "Float",
+		"oneUnit": "Radians per second",
+		"displayUnit": "Degrees per second",
+		"speed": "Speed",
+		"createNumberExtensions": false
+	}],
 	"squareSpeed": [{
 		"className": "SquareSpeed",
 		"floatType": "%FLOAT_TYPE%",

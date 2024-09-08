@@ -1,6 +1,8 @@
 package fixie.generator.spin
 
+import fixie.generator.displacement.DistanceUnit
 import fixie.generator.quantity.FloatQuantityClassGenerator
+import fixie.generator.speed.SpeedUnit
 import java.io.PrintWriter
 
 class SpinClassGenerator(
@@ -37,6 +39,19 @@ class SpinClassGenerator(
             writer.println("\toperator fun div(right: Duration) = toDouble(SpinUnit.RADIANS_PER_SECOND) * " +
 					"${quantity.accelerationClassName}.RADPS2 / right.toDouble(DurationUnit.SECONDS)")
         }
+
+		quantity.speed?.let { speed ->
+			if (speed.computeSupportedUnits().find { it.first == SpeedUnit.METERS_PER_SECOND } != null) {
+				quantity.displacement?.let { displacement ->
+					if (displacement.computeSupportedUnits().find { it.first == DistanceUnit.METER } != null) {
+						writer.println()
+						writer.println("\tfun toSpeed(radius: ${quantity.displacementClassName}) = " +
+								"${quantity.speedClassName}.METERS_PER_SECOND * (toDouble(SpinUnit.RADIANS_PER_SECOND) * " +
+								"radius.toDouble(DistanceUnit.METER))")
+					}
+				}
+			}
+		}
 	}
 
 	override fun generateExtensionFunctions() {

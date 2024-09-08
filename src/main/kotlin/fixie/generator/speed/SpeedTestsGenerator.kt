@@ -46,7 +46,9 @@ internal class SpeedTestsGenerator(
 		arrayOf("kotlin.time.Duration.Companion.hours")
 	} else {
 		emptyArray<String>()
-	}
+	} + if (quantity.spin != null) {
+		arrayOf("kotlin.math.PI")
+	} else { emptyArray<String>() }
 
 	override fun generateToStringBody() {
 		for ((unit, oneValue) in quantity.computeSupportedUnits()) {
@@ -79,6 +81,9 @@ internal class SpeedTestsGenerator(
 				writer.println("\t\tassertEquals(20.0, (2.seconds * (10 * ${quantity.className}.METERS_PER_SECOND)).toDouble(DistanceUnit.METER), $margin)")
 				if (shouldTestHours()) {
 					writer.println("\t\tassertEquals(20.0, (10 * ${quantity.className}.KILOMETERS_PER_HOUR * 2.hours).toDouble(DistanceUnit.KILOMETER), $margin)")
+				}
+				if (quantity.spin != null) {
+					writer.println("\t\tassertEquals(90.0, (${quantity.className}.METERS_PER_SECOND * 10 * PI).toSpin(20 * ${quantity.displacementClassName}.METER).toDouble(SpinUnit.DEGREES_PER_SECOND), ${margin * 4})")
 				}
 			}
 			if (quantity.acceleration != null) {

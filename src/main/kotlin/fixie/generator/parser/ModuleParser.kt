@@ -6,6 +6,7 @@ import dev.gigaherz.util.gddl2.structure.GddlDocument
 import dev.gigaherz.util.gddl2.structure.GddlMap
 import dev.gigaherz.util.gddl2.structure.GddlValue
 import fixie.generator.acceleration.AccelerationClass
+import fixie.generator.acceleration.AngularAccelerationClass
 import fixie.generator.angle.AngleClass
 import fixie.generator.angle.AngleUnit
 import fixie.generator.area.AreaClass
@@ -232,6 +233,13 @@ private class ModuleParser(
 		spinClassName = optionalString(properties, "spin", path)
 	)
 
+	private fun loadAngularAcceleration(properties: GddlMap, path: String) = AngularAccelerationClass(
+		className = requiredString(properties, "className", path),
+		floatType = requiredFloatType(properties, "floatType", path),
+		spinClassName = optionalString(properties, "spin", path),
+		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
+	)
+
 	private fun loadVolume(properties: GddlMap, path: String) = VolumeClass(
 		className = requiredString(properties, "className", path),
 		floatType = requiredFloatType(properties, "floatType", path),
@@ -290,6 +298,7 @@ private class ModuleParser(
 		oneUnit = requiredUnit(properties, "oneUnit", path, SpinUnit.entries),
 		displayUnit = requiredUnit(properties, "displayUnit", path, SpinUnit.entries),
 		angleClassName = optionalString(properties, "angle", path),
+		accelerationClassName = optionalString(properties, "acceleration", path),
 		createNumberExtensions = requiredBoolean(properties, "createNumberExtensions", path)
 	)
 
@@ -362,6 +371,7 @@ private class ModuleParser(
 
 		val accelerations = mapList(root, "accelerations", "(root)", ::loadAcceleration)
 		val angles = mapList(root, "angles", "(root)", ::loadAngle)
+		val angularAccelerations = mapList(root, "angularAccelerations", "(root)", ::loadAngularAcceleration)
 		val volumes = mapList(root, "volumes", "(root)", ::loadVolume)
 		val areas = mapList(root, "areas", "(root)", ::loadArea)
 		val displacements = mapList(root, "displacements", "(root)", ::loadDisplacement)
@@ -380,6 +390,7 @@ private class ModuleParser(
 				numbers = numbers,
 				accelerations = accelerations,
 				angles = angles,
+				angularAccelerations = angularAccelerations,
 				volumes = volumes,
 				areas = areas,
 				displacements = displacements,

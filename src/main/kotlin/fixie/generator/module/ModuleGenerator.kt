@@ -2,6 +2,8 @@ package fixie.generator.module
 
 import fixie.generator.acceleration.AccelerationClassGenerator
 import fixie.generator.acceleration.AccelerationTestsGenerator
+import fixie.generator.acceleration.AngularAccelerationClassGenerator
+import fixie.generator.acceleration.AngularAccelerationTestsGenerator
 import fixie.generator.angle.AngleClassGenerator
 import fixie.generator.angle.AngleTestsGenerator
 import fixie.generator.angle.AngleUnit
@@ -108,6 +110,7 @@ fun generateModule(module: FixieModule, directory: File, clearExistingFiles: Boo
 	generateQuantityFiles(module.squareSpeed, ::SquareSpeedClassGenerator, ::SquareSpeedTestsGenerator)
 	generateQuantityFiles(module.accelerations, ::AccelerationClassGenerator, ::AccelerationTestsGenerator)
 	generateQuantityFiles(module.angles, ::AngleClassGenerator, ::AngleTestsGenerator)
+	generateQuantityFiles(module.angularAccelerations, ::AngularAccelerationClassGenerator, ::AngularAccelerationTestsGenerator)
 	generateQuantityFiles(module.spins, ::SpinClassGenerator, ::SpinTestsGenerator)
 	generateQuantityFiles(module.densities, ::DensityClassGenerator, ::DensityTestsGenerator)
 	generateQuantityFiles(module.momenta, ::MomentumClassGenerator, ::MomentumTestsGenerator)

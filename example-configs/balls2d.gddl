@@ -30,6 +30,12 @@
 		allowComparisons = false,
 		spin = "Spin"
 	}],
+	angularAccelerations = [{
+		className = "AngularAcceleration",
+		floatType = "Double",
+		spin = "Spin",
+		createNumberExtensions = true
+	}],
 	densities = [{
 		className = "Density",
 		number = "FixDensity",
@@ -113,6 +119,7 @@
 		oneUnit = "Degrees per second",
 		displayUnit = "Degrees per second",
 		angle = "Angle",
+		acceleration = "AngularAcceleration",
 		createNumberExtensions = true
 	}]
 }

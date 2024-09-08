@@ -26,8 +26,28 @@
 		"oneUnit": "%SPIN_UNIT1%",
 		"displayUnit": "%SPIN_UNIT2%",
 		"angle": "ConnectedAngle",
+		"acceleration": "FloatAcceleration",
 		"createNumberExtensions": "%NUMBER_EXTENSIONS1%"
 	}],
+	"angularAccelerations": [
+		{
+			"className": "LonelyAcceleration",
+			"floatType": "%FLOAT_TYPE%",
+			"createNumberExtensions": "%NUMBER_EXTENSIONS1%"
+		},
+		{
+			"className": "FloatAcceleration",
+			"floatType": "Float",
+			"spin": "Spin",
+			"createNumberExtensions": false
+		},
+		{
+			"className": "DoubleAcceleration",
+			"floatType": "Double",
+			"spin": "Spin",
+			"createNumberExtensions": "%NUMBER_EXTENSIONS2%"
+		}
+	],
 	"variations": [
 		{
 			"%INT_TYPE%": ["Byte", "UByte", "Short", "UShort", "Int", "UInt", "Long", "ULong"],

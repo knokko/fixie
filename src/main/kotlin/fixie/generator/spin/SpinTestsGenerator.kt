@@ -12,9 +12,9 @@ class SpinTestsGenerator(
 	private val dps = "${quantity.className}.DEGREES_PER_SECOND"
 	private val rps = "${quantity.className}.RADIANS_PER_SECOND"
 
-	override fun getImports() = super.getImports() + arrayOf("kotlin.math.PI") + if (quantity.angleClassName != null) {
-		arrayOf("kotlin.time.Duration.Companion.seconds")
-	} else emptyArray()
+	override fun getImports() = super.getImports() + arrayOf("kotlin.math.PI") + if (
+		quantity.angle != null || quantity.acceleration != null
+		) { arrayOf("kotlin.time.Duration.Companion.seconds") } else emptyArray()
 
 	override fun generateToDoubleBody() {
 		super.generateToDoubleBody()
@@ -58,6 +58,9 @@ class SpinTestsGenerator(
 		quantity.angle?.let { angle ->
 			val margin = if (angle.internalType.numBytes == 1) 5.0 else 0.5
 			writer.println("\t\tassertEquals(150.0, (3.seconds * (50 * $dps)).toDouble(AngleUnit.DEGREES), $margin)")
+		}
+		if (quantity.acceleration != null) {
+			writer.println("\t\tassertEquals(2.5, ((15 * $rps) / 6.seconds).toDouble(), 0.001)")
 		}
 	}
 

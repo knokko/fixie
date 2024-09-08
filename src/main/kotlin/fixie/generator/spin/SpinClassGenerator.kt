@@ -1,6 +1,5 @@
 package fixie.generator.spin
 
-import fixie.generator.number.FloatType
 import fixie.generator.quantity.FloatQuantityClassGenerator
 import java.io.PrintWriter
 
@@ -10,7 +9,7 @@ class SpinClassGenerator(
 	packageName: String
 ) : FloatQuantityClassGenerator<SpinClass>(writer, spin, packageName) {
 
-	override fun getImports() = super.getImports() + if (quantity.angleClassName != null) {
+	override fun getImports() = super.getImports() + if (quantity.angle != null || quantity.acceleration != null) {
 		arrayOf("kotlin.time.Duration", "kotlin.time.DurationUnit")
 	} else emptyArray()
 
@@ -33,11 +32,11 @@ class SpinClassGenerator(
 			writer.println("\toperator fun times(right: Duration) = ${quantity.angleClassName}.$functionName(value * right.toDouble(DurationUnit.SECONDS))")
 		}
 
-		// TODO Angular acceleration?
-//        if (speed.acceleration != null) {
-//            writer.println()
-//            writer.println("\toperator fun div(right: Duration) = toDouble(SpeedUnit.METERS_PER_SECOND) * ${speed.acceleration.className}.MPS2 / right.toDouble(DurationUnit.SECONDS)")
-//        }
+        if (quantity.acceleration != null) {
+            writer.println()
+            writer.println("\toperator fun div(right: Duration) = toDouble(SpinUnit.RADIANS_PER_SECOND) * " +
+					"${quantity.accelerationClassName}.RADPS2 / right.toDouble(DurationUnit.SECONDS)")
+        }
 	}
 
 	override fun generateExtensionFunctions() {

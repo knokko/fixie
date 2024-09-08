@@ -123,7 +123,7 @@ a module.
 ## Supported quantities
 - [x] acceleration
 - [x] angle
-- [ ] angular acceleration
+- [x] angular acceleration
 - [x] angular speed (spin)
 - [ ] angular momentum
 - [x] area

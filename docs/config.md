@@ -264,6 +264,51 @@ obtain a *spin*.
 }
 ```
 
+## Angular acceleration classes
+Angular acceleration classes represent *angular accelerations*: the
+speed at which the spin/angular velocity of an object is changed.
+All angular acceleration classes must use floating-point numbers.
+
+### Arithmetic
+- The product of an *angular acceleration* and a *duration* yields a *spin*
+  (angular velocity)
+
+### className
+The Kotlin class name of the class that should represent the angular
+acceleration.
+
+### floatType
+The floating-point type that will represent the angular acceleration,
+must be either `Float` or `Double`.
+
+### spin
+The optional class name of the *spin* that should be linked to this
+angular acceleration. When specified, instances of this class can be
+multiplied by instances of *Duration* to obtain an instance of the
+spin class.
+
+### createNumberExtensions
+When you enable `createNumberExtensions`, you can use e.g. `10.radps2` to
+obtain 10 rad/s^2.
+
+### Example
+```json
+{
+	"moduleName": "example-angular-acceleration",
+	"packageName": "fixie.angle.acceleration",
+	"angularAccelerations": [{
+		"className": "AngularAcceleration",
+		"floatType": "Double",
+		"spin": "SpinClassName",
+		"createNumberExtensions": true
+	}],
+	"spins": [{
+		"className": "SpinClassName",
+		...
+	}]
+}
+```
+
 ## Area classes
 Area classes represent areas (like 10 square meter or 10 square miles).
 Currently, all area classes must use floating-point numbers, because
@@ -787,6 +832,7 @@ change this in the future.
 
 ### Arithmetic
 - The product of a *spin* and a *duration* is an *angle*.
+- The quotient of a *spin* and a *duration* yields an *angular acceleration*
 
 ### className
 The Kotlin class name of the class that will represent the spin.
@@ -818,6 +864,12 @@ this spin class should be linked. When linked, you can
 multiply instances of this spin class with a *duration*
 to obtain an instance of the angle class.
 
+### acceleration
+The optional class name of the *angular acceleration* class
+to which this spin class should be linked. When linked, you
+can divide instances of this spin class by a *duration*
+to obtain an instance of the angular acceleration class.
+
 ### createNumberExtensions
 Whether extension functions should be generated on primitive
 integer types and floating-point types. If you enable this,
@@ -836,10 +888,15 @@ can enable this.
 		"oneUnit": "Radians per second",
 		"displayUnit": "Degrees per second",
 		"angle": "AngleClass",
+		"acceleration": "AngularAccelerationClass",
 		"createNumberExtensions": true
 	}],
 	"angles": [{
 		"className": "AngleClass",
+		...
+	}],
+	"angularAccelerations": [{
+		"className": "AngularAccelerationClass",
 		...
 	}]
 }

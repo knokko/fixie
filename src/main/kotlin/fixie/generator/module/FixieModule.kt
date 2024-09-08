@@ -1,6 +1,7 @@
 package fixie.generator.module
 
 import fixie.generator.acceleration.AccelerationClass
+import fixie.generator.acceleration.AngularAccelerationClass
 import fixie.generator.angle.AngleClass
 import fixie.generator.area.AreaClass
 import fixie.generator.density.DensityClass
@@ -22,6 +23,7 @@ class FixieModule(
 	val numbers: List<NumberClass>,
 	val accelerations: List<AccelerationClass> = emptyList(),
 	val angles: List<AngleClass> = emptyList(),
+	val angularAccelerations: List<AngularAccelerationClass> = emptyList(),
 	val areas: List<AreaClass> = emptyList(),
 	val volumes: List<VolumeClass> = emptyList(),
 	val masses: List<MassClass> = emptyList(),
@@ -112,13 +114,16 @@ class FixieModule(
 			speed.acceleration = acceleration
 		}
 		resolve(speed, squareSpeed, { it.squareClassName }) { speed, square -> speed.square = square }
+		resolve(spins, angularAccelerations, { it.accelerationClassName }) { spin, acceleration -> spin.acceleration = acceleration }
 		resolve(spins, angles, { it.angleClassName }) { spin, angle -> spin.angle = angle }
+		resolve(angularAccelerations, spins, { it.spinClassName }) { acceleration, spin -> acceleration.spin = spin }
 
 		val allClassNames = numbers.map { it.className } +
 				displacements.map { it.className } + areas.map { it.className } + volumes.map { it.className } +
 				speed.map { it.className } + squareSpeed.map { it.className } + accelerations.map { it.className } +
 				masses.map { it.className } + momenta.map { it.className } + squareMomenta.map { it.className } +
-				angles.map { it.className } + spins.map { it.className } + densities.map { it.className }
+				angles.map { it.className } + spins.map { it.className } + angularAccelerations.map { it.className } +
+				densities.map { it.className }
 
 		for (className in allClassNames) {
 			if (allClassNames.count { it == className } > 1) {
